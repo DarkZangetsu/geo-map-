@@ -3,6 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #6366f1; /* Indigo-500 */
+  --danger: #ef4444; /* Red-500 */
+  --modal-bg: #fff;
+  --modal-text: #171717;
+  --button-bg: #6366f1;
+  --button-text: #fff;
+  --button-hover-bg: #4f46e5;
 }
 
 @theme inline {
@@ -14,8 +21,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ededed;
+    --foreground:  #0a0a0a;
+    --accent: #818cf8; /* Indigo-400 */
+    --danger: #f87171; /* Red-400 */
+    --modal-bg: #18181b;
+    --modal-text: #ededed;
+    --button-bg: #818cf8;
+    --button-text: #18181b;
+    --button-hover-bg: #6366f1;
   }
 }
 
@@ -38,4 +52,24 @@ main {
   height: 100% !important;
   width: 100% !important;
   background: #f3f4f6;
+}
+
+/* Utilitaires pour modals et boutons */
+.modal {
+  background: var(--modal-bg);
+  color: var(--modal-text);
+}
+.button-primary {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+.button-primary:hover {
+  background: var(--button-hover-bg);
+}
+.button-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.button-danger:hover {
+  background: #b91c1c;
 }

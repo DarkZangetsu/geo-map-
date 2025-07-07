@@ -13,12 +13,12 @@ import AuthForm from '../components/AuthForm';
 import ParcellesMap from '../components/ParcellesMap';
 import ParcelleForm from '../components/ParcelleForm';
 import CarteTest from '../components/CarteTest';
-import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug } from 'lucide-react';
+import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from 'lucide-react';
 import { useAuth } from '../components/Providers';
 // import AuthDebugger from '../components/AuthDebugger';
 
 export default function HomePage() {
-  const { user, isAuthenticated, login, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, login, logout, isLoading, isLoggingOut } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showParcelleDetails, setShowParcelleDetails] = useState(false);
@@ -132,8 +132,13 @@ export default function HomePage() {
 
   const handleLogout = () => {
     logout();
-    showSuccess('Déconnexion réussie');
   };
+
+  useEffect(() => {
+    if (!isLoggingOut && !isAuthenticated && !isLoading) {
+      showSuccess('Déconnexion réussie');
+    }
+  }, [isLoggingOut, isAuthenticated, isLoading, showSuccess]);
 
   const handleCreateParcelle = async (parcelleData) => {
     try {
@@ -481,127 +486,122 @@ export default function HomePage() {
               )}
             </div>
         </div>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="border border-gray-300 px-3 py-2 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
-              style={{ minWidth: 180 }}
-            />
-            {/* Burger menu pour filtres colonnes */}
-            <div className="relative">
-              <button
-                type="button"
-                className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
-                onClick={() => setShowColumnsDropdown(v => !v)}
-                style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
-              >
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
-                Colonnes
-              </button>
-              {showColumnsDropdown && (
-                <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
-                  {columns.map(col => (
-                    <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns.includes(col.key)}
-                        onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
-                        className="accent-blue-600 rounded"
-                      />
-                      {col.label}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => setShowMap(!showMap)}
-              className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold"
-            >
-              <Map size={18} />
-              {showMap ? 'Voir le tableau' : 'Voir la carte'}
-            </button>
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800">
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span className="text-sm text-gray-500">par page</span>
-          </div>
-          <div className="p-6 flex flex-row items-center justify-end gap-2">
-            {selected.length > 0 && (
-              <button
-                onClick={() => { selected.forEach(id => handleDeleteParcelle(id)); setSelected([]); }}
-                className="px-3 py-1 rounded-lg bg-red-50 text-red-700 font-medium shadow-sm hover:bg-red-100 border border-red-200 text-sm transition flex items-center gap-1"
-              >
-                <Trash size={16} /> Supprimer ({selected.length})
-              </button>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Affichage conditionnel : Carte ou Tableau */}
-      {(showMap || mapFullscreen) ? (
-        /* Carte des parcelles (plein écran ou normal) */
-        <div className={mapFullscreen ? "fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"} style={mapFullscreen ? {height: '100vh', width: '100vw'} : {}}>
-          <div className={mapFullscreen ? "w-full h-full flex flex-col bg-white rounded-none shadow-none relative" : "bg-white rounded-lg shadow-lg overflow-hidden"} style={mapFullscreen ? {maxWidth: '100vw', maxHeight: '100vh'} : {}}>
-            {/* Quitter plein écran visible en overlay en haut à droite en mode plein écran */}
-            {mapFullscreen && (
-              <button
-                onClick={() => setMapFullscreen(false)}
-                className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
-                title="Quitter le plein écran"
-              >
-                Quitter plein écran
-              </button>
-            )}
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Carte des parcelles</h2>
-              <p className="text-sm text-gray-600">
-                {parcelles.length} parcelle{parcelles.length !== 1 ? 's' : ''} affichée{parcelles.length !== 1 ? 's' : ''} sur la carte
-              </p>
-            </div>
-            <div style={mapFullscreen ? {flex: 1, minHeight: 0, minWidth: 0} : { height: '600px', width: '100%' }}>
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Chargement de la carte...</p>
-                  </div>
-                </div>
-              ) : (
-                <ParcellesMap
-                  parcelles={parcelles}
-                  mapStyle={mapStyle}
-                  onParcelleClick={handleParcelleClick}
-                  style={mapFullscreen ? {height: '100%', width: '100%'} : {}}
-                />
+      {showMap || mapFullscreen ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Bouton pour revenir au tableau au-dessus de la carte */}
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => setShowMap(false)}
+              className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold"
+            >
+              <Map size={18} />
+              Voir le tableau
+            </button>
+          </div>
+          <div className={mapFullscreen ? "fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center" : "bg-white rounded-lg shadow-lg overflow-hidden"} style={mapFullscreen ? {height: '100vh', width: '100vw'} : {}}>
+            <div className={mapFullscreen ? "w-full h-full flex flex-col bg-white rounded-none shadow-none relative" : "bg-white rounded-lg shadow-lg overflow-hidden"} style={mapFullscreen ? {maxWidth: '100vw', maxHeight: '100vh'} : {}}>
+              {/* Quitter plein écran visible en overlay en haut à droite en mode plein écran */}
+              {mapFullscreen && (
+                <button
+                  onClick={() => setMapFullscreen(false)}
+                  className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
+                  title="Quitter le plein écran"
+                >
+                  Quitter plein écran
+                </button>
               )}
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold text-gray-900">Carte des parcelles</h2>
+                <p className="text-sm text-gray-600">
+                  {parcelles.length} parcelle{parcelles.length !== 1 ? 's' : ''} affichée{parcelles.length !== 1 ? 's' : ''} sur la carte
+                </p>
+              </div>
+              <div style={mapFullscreen ? {flex: 1, minHeight: 0, minWidth: 0} : { height: '600px', width: '100%' }}>
+                {loading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                      <p className="mt-2 text-gray-600">Chargement de la carte...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ParcellesMap
+                    parcelles={parcelles}
+                    mapStyle={mapStyle}
+                    onParcelleClick={handleParcelleClick}
+                    style={mapFullscreen ? {height: '100vh', width: '100vw'} : {height: '600px', width: '100%'}}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
       ) : (
-        /* Datatable des parcelles */
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Bouton Voir la carte au-dessus du tableau, aligné à droite */}
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => setShowMap(true)}
+              className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold"
+            >
+              <Map size={18} />
+              Voir la carte
+            </button>
+          </div>
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-6 flex flex-row items-center justify-end gap-2">
-              {selected.length > 0 && (
-                <button
-                  onClick={() => { selected.forEach(id => handleDeleteParcelle(id)); setSelected([]); }}
-                  className="px-3 py-1 rounded-lg bg-red-50 text-red-700 font-medium shadow-sm hover:bg-red-100 border border-red-200 text-sm transition flex items-center gap-1"
-                >
-                  <Trash size={16} /> Supprimer ({selected.length})
-                </button>
-              )}
+            {/* Barre de contrôle du datatable intégrée au bloc */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-blue-100 bg-white">
+              {/* Recherche à gauche avec icône */}
+              <div className="flex items-center gap-2">
+                <Search size={20} className="text-blue-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={search}
+                  onChange={e => { setSearch(e.target.value); setPage(1); }}
+                  className="border border-gray-300 px-3 py-2 rounded-lg w-48 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
+                  style={{ minWidth: 180 }}
+                />
+              </div>
+              {/* Filtres à droite */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
+                    onClick={() => setShowColumnsDropdown(v => !v)}
+                    style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
+                  >
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
+                    Colonnes
+                  </button>
+                  {showColumnsDropdown && (
+                    <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
+                      {columns.map(col => (
+                        <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns.includes(col.key)}
+                            onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
+                            className="accent-blue-600 rounded"
+                          />
+                          {col.label}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800">
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-sm text-gray-500">par page</span>
+              </div>
             </div>
-            {/* Table modernisée */}
             <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
               <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm rounded-2xl overflow-hidden">
                 <thead className="sticky top-0 z-10 bg-white shadow-sm">

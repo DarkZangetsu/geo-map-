@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -35,15 +36,18 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    setIsLoggingOut(true);
+    await new Promise(res => setTimeout(res, 700));
     authUtils.clearAuthData();
     setUser(null);
     setIsAuthenticated(false);
+    setIsLoggingOut(false);
     router.push('/');
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, isLoggingOut, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

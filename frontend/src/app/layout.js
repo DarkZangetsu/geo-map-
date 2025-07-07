@@ -9,8 +9,9 @@ import './globals.css';
 import { AuthProvider, useAuth } from '../components/Providers';
 
 function LayoutContent({ children }) {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, isLoggingOut, logout } = useAuth();
   const { toasts, removeToast } = useToast();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   if (isLoading) {
     return (
@@ -37,6 +38,41 @@ function LayoutContent({ children }) {
       <body style={{ height: '100%' }}>
         <ApolloProvider client={client}>
           <div className="min-h-screen bg-gray-50" style={{ height: '100%' }}>
+            {/* Overlay de chargement lors du logout */}
+            {isLoggingOut && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mb-4"></div>
+                  <span className="text-white text-lg font-semibold">Déconnexion...</span>
+                </div>
+              </div>
+            )}
+            {/* Modal de confirmation de déconnexion */}
+            {showLogoutConfirm && !isLoggingOut && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
+                  <h2 className="text-xl font-bold mb-4">Confirmer la déconnexion</h2>
+                  <p className="mb-6 text-gray-700">Voulez-vous vraiment vous déconnecter ?</p>
+                  <div className="flex gap-4">
+                    <button
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
+                      onClick={async () => {
+                        setShowLogoutConfirm(false);
+                        await logout();
+                      }}
+                    >
+                      Oui, me déconnecter
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 font-semibold"
+                      onClick={() => setShowLogoutConfirm(false)}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Header */}
             {user && (
               <header className="bg-white shadow-sm border-b">
@@ -64,8 +100,9 @@ function LayoutContent({ children }) {
                         </span>
                       </div>
                       <button
-                        onClick={logout}
+                        onClick={() => setShowLogoutConfirm(true)}
                         className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                        disabled={isLoggingOut}
                       >
                         Déconnexion
                       </button>

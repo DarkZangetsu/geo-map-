@@ -35,7 +35,7 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false });
 
-const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
+const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street', style }) => {
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
@@ -181,16 +181,27 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
   }
       
   return (
-    <div className="w-full h-full relative flex">
+    <div
+      className="w-full h-full relative flex"
+      style={{
+        height: (typeof style !== 'undefined' && style.height) ? style.height : '100%',
+        width: (typeof style !== 'undefined' && style.width) ? style.width : '100%',
+        minHeight: (typeof style !== 'undefined' && style.height) ? undefined : '400px',
+        minWidth: (typeof style !== 'undefined' && style.width) ? undefined : undefined,
+        margin: 0,
+        padding: 0,
+      }}
+    >
       <MapContainer
         ref={mapRef}
         key={mapKey}
         center={MADAGASCAR_CENTER}
         zoom={6}
-        style={{ 
-          height: '100%', 
+        style={{
+          height: '100%',
           width: '100%',
-          minHeight: '400px'
+          minHeight: (typeof style !== 'undefined' && style.height) ? undefined : '400px',
+          minWidth: (typeof style !== 'undefined' && style.width) ? undefined : undefined,
         }}
         className="z-0"
         maxBounds={MADAGASCAR_BOUNDS}
