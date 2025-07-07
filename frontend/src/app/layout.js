@@ -6,32 +6,11 @@ import client from '../lib/apollo-client';
 import { useToast } from '../lib/useToast';
 import Toast from '../components/Toast';
 import './globals.css';
+import { AuthProvider, useAuth } from '../components/Providers';
 
-export default function RootLayout({ children }) {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+function LayoutContent({ children }) {
+  const { user, isLoading, logout } = useAuth();
   const { toasts, removeToast } = useToast();
-
-  useEffect(() => {
-    // Récupérer l'utilisateur depuis localStorage
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Erreur lors du parsing de l\'utilisateur:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('authToken');
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
-    setUser(null);
-  };
 
   if (isLoading) {
     return (
@@ -68,7 +47,6 @@ export default function RootLayout({ children }) {
                         Agri-Geo
                       </h1>
                     </div>
-                    
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">
                         {user?.logo && (
@@ -85,9 +63,8 @@ export default function RootLayout({ children }) {
                           {user?.role}
                         </span>
                       </div>
-                      
                       <button
-                        onClick={handleLogout}
+                        onClick={logout}
                         className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
                       >
                         Déconnexion
@@ -97,13 +74,11 @@ export default function RootLayout({ children }) {
                 </div>
               </header>
             )}
-            
             {/* Contenu principal */}
             <main className="h-full">
               {children}
             </main>
           </div>
-          
           {/* Toasts */}
           {toasts.map(toast => (
             <Toast
@@ -117,5 +92,13 @@ export default function RootLayout({ children }) {
         </ApolloProvider>
       </body>
     </html>
+  );
+}
+
+export default function RootLayout({ children }) {
+  return (
+    <AuthProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </AuthProvider>
   );
 } 

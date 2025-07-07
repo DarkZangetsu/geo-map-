@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
@@ -14,14 +14,14 @@ import ParcellesMap from '../components/ParcellesMap';
 import ParcelleForm from '../components/ParcelleForm';
 import CarteTest from '../components/CarteTest';
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug } from 'lucide-react';
+import { useAuth } from '../components/Providers';
 // import AuthDebugger from '../components/AuthDebugger';
 
 export default function HomePage() {
-  const [user, setUser] = useState(null);
+  const { user, isAuthenticated, login, logout, isLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showParcelleDetails, setShowParcelleDetails] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [mapStyle, setMapStyle] = useState('street');
@@ -53,35 +53,12 @@ export default function HomePage() {
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
   const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
 
-  // Check for existing token on mount
-  useEffect(() => {
-    const token = authUtils.getToken();
-    const savedUser = authUtils.getUser();
-    
-    if (token && savedUser) {
-      // Vérifier si le token n'est pas expiré
-      if (!authUtils.isTokenExpired(token)) {
-        setUser(savedUser);
-        setIsAuthenticated(true);
-        console.log('Utilisateur restauré depuis localStorage:', savedUser);
-      } else {
-        console.log('Token expiré, déconnexion...');
-        authUtils.clearAuthData();
-      }
-    } else {
-      console.log('Aucun token ou utilisateur trouvé dans localStorage');
-    }
-  }, []);
-
   // Queries - only run when authenticated
   const { data: meData, loading: meLoading, error: meError } = useQuery(GET_ME, {
     skip: !isAuthenticated,
     onCompleted: (data) => {
       console.log('GET_ME completed:', data);
       if (data?.me) {
-        setUser(data.me);
-        // Mettre à jour les données utilisateur dans localStorage
-        localStorage.setItem('user', JSON.stringify(data.me));
         console.log('Données utilisateur mises à jour:', data.me);
       }
     },
@@ -112,58 +89,23 @@ export default function HomePage() {
 
   const handleLogin = async (credentials) => {
     try {
-      console.log('Tentative de connexion...');
-      
-      const { data } = await tokenAuth({
-        variables: credentials
-      });
-
-      console.log('Réponse tokenAuthWithUser:', data);
-
+      const { data } = await tokenAuth({ variables: credentials });
       if (data.tokenAuthWithUser && data.tokenAuthWithUser.success) {
         const { token, user: userData } = data.tokenAuthWithUser;
-        
-        console.log('Token reçu:', token ? 'Token présent' : 'Aucun token');
-        console.log('Données utilisateur reçues:', userData);
-        
-        // Vérifier la validité du token avec jwt-decode
-        if (token) {
-          const tokenValid = authUtils.validateToken(token);
-          if (!tokenValid) {
-            throw new Error('Token reçu mais invalide');
+        if (token && authUtils.validateToken(token)) {
+          login(userData, token); // maj contexte
+          if (userData.role === 'ADMIN' || userData.role === 'admin' || userData.isStaff) {
+            router.push('/admin');
+          } else {
+            showSuccess('Connexion réussie !');
           }
-        }
-        
-        // Stocker le token et les données utilisateur
-        authUtils.setAuthData(token, userData);
-        
-        // Mettre à jour l'état
-        setUser(userData);
-        setIsAuthenticated(true);
-        
-        console.log('Token et utilisateur stockés dans localStorage');
-        console.log('État d\'authentification mis à jour');
-        
-        // Rediriger automatiquement les admins
-        if (userData.role === 'ADMIN' || userData.role === 'admin' || userData.isStaff) {
-          console.log('Redirection vers admin...');
-          router.push('/admin');
         } else {
-          console.log('Utilisateur membre, reste sur la page principale');
-          showSuccess('Connexion réussie !');
+          throw new Error('Token reçu mais invalide');
         }
       } else {
         throw new Error(data.tokenAuthWithUser?.message || 'Erreur de connexion');
       }
     } catch (error) {
-      console.error('Erreur de connexion:', error);
-      
-      // Si c'est une erreur de décodage, essayer de diagnostiquer
-      if (error.message.includes('decoding signature')) {
-        console.log('Erreur de décodage détectée, diagnostic...');
-        // Vous pouvez ajouter ici des tests de diagnostic supplémentaires
-      }
-      
       throw new Error(error.message || 'Erreur de connexion');
     }
   };
@@ -189,20 +131,7 @@ export default function HomePage() {
   };
 
   const handleLogout = () => {
-    console.log('Déconnexion en cours...');
-    
-    // Utiliser les utilitaires d'authentification
-    authUtils.clearAuthData();
-    
-    // Nettoyer l'état
-    setUser(null);
-    setIsAuthenticated(false);
-    setShowForm(false);
-    setSelectedParcelle(null);
-    setShowParcelleDetails(false);
-    setMapFullscreen(false);
-    
-    console.log('Déconnexion terminée');
+    logout();
     showSuccess('Déconnexion réussie');
   };
 
@@ -270,7 +199,6 @@ export default function HomePage() {
   };
 
   const handleAuthSuccess = (userData) => {
-    setUser(userData);
     if (userData.role === 'ADMIN' || userData.role === 'admin') {
       refetchAllParcelles();
     } else {
@@ -442,7 +370,7 @@ export default function HomePage() {
   const totalPages = Math.ceil(filteredParcelles.length / rowsPerPage);
 
   // Loading state
-  if (isAuthenticated && meLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -553,14 +481,69 @@ export default function HomePage() {
               )}
             </div>
         </div>
-        <div className="mb-4 flex justify-end space-x-2">
-          <button
-            onClick={() => setShowMap(!showMap)}
-            className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold"
-          >
-            <Map size={18} />
-            {showMap ? 'Voir le tableau' : 'Voir la carte'}
-          </button>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              className="border border-gray-300 px-3 py-2 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
+              style={{ minWidth: 180 }}
+            />
+            {/* Burger menu pour filtres colonnes */}
+            <div className="relative">
+              <button
+                type="button"
+                className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
+                onClick={() => setShowColumnsDropdown(v => !v)}
+                style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
+              >
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
+                Colonnes
+              </button>
+              {showColumnsDropdown && (
+                <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
+                  {columns.map(col => (
+                    <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.key)}
+                        onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
+                        className="accent-blue-600 rounded"
+                      />
+                      {col.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold"
+            >
+              <Map size={18} />
+              {showMap ? 'Voir le tableau' : 'Voir la carte'}
+            </button>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800">
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+            <span className="text-sm text-gray-500">par page</span>
+          </div>
+          <div className="p-6 flex flex-row items-center justify-end gap-2">
+            {selected.length > 0 && (
+              <button
+                onClick={() => { selected.forEach(id => handleDeleteParcelle(id)); setSelected([]); }}
+                className="px-3 py-1 rounded-lg bg-red-50 text-red-700 font-medium shadow-sm hover:bg-red-100 border border-red-200 text-sm transition flex items-center gap-1"
+              >
+                <Trash size={16} /> Supprimer ({selected.length})
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -608,61 +591,15 @@ export default function HomePage() {
         /* Datatable des parcelles */
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex flex-col md:flex-row gap-2 md:items-center w-full">
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={search}
-                  onChange={e => { setSearch(e.target.value); setPage(1); }}
-                  className="border border-gray-300 px-3 py-2 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
-                />
-                {/* Burger menu pour filtres colonnes */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
-                    onClick={() => setShowColumnsDropdown(v => !v)}
-                    style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
-                  >
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
-                    Colonnes
-                  </button>
-                  {showColumnsDropdown && (
-                    <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
-                      {columns.map(col => (
-                        <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns.includes(col.key)}
-                            onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
-                            className="accent-blue-600 rounded"
-                          />
-                          {col.label}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-//
-
-              <div className="flex gap-2 items-center">
-                <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800">
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                </select>
-                <span className="text-sm text-gray-500">par page</span>
-                {selected.length > 0 && (
-                  <button
-                    onClick={() => { selected.forEach(id => handleDeleteParcelle(id)); setSelected([]); }}
-                    className="px-3 py-1 rounded-lg bg-red-50 text-red-700 font-medium shadow-sm hover:bg-red-100 border border-red-200 text-sm transition flex items-center gap-1"
-                  >
-                    <Trash size={16} /> Supprimer ({selected.length})
-                  </button>
-                )}
-              </div>
+            <div className="p-6 flex flex-row items-center justify-end gap-2">
+              {selected.length > 0 && (
+                <button
+                  onClick={() => { selected.forEach(id => handleDeleteParcelle(id)); setSelected([]); }}
+                  className="px-3 py-1 rounded-lg bg-red-50 text-red-700 font-medium shadow-sm hover:bg-red-100 border border-red-200 text-sm transition flex items-center gap-1"
+                >
+                  <Trash size={16} /> Supprimer ({selected.length})
+                </button>
+              )}
             </div>
             {/* Table modernisée */}
             <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
@@ -720,7 +657,7 @@ export default function HomePage() {
                 </tbody>
               </table>
             </div>
-// ...existing code...
+
             {/* Pagination */}
             <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
               <div className="text-sm text-blue-900 font-semibold">
