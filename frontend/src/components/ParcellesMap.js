@@ -161,7 +161,7 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
       original: `http://localhost:8000/media/${img.image}`,
       thumbnail: `http://localhost:8000/media/${img.image}`,
       description: `Image ${img.ordre !== undefined ? img.ordre + 1 : idx + 1}`
-    }));
+      }));
   };
 
   const formatDate = (dateString) => {
@@ -386,7 +386,7 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
               <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-indigo-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
                 Galerie d'images
-              </div>
+            </div>
               <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                 <ImageGallery
                   items={prepareGalleryImages(selectedParcelle.images)}

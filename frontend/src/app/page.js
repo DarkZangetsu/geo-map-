@@ -665,32 +665,32 @@ export default function HomePage() {
               </div>
             </div>
             {/* Table modernisée */}
-            <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-gradient-to-br from-white via-blue-50 to-blue-100">
-              <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm">
-                <thead className="bg-gradient-to-r from-blue-50 to-blue-100 sticky top-0 z-10">
+            <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
+              <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm rounded-2xl overflow-hidden">
+                <thead className="sticky top-0 z-10 bg-white shadow-sm">
                   <tr>
-                    <th className="px-4 py-3">
+                    <th className="px-3 py-2">
                       <input type="checkbox" checked={selected.length === paginatedParcelles.length && paginatedParcelles.length > 0} onChange={e => setSelected(e.target.checked ? paginatedParcelles.map(p => p.id) : [])} className="accent-blue-600 rounded" />
                     </th>
                     {visibleColumns.map(colKey => {
                       const col = columns.find(c => c.key === colKey);
                       return (
-                        <th key={colKey} className="px-4 py-3 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">
+                        <th key={colKey} className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">
                           {col?.label}
                         </th>
                       );
                     })}
-                    <th className="px-4 py-3 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
+                    <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedParcelles.map((parcelle, idx) => (
-                    <tr key={parcelle.id} className={"hover:bg-blue-100/60 transition-all " + (idx % 2 === 0 ? 'bg-white' : 'bg-blue-50/60') } style={{ borderRadius: 16 }}>
-                      <td className="px-4 py-2">
+                    <tr key={parcelle.id} className={"hover:bg-indigo-50 transition-all " + (idx % 2 === 0 ? 'bg-white' : 'bg-blue-50')} style={{ borderRadius: 12 }}>
+                      <td className="px-3 py-2">
                         <input type="checkbox" checked={selected.includes(parcelle.id)} onChange={e => setSelected(e.target.checked ? [...selected, parcelle.id] : selected.filter(id => id !== parcelle.id))} className="accent-blue-600 rounded" />
                       </td>
                       {visibleColumns.map(colKey => (
-                        <td key={colKey} className={colKey === 'nom' ? 'px-4 py-2 font-bold text-blue-900' : 'px-4 py-2'}>
+                        <td key={colKey} className={colKey === 'nom' ? 'px-3 py-2 font-bold text-blue-900' : 'px-3 py-2'}>
                           {colKey === 'superficie' ? (parcelle.superficie ? `${parcelle.superficie} ha` : '-') :
                            colKey === 'irrigation' ? (parcelle.irrigation ? 'Oui' : 'Non') :
                            colKey === 'certificationBio' ? (parcelle.certificationBio ? 'Oui' : '') :
@@ -699,20 +699,20 @@ export default function HomePage() {
                            parcelle[colKey]}
                         </td>
                       ))}
-                      <td className="px-4 py-2 whitespace-nowrap flex gap-2">
+                      <td className="px-3 py-2 whitespace-nowrap flex gap-2">
                         <button
                           onClick={() => handleEditParcelle(parcelle)}
-                          className="inline-flex items-center px-3 py-1 rounded-xl bg-gradient-to-r from-blue-50 to-blue-200 text-blue-800 hover:from-blue-100 hover:to-blue-300 border border-blue-200 text-xs font-bold mr-2 transition shadow-sm"
+                          className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
                           title="Modifier la parcelle"
                         >
-                          <Edit size={16} className="mr-1" /> Modifier
+                          <Edit size={15} className="mr-1" />
                         </button>
                         <button
                           onClick={() => handleDeleteParcelle(parcelle.id)}
-                          className="inline-flex items-center px-3 py-1 rounded-xl bg-gradient-to-r from-red-50 to-red-100 text-red-700 hover:from-red-100 hover:to-red-200 border border-red-200 text-xs font-bold transition shadow-sm"
+                          className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
                           title="Supprimer la parcelle"
                         >
-                          <Trash size={16} className="mr-1" /> Supprimer
+                          <Trash size={15} className="mr-1" />
                         </button>
                       </td>
                     </tr>
