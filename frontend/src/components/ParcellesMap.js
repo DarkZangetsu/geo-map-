@@ -40,6 +40,7 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
+  const galleryRef = useRef(null);
 
   // S'assurer que geojson est un objet (pas une chaîne)
   const parseGeojson = (geojson) => {
@@ -260,55 +261,90 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
 
       {/* Panneau latéral pour les détails de la parcelle sélectionnée */}
       {selectedParcelle && (
-        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gray-50 shadow-2xl z-50 overflow-y-auto transition-all duration-300 border-l border-gray-200 flex flex-col rounded-l-2xl">
+        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gray-50 shadow-2xl z-50 overflow-y-auto transition-all duration-300 border border-gray-200 flex flex-col rounded-2xl m-4" style={{maxWidth: 440}}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center">
-              <div className="w-1.5 h-8 bg-indigo-500 rounded-full mr-4"></div>
-              <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Détails de la parcelle</h3>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full shadow">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 20l-5.447-2.724A2 2 0 013 15.382V6a2 2 0 012-2h14a2 2 0 012 2v9.382a2 2 0 01-1.553 1.894L15 20m-6 0v-2a2 2 0 012-2h2a2 2 0 012 2v2' /></svg>
+              </span>
+              <h3 className="text-2xl font-bold text-gray-900 tracking-tight ml-2">Détails de la parcelle</h3>
             </div>
             <button
               onClick={() => setSelectedParcelle(null)}
-              className="text-gray-400 hover:text-indigo-600 text-3xl font-bold transition-colors duration-150"
+              className="text-gray-400 hover:text-indigo-600 text-3xl font-bold transition-colors duration-150 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               title="Fermer"
             >
               ×
             </button>
           </div>
-          <div className="px-6 py-4 flex-1 text-gray-900 flex flex-col justify-between">
-            <div className="space-y-2 divide-y divide-gray-200">
-              <div className="pb-2">
-                <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Culture</div>
+          <div className="px-2 py-2 flex-1 text-gray-900">
+            <div className="space-y-2">
+              <div className="bg-white rounded-xl shadow p-2 flex items-center gap-4">
+                {selectedParcelle.user?.logo && (
+                  <img
+                    src={`http://localhost:8000/media/${selectedParcelle.user.logo}`}
+                    alt="Logo"
+                    className="w-14 h-14 rounded-full border border-gray-200 shadow"
+                  />
+                )}
+                <div>
+                  <h3 className="font-bold text-xl text-gray-900 leading-tight">{selectedParcelle.nom}</h3>
+                  <p className="text-base text-gray-700 font-normal mt-1">
+                    {selectedParcelle.user?.firstName} {selectedParcelle.user?.lastName}
+                  </p>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-2">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
+                  Culture
+                </div>
                 <div className="text-base font-medium text-gray-900">{selectedParcelle.culture}</div>
               </div>
-              <div className="py-2">
-                <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Propriétaire</div>
+              <div className="bg-white rounded-xl shadow p-2">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z' /></svg>
+                  Propriétaire
+                </div>
                 <div className="text-base font-medium text-gray-900">{selectedParcelle.proprietaire}</div>
               </div>
               {selectedParcelle.superficie && (
-                <div className="py-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Superficie</div>
+                <div className="bg-white rounded-xl shadow p-2">
+                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' /></svg>
+                    Superficie
+                  </div>
                   <div className="text-base font-medium text-gray-900">{selectedParcelle.superficie} ha</div>
                 </div>
               )}
               {selectedParcelle.variete && (
-                <div className="py-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Variété</div>
+                <div className="bg-white rounded-xl shadow p-2">
+                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
+                    Variété
+                  </div>
                   <div className="text-base font-medium text-gray-900">{selectedParcelle.variete}</div>
                 </div>
               )}
               {selectedParcelle.dateSemis && (
-                <div className="py-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Date de semis</div>
+                <div className="bg-white rounded-xl shadow p-2">
+                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
+                    Date de semis
+                  </div>
                   <div className="text-base font-medium text-gray-900">{formatDate(selectedParcelle.dateSemis)}</div>
                 </div>
               )}
               {selectedParcelle.dateRecoltePrevue && (
-                <div className="py-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Récolte prévue</div>
+                <div className="bg-white rounded-xl shadow p-2">
+                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
+                    Récolte prévue
+                  </div>
                   <div className="text-base font-medium text-gray-900">{formatDate(selectedParcelle.dateRecoltePrevue)}</div>
                 </div>
               )}
-              <div className="py-2 flex gap-2">
+              <div className="bg-white rounded-xl shadow p-2 flex gap-2">
                 {selectedParcelle.certificationBio && (
                   <span className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-semibold border border-green-200">Bio</span>
                 )}
@@ -317,30 +353,36 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street' }) => {
                 )}
               </div>
               {selectedParcelle.notes && (
-                <div className="py-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-0.5">Notes</div>
-                  <div className="bg-white rounded-lg p-2 text-base text-gray-800 border border-gray-200 shadow-sm">
-                    {selectedParcelle.notes}
+                <div className="bg-white rounded-xl shadow p-2">
+                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6 0a6 6 0 1112 0A6 6 0 019 12z' /></svg>
+                    Notes
                   </div>
+                  <div className="text-base text-gray-800">{selectedParcelle.notes}</div>
                 </div>
               )}
             </div>
-            {/* Bouton voir images tout en bas */}
+            {/* Bouton voir images juste après les sections */}
             {Array.isArray(selectedParcelle.images) && selectedParcelle.images.length > 0 && (
-              <div className="mt-4 flex-shrink-0">
-                <button
-                  onClick={() => setShowGallery(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-base rounded-lg font-semibold hover:bg-indigo-700 transition shadow"
-                >
-                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
-                  Voir les images ({selectedParcelle.images.length})
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setShowGallery(true);
+                  setTimeout(() => {
+                    if (galleryRef.current) {
+                      galleryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-base rounded-xl font-semibold hover:bg-indigo-700 transition shadow-lg mt-4"
+              >
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
+                Voir les images ({selectedParcelle.images.length})
+              </button>
             )}
           </div>
           {/* Galerie d'images dans le panneau latéral, style amélioré */}
           {showGallery && selectedParcelle && (
-            <div className="p-4 border-t border-gray-100 bg-white">
+            <div ref={galleryRef} className="p-4 border-t border-gray-100 bg-white rounded-b-2xl">
               <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-indigo-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
                 Galerie d'images
