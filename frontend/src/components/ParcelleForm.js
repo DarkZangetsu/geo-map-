@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_PARCELLE, UPDATE_PARCELLE } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
+import MapDrawModal from './MapDrawModal';
 
 const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [geojson, setGeojson] = useState(parcelle?.geojson || null);
-  const [manualGeojson, setManualGeojson] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const [createParcelle, { loading: createLoading }] = useMutation(CREATE_PARCELLE);
@@ -80,16 +81,11 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
     e.preventDefault();
     
     let geojsonToUse = geojson;
-    if (manualGeojson.trim()) {
-      try {
-        geojsonToUse = JSON.parse(manualGeojson);
-      } catch (e) {
-        showError('Le texte JSON fourni n\'est pas valide.');
-        return;
-      }
+    if (showMapModal) {
+      geojsonToUse = null;
     }
     if (!geojsonToUse) {
-      showError('Veuillez fournir un fichier GeoJSON ou coller le JSON.');
+      showError('Veuillez fournir un fichier GeoJSON ou dessiner sur la carte.');
       return;
     }
 
@@ -365,28 +361,29 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
             accept=".geojson,.json"
             onChange={handleGeojsonUpload}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            disabled={manualGeojson.trim().length > 0}
-          />
-          {geojson && (
-            <p className="mt-1 text-sm text-green-600">✓ Fichier GeoJSON chargé</p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Remplir l'un ou l'autre, pas les deux.</p>
-        </div>
-
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-black mb-2">
-            Coller ou écrire le GeoJSON
-          </label>
-          <textarea
-            rows={5}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black bg-white placeholder:text-gray-700"
-            placeholder="{ ... }"
-            value={manualGeojson}
-            onChange={e => setManualGeojson(e.target.value)}
             disabled={!!geojson}
           />
-          <p className="text-xs text-gray-500 mt-1">Remplir l'un ou l'autre, pas les deux.</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowMapModal(true)}
+            className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            disabled={!!geojson}
+          >
+            Dessiner sur la carte
+          </button>
+          {geojson && (
+            <p className="mt-1 text-sm text-green-600">✓ Parcelle définie</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">Importer un fichier OU dessiner sur la carte.</p>
+          <MapDrawModal
+            open={showMapModal}
+            onClose={() => setShowMapModal(false)}
+            onSave={gjson => {
+              setGeojson(gjson);
+              setShowMapModal(false);
+            }}
+          />
+        </div>
 
         {/* Images */}
         <div>
