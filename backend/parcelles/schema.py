@@ -385,22 +385,21 @@ class ExportParcellesCSV(graphene.Mutation):
         try:
             user = info.context.user
             parcelles = Parcelle.objects.filter(user=user)
-            
-            # Créer le buffer CSV
             output = io.StringIO()
             writer = csv.writer(output)
-            
-            # En-têtes du CSV
             headers = [
                 'nom', 'culture', 'proprietaire', 'superficie', 'variete',
                 'date_semis', 'date_recolte_prevue', 'type_sol', 'irrigation',
                 'type_irrigation', 'rendement_prevue', 'cout_production',
-                'certification_bio', 'certification_hve', 'notes'
+                'certification_bio', 'certification_hve', 'notes', 'geometrie'
             ]
             writer.writerow(headers)
-            
-            # Données des parcelles
             for parcelle in parcelles:
+                # Exporter la géométrie comme liste de points (lon,lat)
+                coords = ''
+                if parcelle.geojson and 'geometry' in parcelle.geojson and 'coordinates' in parcelle.geojson['geometry']:
+                    points = parcelle.geojson['geometry']['coordinates'][0] if parcelle.geojson['geometry']['type'] == 'Polygon' else []
+                    coords = ','.join(f"[{p[0]},{p[1]}]" for p in points)
                 row = [
                     parcelle.nom,
                     parcelle.culture,
@@ -416,13 +415,12 @@ class ExportParcellesCSV(graphene.Mutation):
                     str(parcelle.cout_production) if parcelle.cout_production else '',
                     'Oui' if parcelle.certification_bio else 'Non',
                     'Oui' if parcelle.certification_hve else 'Non',
-                    parcelle.notes or ''
+                    parcelle.notes or '',
+                    coords
                 ]
                 writer.writerow(row)
-            
             csv_content = output.getvalue()
             output.close()
-            
             return ExportParcellesCSV(
                 csv_data=csv_content,
                 success=True,
@@ -449,19 +447,13 @@ class ImportParcellesCSV(graphene.Mutation):
             user = info.context.user
             imported_count = 0
             errors = []
-            
-            # Lire le fichier CSV
             csv_content = csv_file.read().decode('utf-8')
             csv_reader = csv.DictReader(io.StringIO(csv_content))
-            
-            for row_num, row in enumerate(csv_reader, start=2):  # Commencer à 2 car ligne 1 = en-têtes
+            for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    # Validation des champs requis
                     if not row.get('nom') or not row.get('culture') or not row.get('proprietaire'):
                         errors.append(f"Ligne {row_num}: Nom, culture et propriétaire sont requis")
                         continue
-                    
-                    # Conversion des valeurs
                     superficie = None
                     if row.get('superficie'):
                         try:
@@ -469,7 +461,6 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Superficie invalide")
                             continue
-                    
                     date_semis = None
                     if row.get('date_semis'):
                         try:
@@ -477,7 +468,6 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Date de semis invalide (format: YYYY-MM-DD)")
                             continue
-                    
                     date_recolte_prevue = None
                     if row.get('date_recolte_prevue'):
                         try:
@@ -485,11 +475,11 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Date de récolte prévue invalide (format: YYYY-MM-DD)")
                             continue
-                    
-                    irrigation = row.get('irrigation', '').lower() in ['oui', 'yes', 'true', '1']
-                    certification_bio = row.get('certification_bio', '').lower() in ['oui', 'yes', 'true', '1']
-                    certification_hve = row.get('certification_hve', '').lower() in ['oui', 'yes', 'true', '1']
-                    
+                    def parse_bool(val):
+                        return str(val).strip().lower() in ['1', 'oui', 'yes', 'true', 'vrai']
+                    irrigation = parse_bool(row.get('irrigation', '0'))
+                    certification_bio = parse_bool(row.get('certification_bio', '0'))
+                    certification_hve = parse_bool(row.get('certification_hve', '0'))
                     rendement_prevue = None
                     if row.get('rendement_prevue'):
                         try:
@@ -497,7 +487,6 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Rendement prévu invalide")
                             continue
-                    
                     cout_production = None
                     if row.get('cout_production'):
                         try:
@@ -505,18 +494,50 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Coût de production invalide")
                             continue
-                    
-                    # Créer un GeoJSON par défaut (polygone simple)
-                    default_geojson = {
-                        "type": "Feature",
-                        "geometry": {
-                            "type": "Polygon",
-                            "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
-                        },
-                        "properties": {}
-                    }
-                    
-                    # Créer la parcelle
+                    # Gestion de la géométrie
+                    geojson = None
+                    geometrie_str = row.get('geometrie', '').strip()
+                    if geometrie_str:
+                        import json
+                        try:
+                            # Si c'est un vrai GeoJSON
+                            geojson_candidate = json.loads(geometrie_str)
+                            if isinstance(geojson_candidate, dict) and 'type' in geojson_candidate and 'coordinates' in geojson_candidate:
+                                geojson = {
+                                    "type": "Feature",
+                                    "geometry": geojson_candidate,
+                                    "properties": {}
+                                }
+                        except Exception:
+                            # Sinon, on suppose que c'est une liste de points
+                            try:
+                                import re
+                                points = re.findall(r'\[([\d\.-]+),([\d\.-]+)\]', geometrie_str)
+                                coords = [[float(lon), float(lat)] for lon, lat in points]
+                                if len(coords) >= 4 and coords[0] == coords[-1]:
+                                    pass
+                                elif len(coords) >= 3:
+                                    coords.append(coords[0])
+                                geojson = {
+                                    "type": "Feature",
+                                    "geometry": {
+                                        "type": "Polygon",
+                                        "coordinates": [coords]
+                                    },
+                                    "properties": {}
+                                }
+                            except Exception:
+                                errors.append(f"Ligne {row_num}: Format de géométrie invalide")
+                                geojson = None
+                    if not geojson:
+                        geojson = {
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Polygon",
+                                "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
+                            },
+                            "properties": {}
+                        }
                     parcelle = Parcelle.objects.create(
                         user=user,
                         nom=row['nom'],
@@ -534,26 +555,21 @@ class ImportParcellesCSV(graphene.Mutation):
                         certification_bio=certification_bio,
                         certification_hve=certification_hve,
                         notes=row.get('notes', ''),
-                        geojson=default_geojson
+                        geojson=geojson
                     )
-                    
                     imported_count += 1
-                    
                 except Exception as e:
                     errors.append(f"Ligne {row_num}: {str(e)}")
                     continue
-            
             message = f"Import terminé: {imported_count} parcelles importées"
             if errors:
                 message += f", {len(errors)} erreurs"
-            
             return ImportParcellesCSV(
                 success=True,
                 message=message,
                 imported_count=imported_count,
                 errors=errors
             )
-            
         except Exception as e:
             return ImportParcellesCSV(
                 success=False,

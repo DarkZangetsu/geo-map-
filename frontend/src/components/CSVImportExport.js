@@ -101,15 +101,15 @@ const CSVImportExport = ({ onImportSuccess }) => {
       'nom', 'culture', 'proprietaire', 'superficie', 'variete',
       'date_semis', 'date_recolte_prevue', 'type_sol', 'irrigation',
       'type_irrigation', 'rendement_prevue', 'cout_production',
-      'certification_bio', 'certification_hve', 'notes'
+      'certification_bio', 'certification_hve', 'notes', 'geometrie'
     ];
-    
+    // Exemple de géométrie : liste de points [lon,lat],[lon,lat],...
     const templateData = [
       'Parcelle 1', 'Blé', 'Jean Dupont', '5.5', 'Blé tendre',
       '2024-10-15', '2025-07-20', 'Argileux', 'Oui', 'Aspersion',
-      '8.5', '1200.50', 'Non', 'Oui', 'Parcelle bien exposée'
+      '8.5', '1200.50', 'Oui', 'Non', 'Parcelle bien exposée',
+      '[44.2834,-20.2967],[44.2847,-20.2967],[44.2847,-20.298],[44.2834,-20.298],[44.2834,-20.2967]'
     ];
-    
     const csvContent = [templateHeaders.join(','), templateData.join(',')].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
