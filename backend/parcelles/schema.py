@@ -531,13 +531,13 @@ class ImportParcellesCSV(graphene.Mutation):
                                 geojson = None
                     if not geojson:
                         geojson = {
-                            "type": "Feature",
-                            "geometry": {
-                                "type": "Polygon",
-                                "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
-                            },
-                            "properties": {}
-                        }
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
+                        },
+                        "properties": {}
+                    }
                     parcelle = Parcelle.objects.create(
                         user=user,
                         nom=row['nom'],
