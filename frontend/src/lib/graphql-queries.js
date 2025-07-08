@@ -144,6 +144,63 @@ export const GET_ALL_USERS = gql`
   }
 `;
 
+export const GET_MY_SIEGES = gql`
+  query GetMySieges {
+    mySieges {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
+
+export const GET_ALL_SIEGES = gql`
+  query GetAllSieges {
+    allSieges {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
+
+export const GET_SIEGE = gql`
+  query GetSiege($id: ID!) {
+    siege(id: $id) {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
+
 // Mutations
 export const CREATE_USER = gql`
   mutation CreateUser(
@@ -408,6 +465,104 @@ export const REFRESH_TOKEN = gql`
     refreshToken(refreshToken: $refreshToken) {
       token
       payload
+    }
+  }
+`;
+
+export const CREATE_SIEGE = gql`
+  mutation CreateSiege($nom: String!, $adresse: String!, $latitude: Decimal!, $longitude: Decimal!, $description: String) {
+    createSiege(nom: $nom, adresse: $adresse, latitude: $latitude, longitude: $longitude, description: $description) {
+      success
+      message
+      siege {
+        id
+        nom
+        adresse
+        latitude
+        longitude
+        description
+        createdAt
+        updatedAt
+        user {
+          id
+          username
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_SIEGE = gql`
+  mutation UpdateSiege($id: ID!, $nom: String, $adresse: String, $latitude: Decimal, $longitude: Decimal, $description: String) {
+    updateSiege(id: $id, nom: $nom, adresse: $adresse, latitude: $latitude, longitude: $longitude, description: $description) {
+      success
+      message
+      siege {
+        id
+        nom
+        adresse
+        latitude
+        longitude
+        description
+        createdAt
+        updatedAt
+        user {
+          id
+          username
+        }
+      }
+    }
+  }
+`;
+
+export const DELETE_SIEGE = gql`
+  mutation DeleteSiege($id: ID!) {
+    deleteSiege(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
+// CSV Import/Export mutations
+export const EXPORT_PARCELLES_CSV = gql`
+  mutation ExportParcellesCSV {
+    exportParcellesCsv {
+      success
+      message
+      csvData
+    }
+  }
+`;
+
+export const IMPORT_PARCELLES_CSV = gql`
+  mutation ImportParcellesCSV($csvFile: Upload!) {
+    importParcellesCsv(csvFile: $csvFile) {
+      success
+      message
+      importedCount
+      errors
+    }
+  }
+`;
+
+export const EXPORT_SIEGES_CSV = gql`
+  mutation ExportSiegesCSV {
+    exportSiegesCsv {
+      success
+      message
+      csvData
+    }
+  }
+`;
+
+export const IMPORT_SIEGES_CSV = gql`
+  mutation ImportSiegesCSV($csvFile: Upload!) {
+    importSiegesCsv(csvFile: $csvFile) {
+      success
+      message
+      importedCount
+      errors
     }
   }
 `; 

@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_ME, GET_ALL_USERS, GET_ALL_PARCELLES, DELETE_PARCELLE } from '../../lib/graphql-queries';
+import { GET_ME, GET_ALL_USERS, GET_ALL_PARCELLES, DELETE_PARCELLE, GET_MY_SIEGES } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
 import ParcelleForm from '../../components/ParcelleForm';
 import { useAuth } from '../../components/Providers';
+import SiegeForm from '../../components/SiegeForm';
+import SiegeTable from '../../components/SiegeTable';
+import ParcellesMap from '../../components/ParcellesMap';
 
 export default function AdminPage() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -50,6 +53,11 @@ export default function AdminPage() {
     skip: !isAuthenticated
   });
   const [deleteParcelle] = useMutation(DELETE_PARCELLE);
+  const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
+    skip: !isAuthenticated
+  });
+  const [showSiegeForm, setShowSiegeForm] = useState(false);
+  const [mapSiege, setMapSiege] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -151,12 +159,22 @@ export default function AdminPage() {
     document.body.removeChild(link);
   };
 
+  const handleSiegeSuccess = () => {
+    setShowSiegeForm(false);
+    refetchSieges();
+  };
+
+  const handleShowOnMap = (siege) => {
+    setMapSiege(siege);
+  };
+
   if (isLoading) {
     return <div>Chargement...</div>;
   }
 
   const users = usersData?.allUsers || [];
   const parcelles = parcellesData?.allParcelles || [];
+  const sieges = siegesData?.mySieges || [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -204,6 +222,30 @@ export default function AdminPage() {
             // Implementation of handleParcelleCancel
           }}
         />
+      </div>
+
+      <div className="mb-8 flex gap-4">
+        <button
+          onClick={() => setShowSiegeForm(true)}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+        >
+          Ajouter un siège
+        </button>
+      </div>
+      {showSiegeForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <SiegeForm onSuccess={handleSiegeSuccess} onCancel={() => setShowSiegeForm(false)} />
+        </div>
+      )}
+      <div className="mb-8">
+        <h3 className="text-lg font-bold mb-2">Liste des sièges</h3>
+        <SiegeTable sieges={sieges} onShowOnMap={handleShowOnMap} />
+      </div>
+      <div className="mb-8">
+        <h3 className="text-lg font-bold mb-2">Carte des parcelles et sièges</h3>
+        <div style={{ height: 500 }}>
+          <ParcellesMap parcelles={parcelles} sieges={mapSiege ? [mapSiege] : sieges} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

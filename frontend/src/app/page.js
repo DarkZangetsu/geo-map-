@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_ME, GET_MY_PARCELLES, CREATE_PARCELLE, TOKEN_AUTH_WITH_USER, CREATE_USER, GET_ALL_PARCELLES, DELETE_PARCELLE } from '../lib/graphql-queries';
+import { GET_ME, GET_MY_PARCELLES, CREATE_PARCELLE, TOKEN_AUTH_WITH_USER, CREATE_USER, GET_ALL_PARCELLES, DELETE_PARCELLE, GET_MY_SIEGES } from '../lib/graphql-queries';
 import { exportToGeoJSON } from '../lib/file-parser';
 import { useToast } from '../lib/useToast';
 import { authUtils } from '../lib/utils';
@@ -15,6 +15,9 @@ import ParcelleForm from '../components/ParcelleForm';
 import CarteTest from '../components/CarteTest';
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from 'lucide-react';
 import { useAuth } from '../components/Providers';
+import SiegeForm from '../components/SiegeForm';
+import SiegeTable from '../components/SiegeTable';
+import CSVImportExport from '../components/CSVImportExport';
 // import AuthDebugger from '../components/AuthDebugger';
 
 export default function HomePage() {
@@ -34,6 +37,9 @@ export default function HomePage() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selected, setSelected] = useState([]);
   const [showMap, setShowMap] = useState(false);
+  const [showSiegeForm, setShowSiegeForm] = useState(false);
+  const [mapSiege, setMapSiege] = useState(null);
+  const [showCSVModal, setShowCSVModal] = useState(false);
   // Colonnes du tableau (configurable)
   const columns = [
     { key: 'nom', label: 'Parcelle' },
@@ -80,6 +86,10 @@ export default function HomePage() {
     GET_ALL_PARCELLES,
     { skip: !isAuthenticated || isAuthenticated && user?.role !== 'ADMIN' && user?.role !== 'admin' }
   );
+
+  const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
+    skip: !isAuthenticated || (user && (user.role === 'ADMIN' || user.role === 'admin'))
+  });
 
   // Mutations
   const [tokenAuth] = useMutation(TOKEN_AUTH_WITH_USER);
@@ -252,6 +262,16 @@ export default function HomePage() {
     setShowForm(true);
   };
 
+  const handleSiegeSuccess = () => {
+    setShowSiegeForm(false);
+    refetchSieges();
+  };
+
+  const handleShowOnMap = (siege) => {
+    setMapSiege(siege);
+    setShowMap(true);
+  };
+
   // Fonctions de debug supprimées pour production
 
   const exportToCSV = (parcelles) => {
@@ -374,6 +394,8 @@ export default function HomePage() {
 
   const totalPages = Math.ceil(filteredParcelles.length / rowsPerPage);
 
+  const sieges = siegesData?.mySieges || [];
+
   // Loading state
   if (isLoading) {
     return (
@@ -462,6 +484,13 @@ export default function HomePage() {
               {(!showMap && !mapFullscreen) && (
                 <>
                   <button
+                    onClick={() => setShowCSVModal(true)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-semibold shadow-sm transition"
+                    title="Import/Export CSV avancé"
+                  >
+                    Import/Export CSV
+                  </button>
+                  <button
                     onClick={() => exportToCSV(parcelles)}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold shadow-sm transition"
                     title="Exporter en CSV"
@@ -482,6 +511,15 @@ export default function HomePage() {
                   >
                     <Plus size={18} /> Ajouter une parcelle
                   </button>
+                  {user && user.role !== 'ADMIN' && user.role !== 'admin' && (
+                    <button
+                      onClick={() => router.push('/siege')}
+                      className="px-4 py-2 bg-green-700 text-white rounded-md shadow hover:bg-green-800 font-bold transition flex items-center gap-2 border border-green-900"
+                      title="Gérer mes sièges"
+                    >
+                      <Plus size={18} /> Gérer mes sièges
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -530,6 +568,7 @@ export default function HomePage() {
                 ) : (
                   <ParcellesMap
                     parcelles={parcelles}
+                    sieges={user && user.role !== 'ADMIN' && user.role !== 'admin' ? (mapSiege ? [mapSiege] : sieges) : []}
                     mapStyle={mapStyle}
                     onParcelleClick={handleParcelleClick}
                     style={mapFullscreen ? {height: '100vh', width: '100vw'} : {height: '600px', width: '100%'}}
@@ -691,6 +730,22 @@ export default function HomePage() {
                 onCancel={() => { setShowForm(false); setEditingParcelle(null); }}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Import/Export CSV */}
+      {showCSVModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6 relative">
+            <button
+              onClick={() => setShowCSVModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+              title="Fermer"
+            >
+              ×
+            </button>
+            <CSVImportExport onImportSuccess={() => { setShowCSVModal(false); refetchParcelles(); }} />
           </div>
         </div>
       )}

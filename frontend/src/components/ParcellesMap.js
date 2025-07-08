@@ -35,7 +35,16 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false });
 
-const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street', style }) => {
+const greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+const ParcellesMap = ({ parcelles, sieges = [], onParcelleClick, onSiegeClick, mapStyle = 'street', style }) => {
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
@@ -268,6 +277,25 @@ const ParcellesMap = ({ parcelles, onParcelleClick, mapStyle = 'street', style }
             </div>
           );
         })}
+        {/* Affichage des sièges (marqueurs verts) */}
+        {sieges.map((siege) => (
+          <Marker
+            key={siege.id}
+            position={[parseFloat(siege.latitude), parseFloat(siege.longitude)]}
+            icon={greenIcon}
+            eventHandlers={{
+              click: () => onSiegeClick && onSiegeClick(siege)
+            }}
+          >
+            <Popup>
+              <div>
+                <strong>{siege.nom}</strong><br />
+                {siege.adresse}<br />
+                Lat: {siege.latitude}, Lng: {siege.longitude}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
 
       {/* Panneau latéral pour les détails de la parcelle sélectionnée */}

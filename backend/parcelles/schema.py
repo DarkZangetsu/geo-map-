@@ -5,7 +5,12 @@ from graphql_jwt.decorators import login_required
 from graphql_jwt.shortcuts import create_refresh_token, get_token
 from graphql_jwt.mutations import ObtainJSONWebToken, Refresh, Verify
 from graphene_file_upload.scalars import Upload
-from .models import User, Parcelle, ParcelleImage
+from .models import User, Parcelle, ParcelleImage, Siege
+import csv
+import io
+import json
+from datetime import datetime
+from decimal import Decimal
 
 class UserType(DjangoObjectType):
     firstName = graphene.String(source='first_name')
@@ -29,6 +34,11 @@ class ParcelleType(DjangoObjectType):
     
     def resolve_images(self, info):
         return self.images.all()
+
+class SiegeType(DjangoObjectType):
+    class Meta:
+        model = Siege
+        fields = "__all__"
 
 class CreateUser(graphene.Mutation):
     user = graphene.Field(UserType)
@@ -242,6 +252,81 @@ class DeleteParcelle(graphene.Mutation):
         except Exception as e:
             return DeleteParcelle(success=False, message=str(e))
 
+class CreateSiege(graphene.Mutation):
+    siege = graphene.Field(SiegeType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        nom = graphene.String(required=True)
+        adresse = graphene.String(required=True)
+        latitude = graphene.Decimal(required=True)
+        longitude = graphene.Decimal(required=True)
+        description = graphene.String()
+
+    @login_required
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None):
+        user = info.context.user
+        try:
+            siege = Siege.objects.create(
+                user=user,
+                nom=nom,
+                adresse=adresse,
+                latitude=latitude,
+                longitude=longitude,
+                description=description
+            )
+            return CreateSiege(siege=siege, success=True, message="Siège créé avec succès")
+        except Exception as e:
+            return CreateSiege(success=False, message=str(e))
+
+class UpdateSiege(graphene.Mutation):
+    siege = graphene.Field(SiegeType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        nom = graphene.String()
+        adresse = graphene.String()
+        latitude = graphene.Decimal()
+        longitude = graphene.Decimal()
+        description = graphene.String()
+
+    @login_required
+    def mutate(self, info, id, **kwargs):
+        user = info.context.user
+        try:
+            siege = Siege.objects.get(id=id)
+            if siege.user != user and user.role != 'admin':
+                return UpdateSiege(success=False, message="Non autorisé")
+            for key, value in kwargs.items():
+                if value is not None:
+                    setattr(siege, key, value)
+            siege.save()
+            return UpdateSiege(siege=siege, success=True, message="Siège modifié avec succès")
+        except Exception as e:
+            return UpdateSiege(success=False, message=str(e))
+
+class DeleteSiege(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    @login_required
+    def mutate(self, info, id):
+        user = info.context.user
+        try:
+            siege = Siege.objects.get(id=id)
+            if siege.user != user and user.role != 'admin':
+                return DeleteSiege(success=False, message="Non autorisé")
+            siege.delete()
+            return DeleteSiege(success=True, message="Siège supprimé")
+        except Exception as e:
+            return DeleteSiege(success=False, message=str(e))
+
 class TokenAuthWithUser(graphene.Mutation):
     token = graphene.String()
     refreshToken = graphene.String()
@@ -290,12 +375,294 @@ class TokenAuthWithUser(graphene.Mutation):
                 message=f"Erreur de connexion: {str(e)}"
             )
 
+class ExportParcellesCSV(graphene.Mutation):
+    csv_data = graphene.String()
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    @login_required
+    def mutate(self, info):
+        try:
+            user = info.context.user
+            parcelles = Parcelle.objects.filter(user=user)
+            
+            # Créer le buffer CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # En-têtes du CSV
+            headers = [
+                'nom', 'culture', 'proprietaire', 'superficie', 'variete',
+                'date_semis', 'date_recolte_prevue', 'type_sol', 'irrigation',
+                'type_irrigation', 'rendement_prevue', 'cout_production',
+                'certification_bio', 'certification_hve', 'notes'
+            ]
+            writer.writerow(headers)
+            
+            # Données des parcelles
+            for parcelle in parcelles:
+                row = [
+                    parcelle.nom,
+                    parcelle.culture,
+                    parcelle.proprietaire,
+                    str(parcelle.superficie) if parcelle.superficie else '',
+                    parcelle.variete or '',
+                    parcelle.date_semis.strftime('%Y-%m-%d') if parcelle.date_semis else '',
+                    parcelle.date_recolte_prevue.strftime('%Y-%m-%d') if parcelle.date_recolte_prevue else '',
+                    parcelle.type_sol or '',
+                    'Oui' if parcelle.irrigation else 'Non',
+                    parcelle.type_irrigation or '',
+                    str(parcelle.rendement_prevue) if parcelle.rendement_prevue else '',
+                    str(parcelle.cout_production) if parcelle.cout_production else '',
+                    'Oui' if parcelle.certification_bio else 'Non',
+                    'Oui' if parcelle.certification_hve else 'Non',
+                    parcelle.notes or ''
+                ]
+                writer.writerow(row)
+            
+            csv_content = output.getvalue()
+            output.close()
+            
+            return ExportParcellesCSV(
+                csv_data=csv_content,
+                success=True,
+                message=f"Export CSV réussi - {parcelles.count()} parcelles exportées"
+            )
+        except Exception as e:
+            return ExportParcellesCSV(
+                success=False,
+                message=f"Erreur lors de l'export: {str(e)}"
+            )
+
+class ImportParcellesCSV(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+    imported_count = graphene.Int()
+    errors = graphene.List(graphene.String)
+
+    class Arguments:
+        csv_file = Upload(required=True)
+
+    @login_required
+    def mutate(self, info, csv_file):
+        try:
+            user = info.context.user
+            imported_count = 0
+            errors = []
+            
+            # Lire le fichier CSV
+            csv_content = csv_file.read().decode('utf-8')
+            csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
+            for row_num, row in enumerate(csv_reader, start=2):  # Commencer à 2 car ligne 1 = en-têtes
+                try:
+                    # Validation des champs requis
+                    if not row.get('nom') or not row.get('culture') or not row.get('proprietaire'):
+                        errors.append(f"Ligne {row_num}: Nom, culture et propriétaire sont requis")
+                        continue
+                    
+                    # Conversion des valeurs
+                    superficie = None
+                    if row.get('superficie'):
+                        try:
+                            superficie = Decimal(row['superficie'].replace(',', '.'))
+                        except:
+                            errors.append(f"Ligne {row_num}: Superficie invalide")
+                            continue
+                    
+                    date_semis = None
+                    if row.get('date_semis'):
+                        try:
+                            date_semis = datetime.strptime(row['date_semis'], '%Y-%m-%d').date()
+                        except:
+                            errors.append(f"Ligne {row_num}: Date de semis invalide (format: YYYY-MM-DD)")
+                            continue
+                    
+                    date_recolte_prevue = None
+                    if row.get('date_recolte_prevue'):
+                        try:
+                            date_recolte_prevue = datetime.strptime(row['date_recolte_prevue'], '%Y-%m-%d').date()
+                        except:
+                            errors.append(f"Ligne {row_num}: Date de récolte prévue invalide (format: YYYY-MM-DD)")
+                            continue
+                    
+                    irrigation = row.get('irrigation', '').lower() in ['oui', 'yes', 'true', '1']
+                    certification_bio = row.get('certification_bio', '').lower() in ['oui', 'yes', 'true', '1']
+                    certification_hve = row.get('certification_hve', '').lower() in ['oui', 'yes', 'true', '1']
+                    
+                    rendement_prevue = None
+                    if row.get('rendement_prevue'):
+                        try:
+                            rendement_prevue = Decimal(row['rendement_prevue'].replace(',', '.'))
+                        except:
+                            errors.append(f"Ligne {row_num}: Rendement prévu invalide")
+                            continue
+                    
+                    cout_production = None
+                    if row.get('cout_production'):
+                        try:
+                            cout_production = Decimal(row['cout_production'].replace(',', '.'))
+                        except:
+                            errors.append(f"Ligne {row_num}: Coût de production invalide")
+                            continue
+                    
+                    # Créer un GeoJSON par défaut (polygone simple)
+                    default_geojson = {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
+                        },
+                        "properties": {}
+                    }
+                    
+                    # Créer la parcelle
+                    parcelle = Parcelle.objects.create(
+                        user=user,
+                        nom=row['nom'],
+                        culture=row['culture'],
+                        proprietaire=row['proprietaire'],
+                        superficie=superficie,
+                        variete=row.get('variete', ''),
+                        date_semis=date_semis,
+                        date_recolte_prevue=date_recolte_prevue,
+                        type_sol=row.get('type_sol', ''),
+                        irrigation=irrigation,
+                        type_irrigation=row.get('type_irrigation', ''),
+                        rendement_prevue=rendement_prevue,
+                        cout_production=cout_production,
+                        certification_bio=certification_bio,
+                        certification_hve=certification_hve,
+                        notes=row.get('notes', ''),
+                        geojson=default_geojson
+                    )
+                    
+                    imported_count += 1
+                    
+                except Exception as e:
+                    errors.append(f"Ligne {row_num}: {str(e)}")
+                    continue
+            
+            message = f"Import terminé: {imported_count} parcelles importées"
+            if errors:
+                message += f", {len(errors)} erreurs"
+            
+            return ImportParcellesCSV(
+                success=True,
+                message=message,
+                imported_count=imported_count,
+                errors=errors
+            )
+            
+        except Exception as e:
+            return ImportParcellesCSV(
+                success=False,
+                message=f"Erreur lors de l'import: {str(e)}",
+                imported_count=0,
+                errors=[str(e)]
+            )
+
+class ExportSiegesCSV(graphene.Mutation):
+    csv_data = graphene.String()
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    @login_required
+    def mutate(self, info):
+        try:
+            user = info.context.user
+            sieges = Siege.objects.filter(user=user)
+            output = io.StringIO()
+            writer = csv.writer(output)
+            headers = [
+                'nom', 'adresse', 'latitude', 'longitude', 'description'
+            ]
+            writer.writerow(headers)
+            for siege in sieges:
+                row = [
+                    siege.nom,
+                    siege.adresse,
+                    str(siege.latitude),
+                    str(siege.longitude),
+                    siege.description or ''
+                ]
+                writer.writerow(row)
+            csv_content = output.getvalue()
+            output.close()
+            return ExportSiegesCSV(
+                csv_data=csv_content,
+                success=True,
+                message=f"Export CSV réussi - {sieges.count()} sièges exportés"
+            )
+        except Exception as e:
+            return ExportSiegesCSV(success=False, message=f"Erreur lors de l'export: {str(e)}")
+
+class ImportSiegesCSV(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+    imported_count = graphene.Int()
+    errors = graphene.List(graphene.String)
+
+    class Arguments:
+        csv_file = Upload(required=True)
+
+    @login_required
+    def mutate(self, info, csv_file):
+        try:
+            user = info.context.user
+            imported_count = 0
+            errors = []
+            csv_content = csv_file.read().decode('utf-8')
+            csv_reader = csv.DictReader(io.StringIO(csv_content))
+            for row_num, row in enumerate(csv_reader, start=2):
+                try:
+                    if not row.get('nom') or not row.get('adresse') or not row.get('latitude') or not row.get('longitude'):
+                        errors.append(f"Ligne {row_num}: nom, adresse, latitude et longitude sont requis")
+                        continue
+                    try:
+                        latitude = float(row['latitude'].replace(',', '.'))
+                        longitude = float(row['longitude'].replace(',', '.'))
+                    except:
+                        errors.append(f"Ligne {row_num}: latitude ou longitude invalide")
+                        continue
+                    siege = Siege.objects.create(
+                        user=user,
+                        nom=row['nom'],
+                        adresse=row['adresse'],
+                        latitude=latitude,
+                        longitude=longitude,
+                        description=row.get('description', '')
+                    )
+                    imported_count += 1
+                except Exception as e:
+                    errors.append(f"Ligne {row_num}: {str(e)}")
+                    continue
+            message = f"Import terminé: {imported_count} sièges importés"
+            if errors:
+                message += f", {len(errors)} erreurs"
+            return ImportSiegesCSV(
+                success=True,
+                message=message,
+                imported_count=imported_count,
+                errors=errors
+            )
+        except Exception as e:
+            return ImportSiegesCSV(
+                success=False,
+                message=f"Erreur lors de l'import: {str(e)}",
+                imported_count=0,
+                errors=[str(e)]
+            )
+
 class Query(graphene.ObjectType):
     all_parcelles = graphene.List(ParcelleType)
     my_parcelles = graphene.List(ParcelleType)
     parcelle = graphene.Field(ParcelleType, id=graphene.ID(required=True))
     all_users = graphene.List(UserType)
     me = graphene.Field(UserType)
+    all_sieges = graphene.List(SiegeType)
+    my_sieges = graphene.List(SiegeType)
+    siege = graphene.Field(SiegeType, id=graphene.ID(required=True))
 
     @login_required
     def resolve_all_parcelles(self, info):
@@ -328,17 +695,47 @@ class Query(graphene.ObjectType):
     def resolve_me(self, info):
         return info.context.user
 
+    @login_required
+    def resolve_all_sieges(self, info):
+        user = info.context.user
+        if user.role == 'admin':
+            return Siege.objects.all()
+        return Siege.objects.filter(user=user)
+
+    @login_required
+    def resolve_my_sieges(self, info):
+        user = info.context.user
+        return Siege.objects.filter(user=user)
+
+    @login_required
+    def resolve_siege(self, info, id):
+        user = info.context.user
+        try:
+            siege = Siege.objects.get(id=id)
+            if siege.user != user and user.role != 'admin':
+                return None
+            return siege
+        except Siege.DoesNotExist:
+            return None
+
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     login_user = LoginUser.Field()
     create_parcelle = CreateParcelle.Field()
     update_parcelle = UpdateParcelle.Field()
     delete_parcelle = DeleteParcelle.Field()
+    create_siege = CreateSiege.Field()
+    update_siege = UpdateSiege.Field()
+    delete_siege = DeleteSiege.Field()
     
     # JWT mutations
     token_auth = ObtainJSONWebToken.Field()
     token_auth_with_user = TokenAuthWithUser.Field()
     refresh_token = Refresh.Field()
     verify_token = Verify.Field()
+    export_parcelles_csv = ExportParcellesCSV.Field()
+    import_parcelles_csv = ImportParcellesCSV.Field()
+    export_sieges_csv = ExportSiegesCSV.Field()
+    import_sieges_csv = ImportSiegesCSV.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation) 

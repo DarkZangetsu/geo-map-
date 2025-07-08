@@ -67,3 +67,16 @@ class ParcelleImage(models.Model):
     
     def __str__(self):
         return f"Image {self.ordre} - {self.parcelle.nom}"
+
+class Siege(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sieges')
+    nom = models.CharField(max_length=100)
+    adresse = models.CharField(max_length=255)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nom} - {self.user.username}"
