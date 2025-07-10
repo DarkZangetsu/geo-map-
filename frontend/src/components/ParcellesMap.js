@@ -44,7 +44,7 @@ const greenIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const ParcellesMap = ({ parcelles, sieges = [], onParcelleClick, onSiegeClick, mapStyle = 'street', style }) => {
+const ParcellesMap = ({ parcelles, sieges = [], onParcelleClick, onSiegeClick, mapStyle = 'street', style, center }) => {
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
@@ -204,7 +204,7 @@ const ParcellesMap = ({ parcelles, sieges = [], onParcelleClick, onSiegeClick, m
       <MapContainer
         ref={mapRef}
         key={mapKey}
-        center={MADAGASCAR_CENTER}
+        center={center || MADAGASCAR_CENTER}
         zoom={6}
         style={{
           height: '100%',

@@ -78,10 +78,13 @@ function LayoutContent({ children }) {
               <header className="bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex justify-between items-center py-4">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-6">
                       <h1 className="text-xl font-bold text-gray-900">
                         Agri-Geo
                       </h1>
+                      <a href="/map" className="text-blue-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-blue-50 hover:bg-blue-100 border border-blue-100">
+                        Carte globale
+                      </a>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">

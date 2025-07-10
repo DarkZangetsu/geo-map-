@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_ME, GET_MY_PARCELLES, CREATE_PARCELLE, TOKEN_AUTH_WITH_USER, CREATE_USER, GET_ALL_PARCELLES, DELETE_PARCELLE, GET_MY_SIEGES } from '../lib/graphql-queries';
+import { GET_ME, GET_MY_PARCELLES, CREATE_PARCELLE, TOKEN_AUTH_WITH_USER, CREATE_USER, DELETE_PARCELLE, GET_MY_SIEGES } from '../lib/graphql-queries';
 import { exportToGeoJSON } from '../lib/file-parser';
 import { useToast } from '../lib/useToast';
 import { authUtils } from '../lib/utils';
@@ -82,13 +82,8 @@ export default function HomePage() {
     skip: !isAuthenticated,
   });
 
-  const { data: allParcellesData, loading: allParcellesLoading, refetch: refetchAllParcelles } = useQuery(
-    GET_ALL_PARCELLES,
-    { skip: !isAuthenticated || isAuthenticated && user?.role !== 'ADMIN' && user?.role !== 'admin' }
-  );
-
   const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
-    skip: !isAuthenticated || (user && (user.role === 'ADMIN' || user.role === 'admin'))
+    skip: !isAuthenticated
   });
 
   // Mutations
@@ -107,6 +102,7 @@ export default function HomePage() {
           if (userData.role === 'ADMIN' || userData.role === 'admin' || userData.isStaff) {
             router.push('/admin');
           } else {
+            router.push('/');
             showSuccess('Connexion réussie !');
           }
         } else {
@@ -209,26 +205,14 @@ export default function HomePage() {
     }
   };
 
-  const handleGoToAdmin = () => {
-    router.push('/admin');
-  };
-
   const handleAuthSuccess = (userData) => {
-    if (userData.role === 'ADMIN' || userData.role === 'admin') {
-      refetchAllParcelles();
-    } else {
-      refetchParcelles();
-    }
+    refetchParcelles();
   };
 
   const handleParcelleSuccess = (parcelle) => {
     setShowForm(false);
     setEditingParcelle(null);
-    if (user.role === 'ADMIN' || user.role === 'admin') {
-      refetchAllParcelles();
-    } else {
-      refetchParcelles();
-    }
+    refetchParcelles();
   };
 
   const handleDeleteParcelle = async (id) => {
@@ -243,11 +227,7 @@ export default function HomePage() {
 
       if (data.deleteParcelle.success) {
         showSuccess('Parcelle supprimée avec succès');
-        if (user.role === 'ADMIN' || user.role === 'admin') {
-          refetchAllParcelles();
-        } else {
-          refetchParcelles();
-        }
+        refetchParcelles();
       } else {
         showError(data.deleteParcelle.message);
       }
@@ -273,53 +253,6 @@ export default function HomePage() {
   };
 
   // Fonctions de debug supprimées pour production
-
-  const exportToCSV = (parcelles) => {
-    if (!parcelles || parcelles.length === 0) {
-      showError('Aucune parcelle à exporter');
-      return;
-    }
-
-    const headers = [
-      'Nom', 'Culture', 'Propriétaire', 'Superficie (ha)', 'Variété',
-      'Date de semis', 'Date de récolte prévue', 'Type de sol',
-      'Irrigation', 'Type d\'irrigation', 'Rendement prévu (t/ha)',
-      'Coût de production (€/ha)', 'Certification Bio', 'Certification HVE',
-      'Notes', 'Date de création'
-    ];
-
-    const csvContent = [
-      headers.join(','),
-      ...parcelles.map(parcelle => [
-        parcelle.nom,
-        parcelle.culture,
-        parcelle.proprietaire,
-        parcelle.superficie || '',
-        parcelle.variete || '',
-        parcelle.dateSemis || '',
-        parcelle.dateRecoltePrevue || '',
-        parcelle.typeSol || '',
-        parcelle.irrigation ? 'Oui' : 'Non',
-        parcelle.typeIrrigation || '',
-        parcelle.rendementPrevue || '',
-        parcelle.coutProduction || '',
-        parcelle.certificationBio ? 'Oui' : 'Non',
-        parcelle.certificationHve ? 'Oui' : 'Non',
-        `"${(parcelle.notes || '').replace(/"/g, '""')}"`,
-        new Date(parcelle.createdAt).toLocaleDateString('fr-FR')
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `parcelles_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const exportToGeoJSON = (parcelles) => {
     if (!parcelles || parcelles.length === 0) {
@@ -419,11 +352,8 @@ export default function HomePage() {
     );
   }
 
-  const parcelles = (user.role === 'ADMIN' || user.role === 'admin')
-    ? (allParcellesData?.allParcelles || [])
-    : (parcellesData?.myParcelles || []);
-
-  const loading = (user.role === 'ADMIN' || user.role === 'admin') ? allParcellesLoading : parcellesLoading;
+  const parcelles = parcellesData?.myParcelles || [];
+  const loading = parcellesLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100">
@@ -432,22 +362,13 @@ export default function HomePage() {
         <div className="flex justify-between items-center mb-6">
             <div>
             <h1 className="text-3xl font-extrabold text-blue-900 drop-shadow-sm">
-              {(user.role === 'ADMIN' || user.role === 'admin') ? 'Gestion des parcelles' : 'Mes parcelles'}
+              Mes parcelles
             </h1>
             <p className="text-gray-700 mt-1 font-medium">
               {parcelles.length} parcelle{parcelles.length !== 1 ? 's' : ''} au total
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Admin button always visible */}
-              {(user.role === 'ADMIN' || user.role === 'admin') && (
-                <button
-                  onClick={handleGoToAdmin}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                >
-                  Administration
-                </button>
-              )}
               {/* Carte controls only if showMap or mapFullscreen */}
               {(showMap || mapFullscreen) && (
                 <>
@@ -491,13 +412,6 @@ export default function HomePage() {
                     Import/Export CSV
                   </button>
                   <button
-                    onClick={() => exportToCSV(parcelles)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold shadow-sm transition"
-                    title="Exporter en CSV"
-                  >
-                    Export CSV
-                  </button>
-                  <button
                     onClick={() => exportToGeoJSON(parcelles)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold shadow-sm transition"
                     title="Exporter en GeoJSON"
@@ -511,15 +425,13 @@ export default function HomePage() {
                   >
                     <Plus size={18} /> Ajouter une parcelle
                   </button>
-                  {user && user.role !== 'ADMIN' && user.role !== 'admin' && (
-                    <button
-                      onClick={() => router.push('/siege')}
-                      className="px-4 py-2 bg-green-700 text-white rounded-md shadow hover:bg-green-800 font-bold transition flex items-center gap-2 border border-green-900"
-                      title="Gérer mes sièges"
-                    >
-                      <Plus size={18} /> Gérer mes sièges
-                    </button>
-                  )}
+                  <button
+                    onClick={() => router.push('/siege')}
+                    className="px-4 py-2 bg-green-700 text-white rounded-md shadow hover:bg-green-800 font-bold transition flex items-center gap-2 border border-green-900"
+                    title="Gérer mes sièges"
+                  >
+                    <Plus size={18} /> Gérer mes sièges
+                  </button>
                 </>
               )}
             </div>
@@ -568,7 +480,7 @@ export default function HomePage() {
                 ) : (
                   <ParcellesMap
                     parcelles={parcelles}
-                    sieges={user && user.role !== 'ADMIN' && user.role !== 'admin' ? (mapSiege ? [mapSiege] : sieges) : []}
+                    sieges={mapSiege ? [mapSiege] : sieges}
                     mapStyle={mapStyle}
                     onParcelleClick={handleParcelleClick}
                     style={mapFullscreen ? {height: '100vh', width: '100vw'} : {height: '600px', width: '100%'}}
