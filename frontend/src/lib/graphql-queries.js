@@ -600,4 +600,17 @@ export const UPDATE_USER_ABREVIATION = gql`
       }
     }
   }
+`;
+
+export const UPDATE_USER_LOGO = gql`
+  mutation UpdateUserLogo($logo: Upload!) {
+    updateUserLogo(logo: $logo) {
+      success
+      message
+      user {
+        id
+        logo
+      }
+    }
+  }
 `; 

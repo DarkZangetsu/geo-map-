@@ -722,6 +722,24 @@ class UpdateUserAbreviation(graphene.Mutation):
         except User.DoesNotExist:
             return UpdateUserAbreviation(success=False, message="Utilisateur introuvable")
 
+class UpdateUserLogo(graphene.Mutation):
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        logo = Upload(required=True)
+
+    @login_required
+    def mutate(self, info, logo):
+        user = info.context.user
+        try:
+            user.logo = logo
+            user.save()
+            return UpdateUserLogo(user=user, success=True, message="Logo mis à jour")
+        except Exception as e:
+            return UpdateUserLogo(success=False, message=str(e))
+
 class Query(graphene.ObjectType):
     all_parcelles = graphene.List(ParcelleType)
     my_parcelles = graphene.List(ParcelleType)
@@ -801,5 +819,6 @@ class Mutation(graphene.ObjectType):
     import_sieges_csv = ImportSiegesCSV.Field()
     update_user_active_status = UpdateUserActiveStatus.Field()
     update_user_abreviation = UpdateUserAbreviation.Field()
+    update_user_logo = UpdateUserLogo.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation) 

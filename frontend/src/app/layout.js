@@ -91,6 +91,9 @@ function LayoutContent({ children }) {
                       <a href="/sieges-globaux" className="text-purple-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-purple-50 hover:bg-purple-100 border border-purple-100">
                         Sièges globaux
                       </a>
+                      <a href="/profil" className="text-gray-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-gray-50 hover:bg-gray-100 border border-gray-100">
+                        Mon profil
+                      </a>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">
