@@ -15,6 +15,7 @@ from decimal import Decimal
 class UserType(DjangoObjectType):
     firstName = graphene.String(source='first_name')
     lastName = graphene.String(source='last_name')
+    abreviation = graphene.String()
     
     class Meta:
         model = User
@@ -53,8 +54,9 @@ class CreateUser(graphene.Mutation):
         last_name = graphene.String()
         role = graphene.String()
         logo = Upload()
+        abreviation = graphene.String()
 
-    def mutate(self, info, username, email, password, first_name="", last_name="", role="membre", logo=None):
+    def mutate(self, info, username, email, password, first_name="", last_name="", role="membre", logo=None, abreviation=""):
         try:
             if User.objects.filter(username=username).exists():
                 return CreateUser(success=False, message="Nom d'utilisateur déjà pris")
@@ -68,7 +70,8 @@ class CreateUser(graphene.Mutation):
                 password=password,
                 first_name=first_name,
                 last_name=last_name,
-                role=role
+                role=role,
+                abreviation=abreviation
             )
             
             if logo:
@@ -93,6 +96,11 @@ class LoginUser(graphene.Mutation):
         try:
             user = authenticate(username=username, password=password)
             if user:
+                if not user.is_active:
+                    return LoginUser(
+                        success=False,
+                        message="Compte désactivé, contactez l'administrateur."
+                    )
                 token = get_token(user)
                 return LoginUser(
                     user=user,
@@ -670,6 +678,50 @@ class ImportSiegesCSV(graphene.Mutation):
                 errors=[str(e)]
             )
 
+class UpdateUserActiveStatus(graphene.Mutation):
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        is_active = graphene.Boolean(required=True)
+
+    @login_required
+    def mutate(self, info, user_id, is_active):
+        user = info.context.user
+        if not user.is_superuser and user.role != 'admin':
+            return UpdateUserActiveStatus(success=False, message="Permission refusée")
+        try:
+            target_user = User.objects.get(id=user_id)
+            target_user.is_active = is_active
+            target_user.save()
+            return UpdateUserActiveStatus(user=target_user, success=True, message="Statut mis à jour")
+        except User.DoesNotExist:
+            return UpdateUserActiveStatus(success=False, message="Utilisateur introuvable")
+
+class UpdateUserAbreviation(graphene.Mutation):
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        abreviation = graphene.String(required=True)
+
+    @login_required
+    def mutate(self, info, user_id, abreviation):
+        user = info.context.user
+        if not user.is_superuser and user.role != 'admin':
+            return UpdateUserAbreviation(success=False, message="Permission refusée")
+        try:
+            target_user = User.objects.get(id=user_id)
+            target_user.abreviation = abreviation
+            target_user.save()
+            return UpdateUserAbreviation(user=target_user, success=True, message="Abréviation mise à jour")
+        except User.DoesNotExist:
+            return UpdateUserAbreviation(success=False, message="Utilisateur introuvable")
+
 class Query(graphene.ObjectType):
     all_parcelles = graphene.List(ParcelleType)
     my_parcelles = graphene.List(ParcelleType)
@@ -747,5 +799,7 @@ class Mutation(graphene.ObjectType):
     import_parcelles_csv = ImportParcellesCSV.Field()
     export_sieges_csv = ExportSiegesCSV.Field()
     import_sieges_csv = ImportSiegesCSV.Field()
+    update_user_active_status = UpdateUserActiveStatus.Field()
+    update_user_abreviation = UpdateUserAbreviation.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation) 

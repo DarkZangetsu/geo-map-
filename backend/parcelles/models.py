@@ -8,6 +8,7 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='membre')
     logo = models.ImageField(upload_to='logos/', null=True, blank=True, help_text="Logo du membre")
+    abreviation = models.CharField(max_length=20, blank=True, help_text="Abréviation du membre")
     
     def __str__(self):
         return f"{self.username} ({self.role})"

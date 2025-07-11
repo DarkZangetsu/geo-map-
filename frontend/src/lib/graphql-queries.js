@@ -215,6 +215,7 @@ export const CREATE_USER = gql`
     $password: String!
     $firstName: String
     $lastName: String
+    $abreviation: String
     $role: String
     $logo: Upload
   ) {
@@ -224,6 +225,7 @@ export const CREATE_USER = gql`
       password: $password
       firstName: $firstName
       lastName: $lastName
+      abreviation: $abreviation
       role: $role
       logo: $logo
     ) {
@@ -235,6 +237,7 @@ export const CREATE_USER = gql`
         email
         firstName
         lastName
+        abreviation
         role
         logo
       }
@@ -569,6 +572,32 @@ export const IMPORT_SIEGES_CSV = gql`
       message
       importedCount
       errors
+    }
+  }
+`;
+
+export const UPDATE_USER_ACTIVE_STATUS = gql`
+  mutation UpdateUserActiveStatus($userId: ID!, $isActive: Boolean!) {
+    updateUserActiveStatus(userId: $userId, isActive: $isActive) {
+      success
+      message
+      user {
+        id
+        isActive
+      }
+    }
+  }
+`;
+
+export const UPDATE_USER_ABREVIATION = gql`
+  mutation UpdateUserAbreviation($userId: ID!, $abreviation: String!) {
+    updateUserAbreviation(userId: $userId, abreviation: $abreviation) {
+      success
+      message
+      user {
+        id
+        abreviation
+      }
     }
   }
 `; 

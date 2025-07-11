@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_ME, GET_ALL_USERS, GET_ALL_PARCELLES, DELETE_PARCELLE, GET_MY_SIEGES, DELETE_SIEGE } from '../../lib/graphql-queries';
+import { GET_ME, GET_ALL_USERS, GET_ALL_PARCELLES, DELETE_PARCELLE, GET_MY_SIEGES, DELETE_SIEGE, UPDATE_USER_ACTIVE_STATUS, UPDATE_USER_ABREVIATION } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
 import ParcelleForm from '../../components/ParcelleForm';
 import { useAuth } from '../../components/Providers';
@@ -68,6 +68,9 @@ export default function AdminPage() {
   const [mapSiege, setMapSiege] = useState(null); // <-- Correction ajoutée
   const [showParcelleModal, setShowParcelleModal] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
+  const [updateUserActiveStatus] = useMutation(UPDATE_USER_ACTIVE_STATUS);
+  const [updateUserAbreviation] = useMutation(UPDATE_USER_ABREVIATION);
+  const [isUpdatingUser, setIsUpdatingUser] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -201,6 +204,45 @@ export default function AdminPage() {
     setMapSiege(siege);
   };
 
+  const handleToggleActive = async (user) => {
+    try {
+      setIsUpdatingUser(true);
+      const { data } = await updateUserActiveStatus({
+        variables: { userId: user.id, isActive: !user.isActive }
+      });
+      if (data.updateUserActiveStatus.success) {
+        const action = user.isActive ? 'désactivé' : 'activé';
+        showSuccess(`Utilisateur ${user.firstName} ${user.lastName} ${action} avec succès`);
+        refetchUsers();
+      } else {
+        showError(data.updateUserActiveStatus.message);
+      }
+    } catch (e) {
+      showError('Erreur lors de la mise à jour du statut');
+    } finally {
+      setIsUpdatingUser(false);
+    }
+  };
+
+  const handleEditAbreviation = async (user, newAbrev) => {
+    try {
+      setIsUpdatingUser(true);
+      const { data } = await updateUserAbreviation({
+        variables: { userId: user.id, abreviation: newAbrev }
+      });
+      if (data.updateUserAbreviation.success) {
+        showSuccess(`Abréviation de ${user.firstName} ${user.lastName} modifiée en "${newAbrev}"`);
+        refetchUsers();
+      } else {
+        showError(data.updateUserAbreviation.message);
+      }
+    } catch (e) {
+      showError('Erreur lors de la modification de l\'abréviation');
+    } finally {
+      setIsUpdatingUser(false);
+    }
+  };
+
   if (isLoading) {
     return <div>Chargement...</div>;
   }
@@ -282,7 +324,12 @@ export default function AdminPage() {
                 Export CSV
               </button>
             </div>
-            <UsersTable users={users} />
+            <UsersTable
+              users={users}
+              onToggleActive={handleToggleActive}
+              onEditAbreviation={handleEditAbreviation}
+              isLoading={isUpdatingUser}
+            />
           </section>
           {/* Section Import/Export */}
           <section id="import" className="mb-12 bg-white rounded-lg shadow p-6">

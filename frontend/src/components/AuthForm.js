@@ -12,6 +12,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    abreviation: '',
     role: 'membre'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +37,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
       }
     } else {
       // Validation pour l'inscription
-      if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+      if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || !formData.abreviation) {
         showToast('Veuillez remplir tous les champs obligatoires', 'error');
         return;
       }
@@ -68,7 +69,8 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          role: formData.role
+          abreviation: formData.abreviation,
+          role: 'membre'
         });
         showToast('Inscription réussie !', 'success');
       }
@@ -87,6 +89,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
       confirmPassword: '',
       firstName: '',
       lastName: '',
+      abreviation: '',
       role: 'membre'
     });
   };
@@ -145,6 +148,22 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                   </div>
                 </div>
                 
+                <div className="mb-4">
+                  <label htmlFor="abreviation" className="block text-sm font-medium text-gray-700 mb-1">
+                    Abréviation *
+                  </label>
+                  <input
+                    id="abreviation"
+                    name="abreviation"
+                    type="text"
+                    required
+                    value={formData.abreviation}
+                    onChange={handleInputChange}
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    placeholder="Abréviation (ex: JD)"
+                  />
+                </div>
+
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email *
@@ -221,11 +240,10 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     id="role"
                     name="role"
                     value={formData.role}
-                    onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    disabled
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
                   >
                     <option value="membre">Membre (Agriculteur)</option>
-                    <option value="admin">Administrateur</option>
                   </select>
                 </div>
               </>
