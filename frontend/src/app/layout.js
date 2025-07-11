@@ -85,6 +85,12 @@ function LayoutContent({ children }) {
                       <a href="/map" className="text-blue-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-blue-50 hover:bg-blue-100 border border-blue-100">
                         Carte globale
                       </a>
+                      <a href="/parcelles-globales" className="text-green-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-green-50 hover:bg-green-100 border border-green-100">
+                        Parcelles globales
+                      </a>
+                      <a href="/sieges-globaux" className="text-purple-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-purple-50 hover:bg-purple-100 border border-purple-100">
+                        Sièges globaux
+                      </a>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">

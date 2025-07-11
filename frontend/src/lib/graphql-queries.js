@@ -177,6 +177,9 @@ export const GET_ALL_SIEGES = gql`
       user {
         id
         username
+        firstName
+        lastName
+        logo
       }
     }
   }
@@ -196,6 +199,9 @@ export const GET_SIEGE = gql`
       user {
         id
         username
+        firstName
+        lastName
+        logo
       }
     }
   }

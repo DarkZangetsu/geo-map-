@@ -682,6 +682,8 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_all_parcelles(self, info):
+        # Permettre à tous les utilisateurs authentifiés d'accéder à toutes les parcelles
+        # pour les pages globales
         return Parcelle.objects.all()
 
     @login_required
@@ -702,10 +704,9 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_all_users(self, info):
-        user = info.context.user
-        if user.role == 'admin':
-            return User.objects.all()
-        return User.objects.none()
+        # Permettre à tous les utilisateurs authentifiés d'accéder à la liste des utilisateurs
+        # pour le filtrage dans les pages globales
+        return User.objects.all()
 
     @login_required
     def resolve_me(self, info):
@@ -713,10 +714,9 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_all_sieges(self, info):
-        user = info.context.user
-        if user.role == 'admin':
-            return Siege.objects.all()
-        return Siege.objects.filter(user=user)
+        # Permettre à tous les utilisateurs authentifiés d'accéder à tous les sièges
+        # pour les pages globales
+        return Siege.objects.all()
 
     @login_required
     def resolve_my_sieges(self, info):
