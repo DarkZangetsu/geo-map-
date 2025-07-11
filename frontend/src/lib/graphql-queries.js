@@ -613,4 +613,28 @@ export const UPDATE_USER_LOGO = gql`
       }
     }
   }
+`;
+
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($firstName: String, $lastName: String, $email: String) {
+    updateUserProfile(firstName: $firstName, lastName: $lastName, email: $email) {
+      success
+      message
+      user {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
+  }
+`;
+
+export const CHANGE_PASSWORD = gql`
+  mutation ChangePassword($oldPassword: String!, $newPassword: String!) {
+    changePassword(oldPassword: $oldPassword, newPassword: $newPassword) {
+      success
+      message
+    }
+  }
 `; 

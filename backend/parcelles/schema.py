@@ -740,6 +740,53 @@ class UpdateUserLogo(graphene.Mutation):
         except Exception as e:
             return UpdateUserLogo(success=False, message=str(e))
 
+class UpdateUserProfile(graphene.Mutation):
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        first_name = graphene.String()
+        last_name = graphene.String()
+        email = graphene.String()
+
+    @login_required
+    def mutate(self, info, first_name=None, last_name=None, email=None):
+        user = info.context.user
+        try:
+            if first_name is not None:
+                user.first_name = first_name
+            if last_name is not None:
+                user.last_name = last_name
+            if email is not None:
+                # Vérifier unicité email
+                if User.objects.filter(email=email).exclude(id=user.id).exists():
+                    return UpdateUserProfile(success=False, message="Cet email est déjà utilisé")
+                user.email = email
+            user.save()
+            return UpdateUserProfile(user=user, success=True, message="Profil mis à jour")
+        except Exception as e:
+            return UpdateUserProfile(success=False, message=str(e))
+
+class ChangePassword(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        old_password = graphene.String(required=True)
+        new_password = graphene.String(required=True)
+
+    @login_required
+    def mutate(self, info, old_password, new_password):
+        user = info.context.user
+        if not user.check_password(old_password):
+            return ChangePassword(success=False, message="Ancien mot de passe incorrect")
+        if len(new_password) < 6:
+            return ChangePassword(success=False, message="Le nouveau mot de passe doit contenir au moins 6 caractères")
+        user.set_password(new_password)
+        user.save()
+        return ChangePassword(success=True, message="Mot de passe modifié avec succès")
+
 class Query(graphene.ObjectType):
     all_parcelles = graphene.List(ParcelleType)
     my_parcelles = graphene.List(ParcelleType)
@@ -820,5 +867,7 @@ class Mutation(graphene.ObjectType):
     update_user_active_status = UpdateUserActiveStatus.Field()
     update_user_abreviation = UpdateUserAbreviation.Field()
     update_user_logo = UpdateUserLogo.Field()
+    update_user_profile = UpdateUserProfile.Field()
+    change_password = ChangePassword.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation) 
