@@ -693,12 +693,9 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_parcelle(self, info, id):
-        user = info.context.user
         try:
             parcelle = Parcelle.objects.get(id=id)
-            if parcelle.user == user or user.role == 'admin':
-                return parcelle
-            return None
+            return parcelle
         except Parcelle.DoesNotExist:
             return None
 
@@ -725,11 +722,8 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_siege(self, info, id):
-        user = info.context.user
         try:
             siege = Siege.objects.get(id=id)
-            if siege.user != user and user.role != 'admin':
-                return None
             return siege
         except Siege.DoesNotExist:
             return None

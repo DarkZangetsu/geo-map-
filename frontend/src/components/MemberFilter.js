@@ -5,9 +5,7 @@ import { useState } from 'react';
 const MemberFilter = ({ users, selectedMembers, onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Debug pour voir les données reçues
-  console.log('MemberFilter - users:', users);
-  console.log('MemberFilter - selectedMembers:', selectedMembers);
+
 
   const handleSelectAll = () => {
     if (selectedMembers.length === users.length) {

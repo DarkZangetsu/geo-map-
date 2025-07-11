@@ -17,9 +17,7 @@ export default function ParcellesGlobalesPage() {
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
   
-  // Debug pour voir les données reçues
-  console.log('ParcellesGlobalesPage - usersData:', usersData);
-  console.log('ParcellesGlobalesPage - parcellesData:', parcellesData);
+
 
   // Filtrage des parcelles selon les membres sélectionnés
   useEffect(() => {
