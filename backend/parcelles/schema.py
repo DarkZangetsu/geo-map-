@@ -712,7 +712,8 @@ class UpdateUserAbreviation(graphene.Mutation):
     @login_required
     def mutate(self, info, user_id, abreviation):
         user = info.context.user
-        if not user.is_superuser and user.role != 'admin':
+        # Permettre à l'utilisateur de modifier sa propre abréviation ou aux admins de modifier n'importe quelle abréviation
+        if str(user.id) != str(user_id) and not user.is_superuser and user.role != 'admin':
             return UpdateUserAbreviation(success=False, message="Permission refusée")
         try:
             target_user = User.objects.get(id=user_id)

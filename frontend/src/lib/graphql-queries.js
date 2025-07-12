@@ -11,6 +11,7 @@ export const GET_ME = gql`
       lastName
       role
       logo
+      abreviation
     }
   }
 `;
@@ -597,6 +598,10 @@ export const UPDATE_USER_ABREVIATION = gql`
       user {
         id
         abreviation
+        firstName
+        lastName
+        email
+        logo
       }
     }
   }

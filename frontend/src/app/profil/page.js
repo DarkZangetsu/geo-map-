@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME, UPDATE_USER_ABREVIATION, UPDATE_USER_LOGO, UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
@@ -13,12 +13,25 @@ export default function ProfilPage() {
   const { showSuccess, showError } = useToast();
   const user = data?.me;
   const [form, setForm] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    abreviation: user?.abreviation || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    abreviation: '',
     logo: null
   });
+
+  // Mettre à jour le formulaire quand les données utilisateur sont chargées
+  React.useEffect(() => {
+    if (user) {
+      setForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        abreviation: user.abreviation || '',
+        logo: null
+      });
+    }
+  }, [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -142,7 +155,7 @@ export default function ProfilPage() {
       <form onSubmit={isEditing ? handleProfileSave : handleSave} className="bg-white rounded-lg shadow p-6 flex flex-col gap-6">
         <div className="flex items-center gap-6">
           {user.logo && (
-            <img src={`http://localhost:8000${user.logo}`} alt="Logo" className="w-20 h-20 rounded-full object-cover border" />
+            <img src={`http://localhost:8000/media/${user.logo}`} alt="Logo" className="w-20 h-20 rounded-full object-cover border" />
           )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Changer le logo</label>
@@ -173,7 +186,16 @@ export default function ProfilPage() {
             <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">Modifier</button>
           ) : (
             <>
-              <button type="button" onClick={() => { setIsEditing(false); setForm({ ...form, abreviation: user.abreviation }); }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-semibold">Annuler</button>
+              <button type="button" onClick={() => { 
+                setIsEditing(false); 
+                setForm({
+                  firstName: user.firstName || '',
+                  lastName: user.lastName || '',
+                  email: user.email || '',
+                  abreviation: user.abreviation || '',
+                  logo: null
+                }); 
+              }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-semibold">Annuler</button>
               <button type="submit" disabled={isSaving || !form.abreviation.trim()} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                 {isSaving ? 'Enregistrement...' : 'Enregistrer'}
               </button>
