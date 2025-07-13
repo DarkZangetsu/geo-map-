@@ -84,6 +84,9 @@ const SiegesGlobauxTable = ({ sieges, loading }) => {
                 Membre
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Abréviation
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Latitude
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -127,6 +130,9 @@ const SiegesGlobauxTable = ({ sieges, loading }) => {
                       </div>
                     </div>
                   </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  {siege.user?.abreviation || '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                   {siege.latitude}

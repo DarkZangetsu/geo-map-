@@ -11,6 +11,10 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
     nom: parcelle?.nom || '',
     culture: parcelle?.culture || '',
     proprietaire: parcelle?.proprietaire || '',
+    nomPersonneReferente: parcelle?.nomPersonneReferente || '',
+    poste: parcelle?.poste || '',
+    telephone: parcelle?.telephone || '',
+    email: parcelle?.email || '',
     superficie: parcelle?.superficie || '',
     variete: parcelle?.variete || '',
     dateSemis: parcelle?.dateSemis || '',
@@ -191,6 +195,61 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel }) => {
               name="superficie"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={formData.superficie}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
+        {/* Informations de la personne référente */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nom de la personne référente
+            </label>
+            <input
+              type="text"
+              name="nomPersonneReferente"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={formData.nomPersonneReferente}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Poste
+            </label>
+            <input
+              type="text"
+              name="poste"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={formData.poste}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Téléphone
+            </label>
+            <input
+              type="tel"
+              name="telephone"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={formData.telephone}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={formData.email}
               onChange={handleInputChange}
             />
           </div>

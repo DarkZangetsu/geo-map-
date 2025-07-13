@@ -87,6 +87,9 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                 Membre
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Abréviation
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Superficie (ha)
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -131,7 +134,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                   <div className="flex items-center">
                     {parcelle.user?.logo && (
                       <img
-                        src={`http://localhost:8000${parcelle.user.logo}`}
+                        src={`http://localhost:8000/media/${parcelle.user.logo}`}
                         alt="Logo"
                         className="w-6 h-6 rounded-full mr-2"
                       />
@@ -145,6 +148,9 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                       </div>
                     </div>
                   </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  {parcelle.user?.abreviation || '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                   {parcelle.superficie ? `${parcelle.superficie} ha` : '-'}

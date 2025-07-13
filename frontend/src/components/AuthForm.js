@@ -10,9 +10,9 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
     email: '',
     password: '',
     confirmPassword: '',
-    firstName: '',
-    lastName: '',
     abreviation: '',
+    nomInstitution: '',
+    nomProjet: '',
     role: 'membre'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,9 +67,9 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
           abreviation: formData.abreviation,
+          nomInstitution: formData.nomInstitution,
+          nomProjet: formData.nomProjet,
           role: 'membre'
         });
         showToast('Inscription réussie !', 'success');
@@ -87,9 +87,9 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
       email: '',
       password: '',
       confirmPassword: '',
-      firstName: '',
-      lastName: '',
       abreviation: '',
+      nomInstitution: '',
+      nomProjet: '',
       role: 'membre'
     });
   };
@@ -117,35 +117,34 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
           <div className="rounded-md shadow-sm -space-y-px">
             {!isLogin && (
               <>
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Prénom
-                    </label>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                      placeholder="Prénom"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nom
-                    </label>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                      placeholder="Nom"
-                    />
-                  </div>
+                <div className="mb-4">
+                  <label htmlFor="nomInstitution" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom de l'institution
+                  </label>
+                  <input
+                    id="nomInstitution"
+                    name="nomInstitution"
+                    type="text"
+                    value={formData.nomInstitution}
+                    onChange={handleInputChange}
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    placeholder="Nom de l'institution"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="nomProjet" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom du projet
+                  </label>
+                  <input
+                    id="nomProjet"
+                    name="nomProjet"
+                    type="text"
+                    value={formData.nomProjet}
+                    onChange={handleInputChange}
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    placeholder="Nom du projet"
+                  />
                 </div>
                 
                 <div className="mb-4">

@@ -7,10 +7,9 @@ const SiegeTable = ({ sieges, onShowOnMap, onEdit, onDelete }) => {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Adresse</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Latitude</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Longitude</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Point de Contact</th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
           </tr>
         </thead>
@@ -18,10 +17,23 @@ const SiegeTable = ({ sieges, onShowOnMap, onEdit, onDelete }) => {
           {sieges.map((siege) => (
             <tr key={siege.id}>
               <td className="px-4 py-2 whitespace-nowrap">{siege.nom}</td>
+              <td className="px-4 py-2 whitespace-nowrap">
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  siege.categorie === 'national' ? 'bg-blue-100 text-blue-800' :
+                  siege.categorie === 'régional' ? 'bg-green-100 text-green-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {siege.categorie || 'bureau'}
+                </span>
+              </td>
               <td className="px-4 py-2 whitespace-nowrap">{siege.adresse}</td>
-              <td className="px-4 py-2 whitespace-nowrap">{siege.latitude}</td>
-              <td className="px-4 py-2 whitespace-nowrap">{siege.longitude}</td>
-              <td className="px-4 py-2 whitespace-nowrap">{siege.description}</td>
+              <td className="px-4 py-2 whitespace-nowrap">
+                <div>
+                  <div className="text-sm font-medium">{siege.nomPointContact || '-'}</div>
+                  <div className="text-xs text-gray-500">{siege.poste || '-'}</div>
+                  <div className="text-xs text-gray-500">{siege.telephone || '-'}</div>
+                </div>
+              </td>
               <td className="px-4 py-2 whitespace-nowrap flex gap-2">
                 <button
                   className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"

@@ -10,14 +10,24 @@ class User(AbstractUser):
     logo = models.ImageField(upload_to='logos/', null=True, blank=True, help_text="Logo du membre")
     abreviation = models.CharField(max_length=20, blank=True, help_text="Abréviation du membre")
     
+    # Nouveaux champs pour remplacer nom et prenom
+    nom_institution = models.CharField(max_length=200, blank=True, help_text="Nom de l'institution")
+    nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")
+    
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.username} ({self.role})" 
 
 class Parcelle(models.Model):
     # Informations de base
     nom = models.CharField(max_length=100)
     culture = models.CharField(max_length=100)
     proprietaire = models.CharField(max_length=100)
+    
+    # Nouveaux champs pour personne référente
+    nom_personne_referente = models.CharField(max_length=100, blank=True, help_text="Nom de la personne référente")
+    poste = models.CharField(max_length=100, blank=True, help_text="Poste de la personne référente")
+    telephone = models.CharField(max_length=20, blank=True, help_text="Téléphone de la personne référente")
+    email = models.EmailField(blank=True, help_text="Email de la personne référente")
     
     # Informations agricoles
     superficie = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Superficie en hectares")
@@ -70,8 +80,26 @@ class ParcelleImage(models.Model):
         return f"Image {self.ordre} - {self.parcelle.nom}"
 
 class Siege(models.Model):
+    CATEGORIE_CHOICES = (
+        ('national', 'National'),
+        ('régional', 'Régional'),
+        ('bureau', 'Bureau'),
+    )
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sieges')
     nom = models.CharField(max_length=100)
+    
+    # Nouveaux champs
+    categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES, default='bureau', help_text="Catégorie du siège")
+    nom_point_contact = models.CharField(max_length=100, blank=True, help_text="Nom du point de contact")
+    poste = models.CharField(max_length=100, blank=True, help_text="Poste du point de contact")
+    telephone = models.CharField(max_length=20, blank=True, help_text="Téléphone du point de contact")
+    email = models.EmailField(blank=True, help_text="Email du point de contact")
+    
+    # Horaires fixes
+    horaire_matin = models.CharField(max_length=100, blank=True, help_text="Horaires du matin")
+    horaire_apres_midi = models.CharField(max_length=100, blank=True, help_text="Horaires de l'après-midi")
+    
     adresse = models.CharField(max_length=255)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
@@ -81,3 +109,61 @@ class Siege(models.Model):
 
     def __str__(self):
         return f"{self.nom} - {self.user.username}"
+
+class SiegeImage(models.Model):
+    siege = models.ForeignKey(Siege, on_delete=models.CASCADE, related_name='photos_batiment')
+    image = models.ImageField(upload_to='sieges/', help_text="Photo du bâtiment")
+    titre = models.CharField(max_length=200, null=True, blank=True, help_text="Titre de l'image")
+    description = models.TextField(null=True, blank=True, help_text="Description de l'image")
+    ordre = models.IntegerField(default=0, help_text="Ordre d'affichage")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['ordre', 'created_at']
+    
+    def __str__(self):
+        return f"Photo {self.ordre} - {self.siege.nom}"
+
+class Pepiniere(models.Model):
+    CATEGORIE_CHOICES = (
+        ('national', 'National'),
+        ('régional', 'Régional'),
+        ('bureau', 'Bureau'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pepinieres')
+    nom = models.CharField(max_length=100)
+    categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES, default='bureau', help_text="Catégorie de la pépinière")
+    adresse = models.CharField(max_length=255)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    description = models.TextField(null=True, blank=True)
+    
+    # Champs spécifiques à la pépinière
+    nom_gestionnaire = models.CharField(max_length=100, blank=True, help_text="Nom du gestionnaire")
+    poste_gestionnaire = models.CharField(max_length=100, blank=True, help_text="Poste du gestionnaire")
+    telephone_gestionnaire = models.CharField(max_length=20, blank=True, help_text="Téléphone du gestionnaire")
+    email_gestionnaire = models.EmailField(blank=True, help_text="Email du gestionnaire")
+    especes_produites = models.TextField(blank=True, help_text="Espèces produites")
+    capacite = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Capacité de production")
+    quantite_production_generale = models.TextField(blank=True, help_text="Quantité de production générale")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nom} - {self.user.username}"
+
+class PepiniereImage(models.Model):
+    pepiniere = models.ForeignKey(Pepiniere, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='pepinieres/', help_text="Photo de la pépinière")
+    titre = models.CharField(max_length=200, null=True, blank=True, help_text="Titre de l'image")
+    description = models.TextField(null=True, blank=True, help_text="Description de l'image")
+    ordre = models.IntegerField(default=0, help_text="Ordre d'affichage")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['ordre', 'created_at']
+    
+    def __str__(self):
+        return f"Photo {self.ordre} - {self.pepiniere.nom}"

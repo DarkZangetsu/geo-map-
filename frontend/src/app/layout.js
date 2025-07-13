@@ -82,6 +82,9 @@ function LayoutContent({ children }) {
                       <h1 className="text-xl font-bold text-gray-900">
                         Agri-Geo
                       </h1>
+                       <a href="/" className="text-blue-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-blue-50 hover:bg-blue-100 border border-blue-100">
+                        Mes parcelles
+                      </a>
                       <a href="/map" className="text-blue-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-blue-50 hover:bg-blue-100 border border-blue-100">
                         Carte globale
                       </a>
@@ -91,15 +94,21 @@ function LayoutContent({ children }) {
                       <a href="/sieges-globaux" className="text-purple-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-purple-50 hover:bg-purple-100 border border-purple-100">
                         Sièges globaux
                       </a>
+                      <a href="/pepiniere" className="text-orange-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-orange-50 hover:bg-orange-100 border border-orange-100">
+                        Mes pépinières
+                      </a>
+                      <a href="/pepinieres-globales" className="text-orange-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-orange-50 hover:bg-orange-100 border border-orange-100">
+                        Pépinières globales
+                      </a>
                       <a href="/profil" className="text-gray-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-gray-50 hover:bg-gray-100 border border-gray-100">
-                        Mon profil
+                        Le profil
                       </a>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center">
                         {user?.logo && (
                           <img
-                            src={`http://localhost:8000${user.logo}`}
+                            src={`http://localhost:8000/media/${user.logo}`}
                             alt="Logo"
                             className="w-8 h-8 rounded-full mr-2"
                           />

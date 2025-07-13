@@ -44,7 +44,7 @@ const UsersTable = ({ users, onToggleActive, onEditAbreviation, isLoading = fals
 
   const handleToggleActive = (user) => {
     const action = user.isActive ? 'désactiver' : 'activer';
-    const message = `Êtes-vous sûr de vouloir ${action} l'utilisateur ${user.firstName} ${user.lastName} ?`;
+    const message = `Êtes-vous sûr de vouloir ${action} l'utilisateur ${user.nomInstitution || user.username} ?`;
     
     if (confirm(message)) {
       onToggleActive && onToggleActive(user);
@@ -56,7 +56,7 @@ const UsersTable = ({ users, onToggleActive, onEditAbreviation, isLoading = fals
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Institution/Projet</th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Rôle</th>
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Abréviation</th>
@@ -68,7 +68,12 @@ const UsersTable = ({ users, onToggleActive, onEditAbreviation, isLoading = fals
         <tbody className="bg-white divide-y divide-gray-200">
           {users.map((user) => (
             <tr key={user.id} className="hover:bg-gray-50">
-              <td className="px-4 py-2 whitespace-nowrap font-medium">{user.firstName} {user.lastName}</td>
+              <td className="px-4 py-2 whitespace-nowrap">
+                <div>
+                  <div className="font-medium">{user.nomInstitution || user.username}</div>
+                  <div className="text-sm text-gray-500">{user.nomProjet || '-'}</div>
+                </div>
+              </td>
               <td className="px-4 py-2 whitespace-nowrap text-gray-600">{user.email}</td>
               <td className="px-4 py-2 whitespace-nowrap">
                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -150,7 +155,7 @@ const UsersTable = ({ users, onToggleActive, onEditAbreviation, isLoading = fals
               Modifier l'abréviation
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Modifier l'abréviation pour <strong>{editingUser.firstName} {editingUser.lastName}</strong>
+              Modifier l'abréviation pour <strong>{editingUser.nomInstitution || editingUser.username}</strong>
             </p>
             <div className="mb-4">
               <label htmlFor="abreviation" className="block text-sm font-medium text-gray-700 mb-2">

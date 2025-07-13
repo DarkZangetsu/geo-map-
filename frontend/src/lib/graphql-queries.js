@@ -12,6 +12,8 @@ export const GET_ME = gql`
       role
       logo
       abreviation
+      nomInstitution
+      nomProjet
     }
   }
 `;
@@ -23,6 +25,10 @@ export const GET_MY_PARCELLES = gql`
       nom
       culture
       proprietaire
+      nomPersonneReferente
+      poste
+      telephone
+      email
       geojson
       superficie
       variete
@@ -44,6 +50,9 @@ export const GET_MY_PARCELLES = gql`
         firstName
         lastName
         logo
+        abreviation
+        nomInstitution
+        nomProjet
       }
       images {
         id
@@ -61,6 +70,10 @@ export const GET_ALL_PARCELLES = gql`
       nom
       culture
       proprietaire
+      nomPersonneReferente
+      poste
+      telephone
+      email
       geojson
       superficie
       variete
@@ -82,6 +95,9 @@ export const GET_ALL_PARCELLES = gql`
         firstName
         lastName
         logo
+        abreviation
+        nomInstitution
+        nomProjet
       }
       images {
         id
@@ -99,6 +115,10 @@ export const GET_PARCELLE = gql`
       nom
       culture
       proprietaire
+      nomPersonneReferente
+      poste
+      telephone
+      email
       geojson
       superficie
       variete
@@ -120,6 +140,9 @@ export const GET_PARCELLE = gql`
         firstName
         lastName
         logo
+        abreviation
+        nomInstitution
+        nomProjet
       }
       images {
         id
@@ -140,6 +163,9 @@ export const GET_ALL_USERS = gql`
       lastName
       role
       logo
+      abreviation
+      nomInstitution
+      nomProjet
       dateJoined
     }
   }
@@ -154,11 +180,25 @@ export const GET_MY_SIEGES = gql`
       latitude
       longitude
       description
+      categorie
+      nomPointContact
+      poste
+      telephone
+      email
+      horaireMatin
+      horaireApresMidi
       createdAt
       updatedAt
       user {
         id
         username
+      }
+      photosBatiment {
+        id
+        image
+        titre
+        description
+        ordre
       }
     }
   }
@@ -173,6 +213,13 @@ export const GET_ALL_SIEGES = gql`
       latitude
       longitude
       description
+      categorie
+      nomPointContact
+      poste
+      telephone
+      email
+      horaireMatin
+      horaireApresMidi
       createdAt
       updatedAt
       user {
@@ -181,6 +228,16 @@ export const GET_ALL_SIEGES = gql`
         firstName
         lastName
         logo
+        abreviation
+        nomInstitution
+        nomProjet
+      }
+      photosBatiment {
+        id
+        image
+        titre
+        description
+        ordre
       }
     }
   }
@@ -195,6 +252,13 @@ export const GET_SIEGE = gql`
       latitude
       longitude
       description
+      categorie
+      nomPointContact
+      poste
+      telephone
+      email
+      horaireMatin
+      horaireApresMidi
       createdAt
       updatedAt
       user {
@@ -203,6 +267,131 @@ export const GET_SIEGE = gql`
         firstName
         lastName
         logo
+        abreviation
+        nomInstitution
+        nomProjet
+      }
+      photosBatiment {
+        id
+        image
+        titre
+        description
+        ordre
+      }
+    }
+  }
+`;
+
+// Nouvelles queries pour Pépinière
+export const GET_MY_PEPINIERES = gql`
+  query GetMyPepinieres {
+    myPepinieres {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      categorie
+      nomGestionnaire
+      posteGestionnaire
+      telephoneGestionnaire
+      emailGestionnaire
+      especesProduites
+      capacite
+      quantiteProductionGenerale
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+      }
+      photos {
+        id
+        image
+        titre
+        description
+        ordre
+      }
+    }
+  }
+`;
+
+export const GET_ALL_PEPINIERES = gql`
+  query GetAllPepinieres {
+    allPepinieres {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      categorie
+      nomGestionnaire
+      posteGestionnaire
+      telephoneGestionnaire
+      emailGestionnaire
+      especesProduites
+      capacite
+      quantiteProductionGenerale
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+        firstName
+        lastName
+        logo
+        abreviation
+        nomInstitution
+        nomProjet
+      }
+      photos {
+        id
+        image
+        titre
+        description
+        ordre
+      }
+    }
+  }
+`;
+
+export const GET_PEPINIERE = gql`
+  query GetPepiniere($id: ID!) {
+    pepiniere(id: $id) {
+      id
+      nom
+      adresse
+      latitude
+      longitude
+      description
+      categorie
+      nomGestionnaire
+      posteGestionnaire
+      telephoneGestionnaire
+      emailGestionnaire
+      especesProduites
+      capacite
+      quantiteProductionGenerale
+      createdAt
+      updatedAt
+      user {
+        id
+        username
+        firstName
+        lastName
+        logo
+        abreviation
+        nomInstitution
+        nomProjet
+      }
+      photos {
+        id
+        image
+        titre
+        description
+        ordre
       }
     }
   }
@@ -219,6 +408,8 @@ export const CREATE_USER = gql`
     $abreviation: String
     $role: String
     $logo: Upload
+    $nomInstitution: String
+    $nomProjet: String
   ) {
     createUser(
       username: $username
@@ -229,6 +420,8 @@ export const CREATE_USER = gql`
       abreviation: $abreviation
       role: $role
       logo: $logo
+      nomInstitution: $nomInstitution
+      nomProjet: $nomProjet
     ) {
       success
       message
@@ -241,6 +434,8 @@ export const CREATE_USER = gql`
         abreviation
         role
         logo
+        nomInstitution
+        nomProjet
       }
     }
   }
@@ -260,6 +455,8 @@ export const LOGIN_USER = gql`
         lastName
         role
         logo
+        nomInstitution
+        nomProjet
       }
     }
   }
@@ -284,6 +481,10 @@ export const CREATE_PARCELLE = gql`
     $certificationHve: Boolean
     $notes: String
     $images: [Upload]
+    $nomPersonneReferente: String
+    $poste: String
+    $telephone: String
+    $email: String
   ) {
     createParcelle(
       nom: $nom
@@ -303,6 +504,10 @@ export const CREATE_PARCELLE = gql`
       certificationHve: $certificationHve
       notes: $notes
       images: $images
+      nomPersonneReferente: $nomPersonneReferente
+      poste: $poste
+      telephone: $telephone
+      email: $email
     ) {
       success
       message
@@ -311,6 +516,10 @@ export const CREATE_PARCELLE = gql`
         nom
         culture
         proprietaire
+        nomPersonneReferente
+        poste
+        telephone
+        email
         geojson
         superficie
         variete
@@ -332,6 +541,8 @@ export const CREATE_PARCELLE = gql`
           firstName
           lastName
           logo
+          nomInstitution
+          nomProjet
         }
         images {
           id
@@ -363,6 +574,10 @@ export const UPDATE_PARCELLE = gql`
     $certificationHve: Boolean
     $notes: String
     $images: [Upload]
+    $nomPersonneReferente: String
+    $poste: String
+    $telephone: String
+    $email: String
   ) {
     updateParcelle(
       id: $id
@@ -383,6 +598,10 @@ export const UPDATE_PARCELLE = gql`
       certificationHve: $certificationHve
       notes: $notes
       images: $images
+      nomPersonneReferente: $nomPersonneReferente
+      poste: $poste
+      telephone: $telephone
+      email: $email
     ) {
       success
       message
@@ -391,6 +610,10 @@ export const UPDATE_PARCELLE = gql`
         nom
         culture
         proprietaire
+        nomPersonneReferente
+        poste
+        telephone
+        email
         geojson
         superficie
         variete
@@ -412,6 +635,8 @@ export const UPDATE_PARCELLE = gql`
           firstName
           lastName
           logo
+          nomInstitution
+          nomProjet
         }
         images {
           id
@@ -455,6 +680,8 @@ export const TOKEN_AUTH_WITH_USER = gql`
         lastName
         role
         logo
+        nomInstitution
+        nomProjet
       }
       success
       message
@@ -480,8 +707,36 @@ export const REFRESH_TOKEN = gql`
 `;
 
 export const CREATE_SIEGE = gql`
-  mutation CreateSiege($nom: String!, $adresse: String!, $latitude: Decimal!, $longitude: Decimal!, $description: String) {
-    createSiege(nom: $nom, adresse: $adresse, latitude: $latitude, longitude: $longitude, description: $description) {
+  mutation CreateSiege(
+    $nom: String!
+    $adresse: String!
+    $latitude: Decimal!
+    $longitude: Decimal!
+    $description: String
+    $categorie: String
+    $nomPointContact: String
+    $poste: String
+    $telephone: String
+    $email: String
+    $horaireMatin: String
+    $horaireApresMidi: String
+    $photosBatiment: [Upload]
+  ) {
+    createSiege(
+      nom: $nom
+      adresse: $adresse
+      latitude: $latitude
+      longitude: $longitude
+      description: $description
+      categorie: $categorie
+      nomPointContact: $nomPointContact
+      poste: $poste
+      telephone: $telephone
+      email: $email
+      horaireMatin: $horaireMatin
+      horaireApresMidi: $horaireApresMidi
+      photosBatiment: $photosBatiment
+    ) {
       success
       message
       siege {
@@ -491,11 +746,25 @@ export const CREATE_SIEGE = gql`
         latitude
         longitude
         description
+        categorie
+        nomPointContact
+        poste
+        telephone
+        email
+        horaireMatin
+        horaireApresMidi
         createdAt
         updatedAt
         user {
           id
           username
+        }
+        photosBatiment {
+          id
+          image
+          titre
+          description
+          ordre
         }
       }
     }
@@ -503,8 +772,38 @@ export const CREATE_SIEGE = gql`
 `;
 
 export const UPDATE_SIEGE = gql`
-  mutation UpdateSiege($id: ID!, $nom: String, $adresse: String, $latitude: Decimal, $longitude: Decimal, $description: String) {
-    updateSiege(id: $id, nom: $nom, adresse: $adresse, latitude: $latitude, longitude: $longitude, description: $description) {
+  mutation UpdateSiege(
+    $id: ID!
+    $nom: String
+    $adresse: String
+    $latitude: Decimal
+    $longitude: Decimal
+    $description: String
+    $categorie: String
+    $nomPointContact: String
+    $poste: String
+    $telephone: String
+    $email: String
+    $horaireMatin: String
+    $horaireApresMidi: String
+    $photosBatiment: [Upload]
+  ) {
+    updateSiege(
+      id: $id
+      nom: $nom
+      adresse: $adresse
+      latitude: $latitude
+      longitude: $longitude
+      description: $description
+      categorie: $categorie
+      nomPointContact: $nomPointContact
+      poste: $poste
+      telephone: $telephone
+      email: $email
+      horaireMatin: $horaireMatin
+      horaireApresMidi: $horaireApresMidi
+      photosBatiment: $photosBatiment
+    ) {
       success
       message
       siege {
@@ -514,11 +813,25 @@ export const UPDATE_SIEGE = gql`
         latitude
         longitude
         description
+        categorie
+        nomPointContact
+        poste
+        telephone
+        email
+        horaireMatin
+        horaireApresMidi
         createdAt
         updatedAt
         user {
           id
           username
+        }
+        photosBatiment {
+          id
+          image
+          titre
+          description
+          ordre
         }
       }
     }
@@ -528,6 +841,154 @@ export const UPDATE_SIEGE = gql`
 export const DELETE_SIEGE = gql`
   mutation DeleteSiege($id: ID!) {
     deleteSiege(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
+// Nouvelles mutations pour Pépinière
+export const CREATE_PEPINIERE = gql`
+  mutation CreatePepiniere(
+    $nom: String!
+    $adresse: String!
+    $latitude: Decimal!
+    $longitude: Decimal!
+    $description: String
+    $categorie: String
+    $nomGestionnaire: String
+    $posteGestionnaire: String
+    $telephoneGestionnaire: String
+    $emailGestionnaire: String
+    $especesProduites: String
+    $capacite: Decimal
+    $quantiteProductionGenerale: String
+    $photos: [Upload]
+  ) {
+    createPepiniere(
+      nom: $nom
+      adresse: $adresse
+      latitude: $latitude
+      longitude: $longitude
+      description: $description
+      categorie: $categorie
+      nomGestionnaire: $nomGestionnaire
+      posteGestionnaire: $posteGestionnaire
+      telephoneGestionnaire: $telephoneGestionnaire
+      emailGestionnaire: $emailGestionnaire
+      especesProduites: $especesProduites
+      capacite: $capacite
+      quantiteProductionGenerale: $quantiteProductionGenerale
+      photos: $photos
+    ) {
+      success
+      message
+      pepiniere {
+        id
+        nom
+        adresse
+        latitude
+        longitude
+        description
+        categorie
+        nomGestionnaire
+        posteGestionnaire
+        telephoneGestionnaire
+        emailGestionnaire
+        especesProduites
+        capacite
+        quantiteProductionGenerale
+        createdAt
+        updatedAt
+        user {
+          id
+          username
+        }
+        photos {
+          id
+          image
+          titre
+          description
+          ordre
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_PEPINIERE = gql`
+  mutation UpdatePepiniere(
+    $id: ID!
+    $nom: String
+    $adresse: String
+    $latitude: Decimal
+    $longitude: Decimal
+    $description: String
+    $categorie: String
+    $nomGestionnaire: String
+    $posteGestionnaire: String
+    $telephoneGestionnaire: String
+    $emailGestionnaire: String
+    $especesProduites: String
+    $capacite: Decimal
+    $quantiteProductionGenerale: String
+    $photos: [Upload]
+  ) {
+    updatePepiniere(
+      id: $id
+      nom: $nom
+      adresse: $adresse
+      latitude: $latitude
+      longitude: $longitude
+      description: $description
+      categorie: $categorie
+      nomGestionnaire: $nomGestionnaire
+      posteGestionnaire: $posteGestionnaire
+      telephoneGestionnaire: $telephoneGestionnaire
+      emailGestionnaire: $emailGestionnaire
+      especesProduites: $especesProduites
+      capacite: $capacite
+      quantiteProductionGenerale: $quantiteProductionGenerale
+      photos: $photos
+    ) {
+      success
+      message
+      pepiniere {
+        id
+        nom
+        adresse
+        latitude
+        longitude
+        description
+        categorie
+        nomGestionnaire
+        posteGestionnaire
+        telephoneGestionnaire
+        emailGestionnaire
+        especesProduites
+        capacite
+        quantiteProductionGenerale
+        createdAt
+        updatedAt
+        user {
+          id
+          username
+        }
+        photos {
+          id
+          image
+          titre
+          description
+          ordre
+        }
+      }
+    }
+  }
+`;
+
+export const DELETE_PEPINIERE = gql`
+  mutation DeletePepiniere($id: ID!) {
+    deletePepiniere(id: $id) {
       success
       message
     }
@@ -577,6 +1038,28 @@ export const IMPORT_SIEGES_CSV = gql`
   }
 `;
 
+// Nouvelles mutations CSV pour Pépinière
+export const EXPORT_PEPINIERES_CSV = gql`
+  mutation ExportPepinieresCSV {
+    exportPepinieresCsv {
+      success
+      message
+      csvData
+    }
+  }
+`;
+
+export const IMPORT_PEPINIERES_CSV = gql`
+  mutation ImportPepinieresCSV($csvFile: Upload!) {
+    importPepinieresCsv(csvFile: $csvFile) {
+      success
+      message
+      importedCount
+      errors
+    }
+  }
+`;
+
 export const UPDATE_USER_ACTIVE_STATUS = gql`
   mutation UpdateUserActiveStatus($userId: ID!, $isActive: Boolean!) {
     updateUserActiveStatus(userId: $userId, isActive: $isActive) {
@@ -602,6 +1085,8 @@ export const UPDATE_USER_ABREVIATION = gql`
         lastName
         email
         logo
+        nomInstitution
+        nomProjet
       }
     }
   }
@@ -614,7 +1099,13 @@ export const UPDATE_USER_LOGO = gql`
       message
       user {
         id
+        firstName
+        lastName
+        email
+        abreviation
         logo
+        nomInstitution
+        nomProjet
       }
     }
   }
@@ -630,6 +1121,10 @@ export const UPDATE_USER_PROFILE = gql`
         firstName
         lastName
         email
+        abreviation
+        logo
+        nomInstitution
+        nomProjet
       }
     }
   }

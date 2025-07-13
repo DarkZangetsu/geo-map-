@@ -5,7 +5,7 @@ from graphql_jwt.decorators import login_required
 from graphql_jwt.shortcuts import create_refresh_token, get_token
 from graphql_jwt.mutations import ObtainJSONWebToken, Refresh, Verify
 from graphene_file_upload.scalars import Upload
-from .models import User, Parcelle, ParcelleImage, Siege
+from .models import User, Parcelle, ParcelleImage, Siege, SiegeImage, Pepiniere, PepiniereImage
 import csv
 import io
 import json
@@ -16,6 +16,8 @@ class UserType(DjangoObjectType):
     firstName = graphene.String(source='first_name')
     lastName = graphene.String(source='last_name')
     abreviation = graphene.String()
+    nom_institution = graphene.String()
+    nom_projet = graphene.String()
     
     class Meta:
         model = User
@@ -36,10 +38,35 @@ class ParcelleType(DjangoObjectType):
     def resolve_images(self, info):
         return self.images.all()
 
+class SiegeImageType(DjangoObjectType):
+    class Meta:
+        model = SiegeImage
+        fields = "__all__"
+
 class SiegeType(DjangoObjectType):
+    photos_batiment = graphene.List(SiegeImageType)
+    
     class Meta:
         model = Siege
         fields = "__all__"
+    
+    def resolve_photos_batiment(self, info):
+        return self.photos_batiment.all()
+
+class PepiniereImageType(DjangoObjectType):
+    class Meta:
+        model = PepiniereImage
+        fields = "__all__"
+
+class PepiniereType(DjangoObjectType):
+    photos = graphene.List(PepiniereImageType)
+    
+    class Meta:
+        model = Pepiniere
+        fields = "__all__"
+    
+    def resolve_photos(self, info):
+        return self.photos.all()
 
 class CreateUser(graphene.Mutation):
     user = graphene.Field(UserType)
@@ -55,8 +82,10 @@ class CreateUser(graphene.Mutation):
         role = graphene.String()
         logo = Upload()
         abreviation = graphene.String()
+        nom_institution = graphene.String()
+        nom_projet = graphene.String()
 
-    def mutate(self, info, username, email, password, first_name="", last_name="", role="membre", logo=None, abreviation=""):
+    def mutate(self, info, username, email, password, first_name="", last_name="", role="membre", logo=None, abreviation="", nom_institution="", nom_projet=""):
         try:
             if User.objects.filter(username=username).exists():
                 return CreateUser(success=False, message="Nom d'utilisateur déjà pris")
@@ -71,7 +100,9 @@ class CreateUser(graphene.Mutation):
                 first_name=first_name,
                 last_name=last_name,
                 role=role,
-                abreviation=abreviation
+                abreviation=abreviation,
+                nom_institution=nom_institution,
+                nom_projet=nom_projet
             )
             
             if logo:
@@ -142,6 +173,11 @@ class CreateParcelle(graphene.Mutation):
         certification_hve = graphene.Boolean()
         notes = graphene.String()
         images = graphene.List(Upload)
+        # Nouveaux champs
+        nom_personne_referente = graphene.String()
+        poste = graphene.String()
+        telephone = graphene.String()
+        email = graphene.String()
 
     @login_required
     def mutate(self, info, nom, culture, proprietaire, geojson, **kwargs):
@@ -200,6 +236,11 @@ class UpdateParcelle(graphene.Mutation):
         certification_hve = graphene.Boolean()
         notes = graphene.String()
         images = graphene.List(Upload)
+        # Nouveaux champs
+        nom_personne_referente = graphene.String()
+        poste = graphene.String()
+        telephone = graphene.String()
+        email = graphene.String()
 
     @login_required
     def mutate(self, info, id, **kwargs):
@@ -271,19 +312,46 @@ class CreateSiege(graphene.Mutation):
         latitude = graphene.Decimal(required=True)
         longitude = graphene.Decimal(required=True)
         description = graphene.String()
+        # Nouveaux champs
+        categorie = graphene.String()
+        nom_point_contact = graphene.String()
+        poste = graphene.String()
+        telephone = graphene.String()
+        email = graphene.String()
+        horaire_matin = graphene.String()
+        horaire_apres_midi = graphene.String()
+        photos_batiment = graphene.List(Upload)
 
     @login_required
-    def mutate(self, info, nom, adresse, latitude, longitude, description=None):
-        user = info.context.user
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='bureau', nom_point_contact="", poste="", telephone="", email="", horaire_matin="", horaire_apres_midi="", photos_batiment=None):
         try:
+            user = info.context.user
             siege = Siege.objects.create(
                 user=user,
                 nom=nom,
                 adresse=adresse,
                 latitude=latitude,
                 longitude=longitude,
-                description=description
+                description=description,
+                categorie=categorie,
+                nom_point_contact=nom_point_contact,
+                poste=poste,
+                telephone=telephone,
+                email=email,
+                horaire_matin=horaire_matin,
+                horaire_apres_midi=horaire_apres_midi
             )
+            
+            # Créer les photos associées
+            if photos_batiment:
+                for i, photo_file in enumerate(photos_batiment):
+                    if photo_file:
+                        SiegeImage.objects.create(
+                            siege=siege,
+                            image=photo_file,
+                            ordre=i
+                        )
+                        
             return CreateSiege(siege=siege, success=True, message="Siège créé avec succès")
         except Exception as e:
             return CreateSiege(success=False, message=str(e))
@@ -300,19 +368,46 @@ class UpdateSiege(graphene.Mutation):
         latitude = graphene.Decimal()
         longitude = graphene.Decimal()
         description = graphene.String()
+        # Nouveaux champs
+        categorie = graphene.String()
+        nom_point_contact = graphene.String()
+        poste = graphene.String()
+        telephone = graphene.String()
+        email = graphene.String()
+        horaire_matin = graphene.String()
+        horaire_apres_midi = graphene.String()
+        photos_batiment = graphene.List(Upload)
 
     @login_required
     def mutate(self, info, id, **kwargs):
-        user = info.context.user
         try:
+            user = info.context.user
             siege = Siege.objects.get(id=id)
             if siege.user != user and user.role != 'admin':
                 return UpdateSiege(success=False, message="Non autorisé")
-            for key, value in kwargs.items():
+            
+            # Extraire les photos du kwargs
+            photos_batiment = kwargs.pop('photos_batiment', None)
+            
+            for field, value in kwargs.items():
                 if value is not None:
-                    setattr(siege, key, value)
+                    setattr(siege, field, value)
             siege.save()
-            return UpdateSiege(siege=siege, success=True, message="Siège modifié avec succès")
+            
+            # Mettre à jour les photos si fournies
+            if photos_batiment is not None:
+                siege.photos_batiment.all().delete()
+                for i, photo_file in enumerate(photos_batiment):
+                    if photo_file:
+                        SiegeImage.objects.create(
+                            siege=siege,
+                            image=photo_file,
+                            ordre=i
+                        )
+                        
+            return UpdateSiege(siege=siege, success=True, message="Siège mis à jour")
+        except Siege.DoesNotExist:
+            return UpdateSiege(success=False, message="Siège non trouvé")
         except Exception as e:
             return UpdateSiege(success=False, message=str(e))
 
@@ -392,26 +487,34 @@ class ExportParcellesCSV(graphene.Mutation):
     def mutate(self, info):
         try:
             user = info.context.user
-            parcelles = Parcelle.objects.filter(user=user)
+            if user.role != 'admin':
+                parcelles = Parcelle.objects.filter(user=user)
+            else:
+                parcelles = Parcelle.objects.all()
+            
             output = io.StringIO()
             writer = csv.writer(output)
+            
+            # En-têtes avec nouveaux champs
             headers = [
-                'nom', 'culture', 'proprietaire', 'superficie', 'variete',
-                'date_semis', 'date_recolte_prevue', 'type_sol', 'irrigation',
-                'type_irrigation', 'rendement_prevue', 'cout_production',
-                'certification_bio', 'certification_hve', 'notes', 'geometrie'
+                'ID', 'Nom', 'Culture', 'Propriétaire', 'Nom Personne Référente',
+                'Poste', 'Téléphone', 'Email', 'Superficie', 'Variété',
+                'Date Semis', 'Date Récolte Prévue', 'Type Sol', 'Irrigation',
+                'Type Irrigation', 'Rendement Prévu', 'Coût Production',
+                'Certification Bio', 'Certification HVE', 'Notes',
+                'Utilisateur', 'Date Création', 'Date Modification'
             ]
             writer.writerow(headers)
             for parcelle in parcelles:
-                # Exporter la géométrie comme liste de points (lon,lat)
-                coords = ''
-                if parcelle.geojson and 'geometry' in parcelle.geojson and 'coordinates' in parcelle.geojson['geometry']:
-                    points = parcelle.geojson['geometry']['coordinates'][0] if parcelle.geojson['geometry']['type'] == 'Polygon' else []
-                    coords = ','.join(f"[{p[0]},{p[1]}]" for p in points)
                 row = [
+                    parcelle.id,
                     parcelle.nom,
                     parcelle.culture,
                     parcelle.proprietaire,
+                    parcelle.nom_personne_referente or '',
+                    parcelle.poste or '',
+                    parcelle.telephone or '',
+                    parcelle.email or '',
                     str(parcelle.superficie) if parcelle.superficie else '',
                     parcelle.variete or '',
                     parcelle.date_semis.strftime('%Y-%m-%d') if parcelle.date_semis else '',
@@ -424,7 +527,9 @@ class ExportParcellesCSV(graphene.Mutation):
                     'Oui' if parcelle.certification_bio else 'Non',
                     'Oui' if parcelle.certification_hve else 'Non',
                     parcelle.notes or '',
-                    coords
+                    parcelle.user.username,
+                    parcelle.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    parcelle.updated_at.strftime('%Y-%m-%d %H:%M:%S')
                 ]
                 writer.writerow(row)
             csv_content = output.getvalue()
@@ -459,46 +564,46 @@ class ImportParcellesCSV(graphene.Mutation):
             csv_reader = csv.DictReader(io.StringIO(csv_content))
             for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    if not row.get('nom') or not row.get('culture') or not row.get('proprietaire'):
-                        errors.append(f"Ligne {row_num}: Nom, culture et propriétaire sont requis")
+                    if not row.get('Nom') or not row.get('Culture') or not row.get('Propriétaire'):
+                        errors.append(f"Ligne {row_num}: Nom, Culture et Propriétaire sont requis")
                         continue
                     superficie = None
-                    if row.get('superficie'):
+                    if row.get('Superficie'):
                         try:
-                            superficie = Decimal(row['superficie'].replace(',', '.'))
+                            superficie = Decimal(row['Superficie'].replace(',', '.'))
                         except:
                             errors.append(f"Ligne {row_num}: Superficie invalide")
                             continue
                     date_semis = None
-                    if row.get('date_semis'):
+                    if row.get('Date Semis'):
                         try:
-                            date_semis = datetime.strptime(row['date_semis'], '%Y-%m-%d').date()
+                            date_semis = datetime.strptime(row['Date Semis'], '%Y-%m-%d').date()
                         except:
                             errors.append(f"Ligne {row_num}: Date de semis invalide (format: YYYY-MM-DD)")
                             continue
                     date_recolte_prevue = None
-                    if row.get('date_recolte_prevue'):
+                    if row.get('Date Récolte Prévue'):
                         try:
-                            date_recolte_prevue = datetime.strptime(row['date_recolte_prevue'], '%Y-%m-%d').date()
+                            date_recolte_prevue = datetime.strptime(row['Date Récolte Prévue'], '%Y-%m-%d').date()
                         except:
                             errors.append(f"Ligne {row_num}: Date de récolte prévue invalide (format: YYYY-MM-DD)")
                             continue
                     def parse_bool(val):
                         return str(val).strip().lower() in ['1', 'oui', 'yes', 'true', 'vrai']
-                    irrigation = parse_bool(row.get('irrigation', '0'))
-                    certification_bio = parse_bool(row.get('certification_bio', '0'))
-                    certification_hve = parse_bool(row.get('certification_hve', '0'))
+                    irrigation = parse_bool(row.get('Irrigation', '0'))
+                    certification_bio = parse_bool(row.get('Certification Bio', '0'))
+                    certification_hve = parse_bool(row.get('Certification HVE', '0'))
                     rendement_prevue = None
-                    if row.get('rendement_prevue'):
+                    if row.get('Rendement Prévu'):
                         try:
-                            rendement_prevue = Decimal(row['rendement_prevue'].replace(',', '.'))
+                            rendement_prevue = Decimal(row['Rendement Prévu'].replace(',', '.'))
                         except:
                             errors.append(f"Ligne {row_num}: Rendement prévu invalide")
                             continue
                     cout_production = None
-                    if row.get('cout_production'):
+                    if row.get('Coût Production'):
                         try:
-                            cout_production = Decimal(row['cout_production'].replace(',', '.'))
+                            cout_production = Decimal(row['Coût Production'].replace(',', '.'))
                         except:
                             errors.append(f"Ligne {row_num}: Coût de production invalide")
                             continue
@@ -548,21 +653,25 @@ class ImportParcellesCSV(graphene.Mutation):
                     }
                     parcelle = Parcelle.objects.create(
                         user=user,
-                        nom=row['nom'],
-                        culture=row['culture'],
-                        proprietaire=row['proprietaire'],
+                        nom=row['Nom'],
+                        culture=row['Culture'],
+                        proprietaire=row['Propriétaire'],
+                        nom_personne_referente=row.get('Nom Personne Référente', ''),
+                        poste=row.get('Poste', ''),
+                        telephone=row.get('Téléphone', ''),
+                        email=row.get('Email', ''),
                         superficie=superficie,
-                        variete=row.get('variete', ''),
+                        variete=row.get('Variété', ''),
                         date_semis=date_semis,
                         date_recolte_prevue=date_recolte_prevue,
-                        type_sol=row.get('type_sol', ''),
+                        type_sol=row.get('Type Sol', ''),
                         irrigation=irrigation,
-                        type_irrigation=row.get('type_irrigation', ''),
+                        type_irrigation=row.get('Type Irrigation', ''),
                         rendement_prevue=rendement_prevue,
                         cout_production=cout_production,
                         certification_bio=certification_bio,
                         certification_hve=certification_hve,
-                        notes=row.get('notes', ''),
+                        notes=row.get('Notes', ''),
                         geojson=geojson
                     )
                     imported_count += 1
@@ -595,20 +704,41 @@ class ExportSiegesCSV(graphene.Mutation):
     def mutate(self, info):
         try:
             user = info.context.user
-            sieges = Siege.objects.filter(user=user)
+            if user.role != 'admin':
+                sieges = Siege.objects.filter(user=user)
+            else:
+                sieges = Siege.objects.all()
+            
             output = io.StringIO()
             writer = csv.writer(output)
+            
+            # En-têtes avec nouveaux champs
             headers = [
-                'nom', 'adresse', 'latitude', 'longitude', 'description'
+                'ID', 'Nom', 'Adresse', 'Latitude', 'Longitude', 'Description',
+                'Catégorie', 'Nom Point Contact', 'Poste', 'Téléphone', 'Email',
+                'Horaire Matin', 'Horaire Après-midi', 'Utilisateur',
+                'Date Création', 'Date Modification'
             ]
             writer.writerow(headers)
+            
             for siege in sieges:
                 row = [
+                    siege.id,
                     siege.nom,
                     siege.adresse,
                     str(siege.latitude),
                     str(siege.longitude),
-                    siege.description or ''
+                    siege.description or '',
+                    siege.categorie,
+                    siege.nom_point_contact or '',
+                    siege.poste or '',
+                    siege.telephone or '',
+                    siege.email or '',
+                    siege.horaire_matin or '',
+                    siege.horaire_apres_midi or '',
+                    siege.user.username,
+                    siege.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    siege.updated_at.strftime('%Y-%m-%d %H:%M:%S')
                 ]
                 writer.writerow(row)
             csv_content = output.getvalue()
@@ -640,22 +770,29 @@ class ImportSiegesCSV(graphene.Mutation):
             csv_reader = csv.DictReader(io.StringIO(csv_content))
             for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    if not row.get('nom') or not row.get('adresse') or not row.get('latitude') or not row.get('longitude'):
-                        errors.append(f"Ligne {row_num}: nom, adresse, latitude et longitude sont requis")
+                    if not row.get('Nom') or not row.get('Adresse') or not row.get('Latitude') or not row.get('Longitude'):
+                        errors.append(f"Ligne {row_num}: Nom, Adresse, Latitude et Longitude sont requis")
                         continue
                     try:
-                        latitude = float(row['latitude'].replace(',', '.'))
-                        longitude = float(row['longitude'].replace(',', '.'))
+                        latitude = float(row['Latitude'].replace(',', '.'))
+                        longitude = float(row['Longitude'].replace(',', '.'))
                     except:
                         errors.append(f"Ligne {row_num}: latitude ou longitude invalide")
                         continue
                     siege = Siege.objects.create(
                         user=user,
-                        nom=row['nom'],
-                        adresse=row['adresse'],
+                        nom=row['Nom'],
+                        adresse=row['Adresse'],
                         latitude=latitude,
                         longitude=longitude,
-                        description=row.get('description', '')
+                        description=row.get('Description', ''),
+                        categorie=row.get('Catégorie', 'bureau'),
+                        nom_point_contact=row.get('Nom Point Contact', ''),
+                        poste=row.get('Poste', ''),
+                        telephone=row.get('Téléphone', ''),
+                        email=row.get('Email', ''),
+                        horaire_matin=row.get('Horaire Matin', ''),
+                        horaire_apres_midi=row.get('Horaire Après-midi', '')
                     )
                     imported_count += 1
                 except Exception as e:
@@ -672,6 +809,268 @@ class ImportSiegesCSV(graphene.Mutation):
             )
         except Exception as e:
             return ImportSiegesCSV(
+                success=False,
+                message=f"Erreur lors de l'import: {str(e)}",
+                imported_count=0,
+                errors=[str(e)]
+            )
+
+class CreatePepiniere(graphene.Mutation):
+    pepiniere = graphene.Field(PepiniereType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        nom = graphene.String(required=True)
+        adresse = graphene.String(required=True)
+        latitude = graphene.Decimal(required=True)
+        longitude = graphene.Decimal(required=True)
+        description = graphene.String()
+        categorie = graphene.String()
+        # Champs spécifiques à la pépinière
+        nom_gestionnaire = graphene.String()
+        poste_gestionnaire = graphene.String()
+        telephone_gestionnaire = graphene.String()
+        email_gestionnaire = graphene.String()
+        especes_produites = graphene.String()
+        capacite = graphene.Decimal()
+        quantite_production_generale = graphene.String()
+        photos = graphene.List(Upload)
+
+    @login_required
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='bureau', nom_gestionnaire="", poste_gestionnaire="", telephone_gestionnaire="", email_gestionnaire="", especes_produites="", capacite=None, quantite_production_generale="", photos=None):
+        try:
+            user = info.context.user
+            pepiniere = Pepiniere.objects.create(
+                user=user,
+                nom=nom,
+                adresse=adresse,
+                latitude=latitude,
+                longitude=longitude,
+                description=description,
+                categorie=categorie,
+                nom_gestionnaire=nom_gestionnaire,
+                poste_gestionnaire=poste_gestionnaire,
+                telephone_gestionnaire=telephone_gestionnaire,
+                email_gestionnaire=email_gestionnaire,
+                especes_produites=especes_produites,
+                capacite=capacite,
+                quantite_production_generale=quantite_production_generale
+            )
+            
+            # Créer les photos associées
+            if photos:
+                for i, photo_file in enumerate(photos):
+                    if photo_file:
+                        PepiniereImage.objects.create(
+                            pepiniere=pepiniere,
+                            image=photo_file,
+                            ordre=i
+                        )
+                        
+            return CreatePepiniere(pepiniere=pepiniere, success=True, message="Pépinière créée avec succès")
+        except Exception as e:
+            return CreatePepiniere(success=False, message=str(e))
+
+class UpdatePepiniere(graphene.Mutation):
+    pepiniere = graphene.Field(PepiniereType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        nom = graphene.String()
+        adresse = graphene.String()
+        latitude = graphene.Decimal()
+        longitude = graphene.Decimal()
+        description = graphene.String()
+        categorie = graphene.String()
+        nom_gestionnaire = graphene.String()
+        poste_gestionnaire = graphene.String()
+        telephone_gestionnaire = graphene.String()
+        email_gestionnaire = graphene.String()
+        especes_produites = graphene.String()
+        capacite = graphene.Decimal()
+        quantite_production_generale = graphene.String()
+        photos = graphene.List(Upload)
+
+    @login_required
+    def mutate(self, info, id, **kwargs):
+        try:
+            user = info.context.user
+            pepiniere = Pepiniere.objects.get(id=id)
+            if pepiniere.user != user and user.role != 'admin':
+                return UpdatePepiniere(success=False, message="Non autorisé")
+            
+            # Extraire les photos du kwargs
+            photos = kwargs.pop('photos', None)
+            
+            for field, value in kwargs.items():
+                if value is not None:
+                    setattr(pepiniere, field, value)
+            pepiniere.save()
+            
+            # Mettre à jour les photos si fournies
+            if photos is not None:
+                pepiniere.photos.all().delete()
+                for i, photo_file in enumerate(photos):
+                    if photo_file:
+                        PepiniereImage.objects.create(
+                            pepiniere=pepiniere,
+                            image=photo_file,
+                            ordre=i
+                        )
+                        
+            return UpdatePepiniere(pepiniere=pepiniere, success=True, message="Pépinière mise à jour")
+        except Pepiniere.DoesNotExist:
+            return UpdatePepiniere(success=False, message="Pépinière non trouvée")
+        except Exception as e:
+            return UpdatePepiniere(success=False, message=str(e))
+
+class DeletePepiniere(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    @login_required
+    def mutate(self, info, id):
+        try:
+            user = info.context.user
+            pepiniere = Pepiniere.objects.get(id=id)
+            if pepiniere.user != user and user.role != 'admin':
+                return DeletePepiniere(success=False, message="Non autorisé")
+            pepiniere.delete()
+            return DeletePepiniere(success=True, message="Pépinière supprimée")
+        except Pepiniere.DoesNotExist:
+            return DeletePepiniere(success=False, message="Pépinière non trouvée")
+        except Exception as e:
+            return DeletePepiniere(success=False, message=str(e))
+
+class ExportPepinieresCSV(graphene.Mutation):
+    csv_data = graphene.String()
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    @login_required
+    def mutate(self, info):
+        try:
+            user = info.context.user
+            if user.role != 'admin':
+                pepinieres = Pepiniere.objects.filter(user=user)
+            else:
+                pepinieres = Pepiniere.objects.all()
+            
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # En-têtes
+            headers = [
+                'ID', 'Nom', 'Adresse', 'Latitude', 'Longitude', 'Description',
+                'Catégorie', 'Nom Gestionnaire', 'Poste Gestionnaire', 
+                'Téléphone Gestionnaire', 'Email Gestionnaire',
+                'Espèces Produites', 'Capacité', 'Quantité Production Générale',
+                'Utilisateur', 'Date Création', 'Date Modification'
+            ]
+            writer.writerow(headers)
+            
+            # Données
+            for pepiniere in pepinieres:
+                writer.writerow([
+                    pepiniere.id, pepiniere.nom, pepiniere.adresse,
+                    pepiniere.latitude, pepiniere.longitude, pepiniere.description,
+                    pepiniere.categorie, pepiniere.nom_gestionnaire,
+                    pepiniere.poste_gestionnaire, pepiniere.telephone_gestionnaire,
+                    pepiniere.email_gestionnaire, pepiniere.especes_produites,
+                    pepiniere.capacite, pepiniere.quantite_production_generale,
+                    pepiniere.user.username, pepiniere.created_at, pepiniere.updated_at
+                ])
+            
+            return ExportPepinieresCSV(
+                csv_data=output.getvalue(),
+                success=True,
+                message="Export CSV réussi"
+            )
+        except Exception as e:
+            return ExportPepinieresCSV(
+                success=False,
+                message=f"Erreur lors de l'export: {str(e)}"
+            )
+
+class ImportPepinieresCSV(graphene.Mutation):
+    success = graphene.Boolean()
+    message = graphene.String()
+    imported_count = graphene.Int()
+    errors = graphene.List(graphene.String)
+
+    class Arguments:
+        csv_file = Upload(required=True)
+
+    @login_required
+    def mutate(self, info, csv_file):
+        try:
+            user = info.context.user
+            content = csv_file.read().decode('utf-8')
+            csv_data = csv.DictReader(io.StringIO(content))
+            
+            imported_count = 0
+            errors = []
+            
+            for row in csv_data:
+                try:
+                    # Validation des champs requis
+                    if not row.get('Nom') or not row.get('Adresse'):
+                        errors.append(f"Ligne {imported_count + 1}: Nom et Adresse sont requis")
+                        continue
+                    
+                    # Conversion des coordonnées
+                    try:
+                        latitude = Decimal(row.get('Latitude', '0'))
+                        longitude = Decimal(row.get('Longitude', '0'))
+                    except (ValueError, TypeError):
+                        latitude = Decimal('0')
+                        longitude = Decimal('0')
+                    
+                    # Conversion de la capacité
+                    capacite = None
+                    if row.get('Capacité'):
+                        try:
+                            capacite = Decimal(row.get('Capacité'))
+                        except (ValueError, TypeError):
+                            pass
+                    
+                    pepiniere = Pepiniere.objects.create(
+                        user=user,
+                        nom=row.get('Nom', ''),
+                        adresse=row.get('Adresse', ''),
+                        latitude=latitude,
+                        longitude=longitude,
+                        description=row.get('Description', ''),
+                        categorie=row.get('Catégorie', 'bureau'),
+                        nom_gestionnaire=row.get('Nom Gestionnaire', ''),
+                        poste_gestionnaire=row.get('Poste Gestionnaire', ''),
+                        telephone_gestionnaire=row.get('Téléphone Gestionnaire', ''),
+                        email_gestionnaire=row.get('Email Gestionnaire', ''),
+                        especes_produites=row.get('Espèces Produites', ''),
+                        capacite=capacite,
+                        quantite_production_generale=row.get('Quantité Production Générale', '')
+                    )
+                    
+                    imported_count += 1
+                    
+                except Exception as e:
+                    errors.append(f"Ligne {imported_count + 1}: {str(e)}")
+            
+            return ImportPepinieresCSV(
+                success=True,
+                message=f"{imported_count} pépinières importées avec succès",
+                imported_count=imported_count,
+                errors=errors
+            )
+            
+        except Exception as e:
+            return ImportPepinieresCSV(
                 success=False,
                 message=f"Erreur lors de l'import: {str(e)}",
                 imported_count=0,
@@ -797,6 +1196,10 @@ class Query(graphene.ObjectType):
     all_sieges = graphene.List(SiegeType)
     my_sieges = graphene.List(SiegeType)
     siege = graphene.Field(SiegeType, id=graphene.ID(required=True))
+    # Nouvelles queries pour Pépinière
+    all_pepinieres = graphene.List(PepiniereType)
+    my_pepinieres = graphene.List(PepiniereType)
+    pepiniere = graphene.Field(PepiniereType, id=graphene.ID(required=True))
 
     @login_required
     def resolve_all_parcelles(self, info):
@@ -806,16 +1209,11 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_my_parcelles(self, info):
-        user = info.context.user
-        return Parcelle.objects.filter(user=user)
+        return Parcelle.objects.filter(user=info.context.user)
 
     @login_required
     def resolve_parcelle(self, info, id):
-        try:
-            parcelle = Parcelle.objects.get(id=id)
-            return parcelle
-        except Parcelle.DoesNotExist:
-            return None
+        return Parcelle.objects.get(id=id)
 
     @login_required
     def resolve_all_users(self, info):
@@ -835,16 +1233,25 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_my_sieges(self, info):
-        user = info.context.user
-        return Siege.objects.filter(user=user)
+        return Siege.objects.filter(user=info.context.user)
 
     @login_required
     def resolve_siege(self, info, id):
-        try:
-            siege = Siege.objects.get(id=id)
-            return siege
-        except Siege.DoesNotExist:
-            return None
+        return Siege.objects.get(id=id)
+
+    @login_required
+    def resolve_all_pepinieres(self, info):
+        # Permettre à tous les utilisateurs authentifiés d'accéder à toutes les pépinières
+        # pour les pages globales
+        return Pepiniere.objects.all()
+
+    @login_required
+    def resolve_my_pepinieres(self, info):
+        return Pepiniere.objects.filter(user=info.context.user)
+
+    @login_required
+    def resolve_pepiniere(self, info, id):
+        return Pepiniere.objects.get(id=id)
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
@@ -855,6 +1262,10 @@ class Mutation(graphene.ObjectType):
     create_siege = CreateSiege.Field()
     update_siege = UpdateSiege.Field()
     delete_siege = DeleteSiege.Field()
+    # Nouvelles mutations pour Pépinière
+    create_pepiniere = CreatePepiniere.Field()
+    update_pepiniere = UpdatePepiniere.Field()
+    delete_pepiniere = DeletePepiniere.Field()
     
     # JWT mutations
     token_auth = ObtainJSONWebToken.Field()
@@ -865,6 +1276,9 @@ class Mutation(graphene.ObjectType):
     import_parcelles_csv = ImportParcellesCSV.Field()
     export_sieges_csv = ExportSiegesCSV.Field()
     import_sieges_csv = ImportSiegesCSV.Field()
+    # Nouvelles mutations CSV pour Pépinière
+    export_pepinieres_csv = ExportPepinieresCSV.Field()
+    import_pepinieres_csv = ImportPepinieresCSV.Field()
     update_user_active_status = UpdateUserActiveStatus.Field()
     update_user_abreviation = UpdateUserAbreviation.Field()
     update_user_logo = UpdateUserLogo.Field()

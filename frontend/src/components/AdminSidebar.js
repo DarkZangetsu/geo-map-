@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Utilisateurs', href: '/admin/utilisateurs', icon: <User size={20} /> },
   { label: 'Parcelles', href: '/admin/parcelles', icon: <Layers size={20} /> },
   { label: 'Sièges', href: '/admin/sieges', icon: <Map size={20} /> },
+  { label: 'Pépinières', href: '/admin/pepinieres', icon: <Layers size={20} /> },
   { label: 'Import/Export', href: '/admin/import', icon: <FileText size={20} /> },
 ];
 

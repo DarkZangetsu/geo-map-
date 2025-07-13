@@ -1,63 +1,67 @@
 // Script de débogage pour l'authentification
-export const debugAuth = () => {
+import { gql } from '@apollo/client';
+import { authUtils } from './utils';
+
+export function debugAuth() {
   console.log('=== DÉBOGAGE AUTHENTIFICATION ===');
   
-  // Vérifier localStorage
-  const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
-  
-  console.log('Token dans localStorage:', token ? 'Présent' : 'Absent');
-  console.log('User dans localStorage:', user ? 'Présent' : 'Absent');
-  
+  // Vérifier le token
+  const token = authUtils.getToken();
+  console.log('Token présent:', !!token);
   if (token) {
-    try {
-      const decoded = require('jwt-decode').jwtDecode(token);
-      console.log('Token décodé:', decoded);
-      console.log('Expiration:', new Date(decoded.exp * 1000).toLocaleString());
-      console.log('Expiré:', decoded.exp < Date.now() / 1000);
-    } catch (error) {
-      console.error('Erreur décodage token:', error);
-    }
+    console.log('Token:', token.substring(0, 50) + '...');
+    const decoded = authUtils.decodeToken(token);
+    console.log('Token décodé:', decoded);
+    console.log('Token expiré:', authUtils.isTokenExpired(token));
   }
   
+  // Vérifier l'utilisateur
+  const user = authUtils.getUser();
+  console.log('Utilisateur présent:', !!user);
   if (user) {
-    try {
-      const userObj = JSON.parse(user);
-      console.log('Données utilisateur:', userObj);
-    } catch (error) {
-      console.error('Erreur parsing user:', error);
-    }
+    console.log('Données utilisateur:', user);
+  }
+  
+  // Vérifier l'état d'authentification
+  const isAuth = authUtils.isAuthenticated();
+  console.log('Authentifié:', isAuth);
+  
+  // Vérifier localStorage
+  if (typeof window !== 'undefined') {
+    console.log('localStorage token:', localStorage.getItem('token') ? 'Présent' : 'Absent');
+    console.log('localStorage user:', localStorage.getItem('user') ? 'Présent' : 'Absent');
   }
   
   console.log('=== FIN DÉBOGAGE ===');
-};
+}
 
-// Fonction pour forcer la reconnexion
-export const forceReconnect = async () => {
-  console.log('Forçage de la reconnexion...');
-  
-  // Nettoyer localStorage
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  
-  // Recharger la page
-  window.location.reload();
-};
-
-// Fonction pour tester la requête GraphQL
-export const testGraphQLQuery = async (client) => {
-  console.log('Test de requête GraphQL...');
+// Fonction pour tester la requête GET_ME
+export async function testGetMe(client) {
+  console.log('=== TEST GET_ME ===');
   
   try {
-    const { data } = await client.query({
-      query: require('./graphql-queries').GET_ME,
+    const { data, loading, error } = await client.query({
+      query: gql`
+        query GetMe {
+          me {
+            id
+            username
+            email
+            firstName
+            lastName
+            role
+            logo
+            abreviation
+          }
+        }
+      `,
       fetchPolicy: 'network-only'
     });
     
-    console.log('Résultat GET_ME:', data);
-    return data;
+    console.log('GET_ME résultat:', { data, loading, error });
+    return { data, loading, error };
   } catch (error) {
-    console.error('Erreur requête GraphQL:', error);
-    return null;
+    console.error('Erreur GET_ME:', error);
+    return { error };
   }
-}; 
+} 

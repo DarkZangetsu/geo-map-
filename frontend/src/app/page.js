@@ -432,6 +432,13 @@ export default function HomePage() {
                   >
                     <Plus size={18} /> Gérer mes sièges
                   </button>
+                  <button
+                    onClick={() => router.push('/pepiniere')}
+                    className="px-4 py-2 bg-purple-700 text-white rounded-md shadow hover:bg-purple-800 font-bold transition flex items-center gap-2 border border-purple-900"
+                    title="Gérer mes pépinières"
+                  >
+                    <Plus size={18} /> Gérer mes pépinières
+                  </button>
                 </>
               )}
             </div>
