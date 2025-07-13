@@ -3,6 +3,7 @@ import { useMutation } from '@apollo/client';
 import { CREATE_SIEGE, UPDATE_SIEGE } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapPointModal from './MapPointModal';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', siegeId = null }) => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
     horaireMatin: '',
     horaireApresMidi: ''
   });
+  const [photos, setPhotos] = useState([]);
   const [showMapModal, setShowMapModal] = useState(false);
   const { showSuccess, showError } = useToast();
   const [createSiege, { loading: loadingCreate }] = useMutation(CREATE_SIEGE);
@@ -40,12 +42,53 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
         horaireMatin: initialData.horaireMatin || '',
         horaireApresMidi: initialData.horaireApresMidi || ''
       });
+      // Charger les photos existantes si en mode édition
+      if (initialData.photosBatiment) {
+        setPhotos(initialData.photosBatiment.map(photo => ({
+          id: photo.id,
+          url: photo.image,
+          titre: photo.titre || '',
+          description: photo.description || '',
+          isExisting: true
+        })));
+      }
     }
   }, [initialData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (photos.length + files.length > 2) {
+      showError('Vous ne pouvez ajouter que 2 photos maximum.');
+      return;
+    }
+    
+    const newPhotos = files.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+      titre: '',
+      description: '',
+      isExisting: false
+    }));
+    
+    setPhotos(prev => [...prev, ...newPhotos]);
+  };
+
+  const removePhoto = (index) => {
+    setPhotos(prev => {
+      const newPhotos = prev.filter((_, i) => i !== index);
+      return newPhotos;
+    });
+  };
+
+  const updatePhotoInfo = (index, field, value) => {
+    setPhotos(prev => prev.map((photo, i) => 
+      i === index ? { ...photo, [field]: value } : photo
+    ));
   };
 
   const handleMapSelect = (geometry) => {
@@ -67,6 +110,9 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
       return;
     }
     try {
+      // Préparer les nouvelles photos (fichiers)
+      const newPhotos = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
+      
       if (mode === 'edit' && siegeId) {
         const { data } = await updateSiege({
           variables: {
@@ -82,11 +128,12 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
             telephone: formData.telephone,
             email: formData.email,
             horaireMatin: formData.horaireMatin,
-            horaireApresMidi: formData.horaireApresMidi
+            horaireApresMidi: formData.horaireApresMidi,
+            photosBatiment: newPhotos
           }
         });
         if (data.updateSiege.success) {
-          showSuccess('Siège modifié avec succès !');
+          showSuccess('Local modifié avec succès !');
           onSuccess && onSuccess(data.updateSiege.siege);
         } else {
           showError(data.updateSiege.message);
@@ -105,103 +152,300 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
             telephone: formData.telephone,
             email: formData.email,
             horaireMatin: formData.horaireMatin,
-            horaireApresMidi: formData.horaireApresMidi
+            horaireApresMidi: formData.horaireApresMidi,
+            photosBatiment: newPhotos
           }
         });
         if (data.createSiege.success) {
-          showSuccess('Siège ajouté avec succès !');
+          showSuccess('Local ajouté avec succès !');
           onSuccess && onSuccess(data.createSiege.siege);
         } else {
           showError(data.createSiege.message);
         }
       }
     } catch (error) {
-      showError('Erreur lors de la soumission du siège.');
+      console.error('Erreur lors de la soumission:', error);
+      showError('Erreur lors de la soumission du local.');
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold mb-4">{mode === 'edit' ? 'Modifier le siège' : 'Ajouter un siège'}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Informations de base */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-            <input type="text" name="nom" required className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.nom} onChange={handleInputChange} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-            <select name="categorie" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.categorie} onChange={handleInputChange}>
-              <option value="bureau">Bureau</option>
-              <option value="régional">Régional</option>
-              <option value="national">National</option>
-            </select>
-          </div>
-        </div>
+    <>
+      {/* Header fixe - complètement séparé */}
+      <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg">
+        <h2 className="text-2xl font-bold text-gray-900">
+          {mode === 'edit' ? 'Modifier le local' : 'Ajouter un local'}
+        </h2>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse *</label>
-          <input type="text" name="adresse" required className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.adresse} onChange={handleInputChange} />
-        </div>
+      {/* Contenu scrollable - section séparée */}
+      <div className="bg-white overflow-y-auto max-h-[60vh]">
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Informations de base */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                <input 
+                  type="text" 
+                  name="nom" 
+                  required 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value={formData.nom} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                <select 
+                  name="categorie" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value={formData.categorie} 
+                  onChange={handleInputChange}
+                >
+                  <option value="bureau">Bureau</option>
+                  <option value="régional">Régional</option>
+                  <option value="national">National</option>
+                </select>
+              </div>
+            </div>
 
-        {/* Coordonnées */}
-        <div className="flex gap-2 items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
-            <input type="number" step="0.000001" name="latitude" required className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.latitude} onChange={handleInputChange} />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
-            <input type="number" step="0.000001" name="longitude" required className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.longitude} onChange={handleInputChange} />
-          </div>
-          <button type="button" onClick={() => setShowMapModal(true)} className="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Sélectionner sur la carte</button>
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Adresse *</label>
+              <input 
+                type="text" 
+                name="adresse" 
+                required 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                value={formData.adresse} 
+                onChange={handleInputChange} 
+              />
+            </div>
 
-        {/* Point de contact */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du point de contact</label>
-            <input type="text" name="nomPointContact" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.nomPointContact} onChange={handleInputChange} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Poste</label>
-            <input type="text" name="poste" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.poste} onChange={handleInputChange} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-            <input type="tel" name="telephone" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.telephone} onChange={handleInputChange} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" name="email" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.email} onChange={handleInputChange} />
-          </div>
-        </div>
+            {/* Coordonnées */}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Latitude *</label>
+                <input 
+                  type="number" 
+                  step="0.000001" 
+                  name="latitude" 
+                  required 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value={formData.latitude} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Longitude *</label>
+                <input 
+                  type="number" 
+                  step="0.000001" 
+                  name="longitude" 
+                  required 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value={formData.longitude} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setShowMapModal(true)} 
+                className="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                Sélectionner sur la carte
+              </button>
+            </div>
 
-        {/* Horaires */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Horaires du matin</label>
-            <input type="text" name="horaireMatin" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.horaireMatin} onChange={handleInputChange} placeholder="ex: 8h-12h" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Horaires de l'après-midi</label>
-            <input type="text" name="horaireApresMidi" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.horaireApresMidi} onChange={handleInputChange} placeholder="ex: 14h-18h" />
-          </div>
-        </div>
+            {/* Point de contact */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Point de contact</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom du point de contact</label>
+                  <input 
+                    type="text" 
+                    name="nomPointContact" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.nomPointContact} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Poste</label>
+                  <input 
+                    type="text" 
+                    name="poste" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.poste} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                  <input 
+                    type="tel" 
+                    name="telephone" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.telephone} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.email} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+              </div>
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea name="description" className="w-full px-3 py-2 border border-gray-300 rounded-md" value={formData.description} onChange={handleInputChange} />
-        </div>
+            {/* Horaires */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Horaires d'ouverture</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Horaires du matin</label>
+                  <input 
+                    type="text" 
+                    name="horaireMatin" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.horaireMatin} 
+                    onChange={handleInputChange} 
+                    placeholder="ex: 8h-12h" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Horaires de l'après-midi</label>
+                  <input 
+                    type="text" 
+                    name="horaireApresMidi" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    value={formData.horaireApresMidi} 
+                    onChange={handleInputChange} 
+                    placeholder="ex: 14h-18h" 
+                  />
+                </div>
+              </div>
+            </div>
 
-        <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Annuler</button>
-          <button type="submit" disabled={loadingCreate || loadingUpdate} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50">
-            {mode === 'edit' ? 'Enregistrer' : 'Ajouter'}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <textarea 
+                name="description" 
+                rows="3" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                value={formData.description} 
+                onChange={handleInputChange} 
+              />
+            </div>
+
+            {/* Photos */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Photos du bâtiment (max 2)</h3>
+              <div className="space-y-4">
+                {/* Upload de nouvelles photos */}
+                {photos.length < 2 && (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-2">
+                      <label htmlFor="photo-upload" className="cursor-pointer">
+                        <span className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                          Cliquez pour ajouter une photo
+                        </span>
+                        <input
+                          id="photo-upload"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handlePhotoChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG jusqu'à 10MB
+                    </p>
+                  </div>
+                )}
+
+                {/* Affichage des photos */}
+                {photos.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {photos.map((photo, index) => (
+                      <div key={index} className="relative border rounded-lg p-4">
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X size={16} />
+                        </button>
+                        <div className="flex items-center space-x-3 mb-3">
+                          <ImageIcon className="h-8 w-8 text-gray-400" />
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              placeholder="Titre de la photo"
+                              value={photo.titre}
+                              onChange={(e) => updatePhotoInfo(index, 'titre', e.target.value)}
+                              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                            />
+                          </div>
+                        </div>
+                        <img
+                          src={photo.url}
+                          alt={photo.titre || 'Photo du bâtiment'}
+                          className="w-full h-32 object-cover rounded"
+                        />
+                        <textarea
+                          placeholder="Description de la photo"
+                          value={photo.description}
+                          onChange={(e) => updatePhotoInfo(index, 'description', e.target.value)}
+                          className="w-full mt-2 text-sm border border-gray-300 rounded px-2 py-1 resize-none"
+                          rows="2"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Footer fixe - complètement séparé */}
+      <div className="bg-white border-t border-gray-200 p-6 rounded-b-lg">
+        <div className="flex justify-end space-x-4">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Annuler
+          </button>
+          <button 
+            onClick={handleSubmit}
+            disabled={loadingCreate || loadingUpdate} 
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {(loadingCreate || loadingUpdate) ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {mode === 'edit' ? 'Mise à jour...' : 'Création...'}
+              </div>
+            ) : (
+              mode === 'edit' ? 'Mettre à jour' : 'Ajouter le local'
+            )}
           </button>
         </div>
-      </form>
+      </div>
+
       {showMapModal && (
         <MapPointModal
           open={showMapModal}
@@ -213,7 +457,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
           initialPosition={formData.latitude && formData.longitude ? [parseFloat(formData.latitude), parseFloat(formData.longitude)] : null}
         />
       )}
-    </div>
+    </>
   );
 };
 

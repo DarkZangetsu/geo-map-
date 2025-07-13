@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME, UPDATE_USER_ABREVIATION, UPDATE_USER_LOGO, UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
+import { useAuthGuard } from '../../lib/useAuthGuard';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { debugAuth } from '../../lib/debug-auth';
 import { useAuth } from '../../components/Providers';
 
 export default function ProfilPage() {
+  const { isLoading, isAuthorized } = useAuthGuard(true);
   const { isAuthenticated, user: authUser } = useAuth();
   const { data, loading, refetch, error } = useQuery(GET_ME, {
     skip: !isAuthenticated,
@@ -22,8 +24,8 @@ export default function ProfilPage() {
   const { showSuccess, showError } = useToast();
   const user = data?.me;
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    nomInstitution: '',
+    nomProjet: '',
     email: '',
     abreviation: '',
     logo: null
@@ -33,8 +35,8 @@ export default function ProfilPage() {
   React.useEffect(() => {
     if (user) {
       setForm({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
+        nomInstitution: user.nomInstitution || '',
+        nomProjet: user.nomProjet || '',
         email: user.email || '',
         abreviation: user.abreviation || '',
         logo: null
@@ -48,6 +50,20 @@ export default function ProfilPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <div className="text-center py-12 text-gray-500">Veuillez vous connecter pour accéder à votre profil.</div>;
@@ -85,8 +101,8 @@ export default function ProfilPage() {
     
     // Vérifier s'il y a des changements
     const hasChanges = 
-      form.firstName !== user.firstName ||
-      form.lastName !== user.lastName ||
+      form.nomInstitution !== user.nomInstitution ||
+      form.nomProjet !== user.nomProjet ||
       form.email !== user.email ||
       form.abreviation !== user.abreviation;
     
@@ -118,11 +134,11 @@ export default function ProfilPage() {
       }
 
       // Mettre à jour le profil si les autres champs ont changé
-      if (success && (form.firstName !== user.firstName || form.lastName !== user.lastName || form.email !== user.email)) {
+      if (success && (form.nomInstitution !== user.nomInstitution || form.nomProjet !== user.nomProjet || form.email !== user.email)) {
         const { data: profileData } = await updateUserProfile({
           variables: {
-            firstName: form.firstName,
-            lastName: form.lastName,
+            nomInstitution: form.nomInstitution,
+            nomProjet: form.nomProjet,
             email: form.email
           }
         });
@@ -235,12 +251,12 @@ export default function ProfilPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-            <input type="text" name="firstName" value={form.firstName} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'institution</label>
+            <input type="text" name="nomInstitution" value={form.nomInstitution} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-            <input type="text" name="lastName" value={form.lastName} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du projet</label>
+            <input type="text" name="nomProjet" value={form.nomProjet} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
           </div>
         </div>
         <div>
@@ -259,8 +275,8 @@ export default function ProfilPage() {
               <button type="button" onClick={() => { 
                 setIsEditing(false); 
                 setForm({
-                  firstName: user.firstName || '',
-                  lastName: user.lastName || '',
+                  nomInstitution: user.nomInstitution || '',
+                  nomProjet: user.nomProjet || '',
                   email: user.email || '',
                   abreviation: user.abreviation || '',
                   logo: null

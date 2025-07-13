@@ -68,12 +68,14 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       if (extensions?.code === 'UNAUTHENTICATED' || 
           message.includes('authentication') || 
           message.includes('decoding signature') ||
-          message.includes('token')) {
-        console.log('Token expiré ou invalide, déconnexion...');
+          message.includes('token') ||
+          message.includes('expired')) {
+        console.log('Token expiré ou invalide, redirection vers login...');
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.reload();
+          // Rediriger vers la page de login au lieu de recharger
+          window.location.href = '/';
         }
       }
     });
@@ -81,6 +83,15 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);
+    // Gérer les erreurs réseau liées à l'authentification
+    if (networkError.statusCode === 401) {
+      console.log('Erreur 401 - Token invalide, redirection vers login...');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+      }
+    }
   }
 });
 

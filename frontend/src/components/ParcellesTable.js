@@ -1,4 +1,5 @@
 import React from 'react';
+import { Edit } from 'lucide-react';
 
 const ParcellesTable = ({ parcelles, onEdit, onDelete }) => {
   return (
@@ -29,14 +30,16 @@ const ParcellesTable = ({ parcelles, onEdit, onDelete }) => {
               <td className="px-4 py-2 whitespace-nowrap">{parcelle.superficie}</td>
               <td className="px-4 py-2 whitespace-nowrap flex gap-2">
                 <button
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                   onClick={() => onEdit && onEdit(parcelle)}
+                  className="text-indigo-600 hover:text-indigo-900"
+                  title="Modifier le site de référence"
                 >
-                  Éditer
+                  <Edit className="h-4 w-4" />
                 </button>
                 <button
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                   onClick={() => onDelete && onDelete(parcelle)}
+                  className="text-red-600 hover:text-red-900"
+                  title="Supprimer le site de référence"
                 >
                   Supprimer
                 </button>

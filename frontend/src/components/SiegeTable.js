@@ -1,56 +1,110 @@
 import React from 'react';
+import { Edit, Trash } from 'lucide-react';
 
-const SiegeTable = ({ sieges, onShowOnMap, onEdit, onDelete }) => {
+const ALL_COLUMNS = [
+  { key: 'nom', label: 'Nom' },
+  { key: 'categorie', label: 'Catégorie' },
+  { key: 'adresse', label: 'Adresse' },
+  { key: 'pointContact', label: 'Point de Contact' },
+  { key: 'horaires', label: 'Horaires' },
+  { key: 'description', label: 'Description' },
+  { key: 'createdAt', label: 'Date de création' },
+];
+
+const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
+      <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm rounded-2xl overflow-hidden">
+        <thead className="sticky top-0 z-10 bg-white shadow-sm">
           <tr>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Adresse</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Point de Contact</th>
-            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            {visibleColumns.includes('nom') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Nom</th>
+            )}
+            {visibleColumns.includes('categorie') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Catégorie</th>
+            )}
+            {visibleColumns.includes('adresse') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Adresse</th>
+            )}
+            {visibleColumns.includes('pointContact') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Point de Contact</th>
+            )}
+            {visibleColumns.includes('horaires') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Horaires</th>
+            )}
+            {visibleColumns.includes('description') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Description</th>
+            )}
+            {visibleColumns.includes('createdAt') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Date de création</th>
+            )}
+            <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sieges.map((siege) => (
-            <tr key={siege.id}>
-              <td className="px-4 py-2 whitespace-nowrap">{siege.nom}</td>
-              <td className="px-4 py-2 whitespace-nowrap">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  siege.categorie === 'national' ? 'bg-blue-100 text-blue-800' :
-                  siege.categorie === 'régional' ? 'bg-green-100 text-green-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {siege.categorie || 'bureau'}
-                </span>
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap">{siege.adresse}</td>
-              <td className="px-4 py-2 whitespace-nowrap">
-                <div>
-                  <div className="text-sm font-medium">{siege.nomPointContact || '-'}</div>
-                  <div className="text-xs text-gray-500">{siege.poste || '-'}</div>
-                  <div className="text-xs text-gray-500">{siege.telephone || '-'}</div>
-                </div>
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap flex gap-2">
+        <tbody>
+          {sieges.map((siege, idx) => (
+            <tr key={siege.id} className={"hover:bg-indigo-50 transition-all " + (idx % 2 === 0 ? 'bg-white' : 'bg-blue-50')} style={{ borderRadius: 12 }}>
+              {visibleColumns.includes('nom') && (
+                <td className="px-3 py-2 font-bold text-blue-900">{siege.nom}</td>
+              )}
+              {visibleColumns.includes('categorie') && (
+                <td className="px-3 py-2">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    siege.categorie === 'national' ? 'bg-blue-100 text-blue-800' :
+                    siege.categorie === 'régional' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {siege.categorie || 'bureau'}
+                  </span>
+                </td>
+              )}
+              {visibleColumns.includes('adresse') && (
+                <td className="px-3 py-2">{siege.adresse}</td>
+              )}
+              {visibleColumns.includes('pointContact') && (
+                <td className="px-3 py-2">
+                  <div>
+                    <div className="text-sm font-medium">{siege.nomPointContact || '-'}</div>
+                    <div className="text-xs text-gray-500">{siege.poste || '-'}</div>
+                    <div className="text-xs text-gray-500">{siege.telephone || '-'}</div>
+                    <div className="text-xs text-gray-500">{siege.email || '-'}</div>
+                  </div>
+                </td>
+              )}
+              {visibleColumns.includes('horaires') && (
+                <td className="px-3 py-2">
+                  <div className="text-xs">
+                    <div><span className="font-medium">Matin:</span> {siege.horaireMatin || '-'}</div>
+                    <div><span className="font-medium">Après-midi:</span> {siege.horaireApresMidi || '-'}</div>
+                  </div>
+                </td>
+              )}
+              {visibleColumns.includes('description') && (
+                <td className="px-3 py-2">
+                  <div className="max-w-xs truncate" title={siege.description || '-'}>
+                    {siege.description || '-'}
+                  </div>
+                </td>
+              )}
+              {visibleColumns.includes('createdAt') && (
+                <td className="px-3 py-2 text-xs text-gray-500">
+                  {siege.createdAt ? new Date(siege.createdAt).toLocaleDateString('fr-FR') : '-'}
+                </td>
+              )}
+              <td className="px-3 py-2 whitespace-nowrap flex gap-2">
                 <button
-                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                  onClick={() => onShowOnMap && onShowOnMap(siege)}
-                >
-                  Voir sur la carte
-                </button>
-                <button
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                   onClick={() => onEdit && onEdit(siege)}
+                  className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
+                  title="Modifier le local"
                 >
-                  Éditer
+                  <Edit size={15} className="mr-1" />
                 </button>
                 <button
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                   onClick={() => onDelete && onDelete(siege)}
+                  className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
+                  title="Supprimer le local"
                 >
+                  <Trash size={15} className="mr-1" />
                   Supprimer
                 </button>
               </td>

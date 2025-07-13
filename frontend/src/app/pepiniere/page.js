@@ -7,9 +7,11 @@ import PepiniereModal from '../../components/PepiniereModal';
 import PepiniereTable from '../../components/PepiniereTable';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
 import { useToast } from '../../lib/useToast';
+import { useAuthGuard } from '../../lib/useAuthGuard';
 import { Plus, Upload, Download } from 'lucide-react';
 
 export default function PepinierePage() {
+  const { isLoading, isAuthorized } = useAuthGuard(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPepiniere, setEditingPepiniere] = useState(null);
   const [showCSVModal, setShowCSVModal] = useState(false);
@@ -72,6 +74,20 @@ export default function PepinierePage() {
     refetch();
     showToast('Import/Export CSV terminé avec succès', 'success');
   };
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -141,7 +157,9 @@ export default function PepinierePage() {
         {/* Modals */}
         {showModal && (
           <PepiniereModal
-            pepiniere={editingPepiniere}
+            isOpen={showModal}
+            initialData={editingPepiniere}
+            mode={editingPepiniere ? 'edit' : 'add'}
             onClose={() => {
               setShowModal(false);
               setEditingPepiniere(null);

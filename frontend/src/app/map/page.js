@@ -5,8 +5,10 @@ import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES, GET_MY_PARCELLES
 import ParcellesMap from '../../components/ParcellesMap';
 import { useState } from 'react';
 import { useAuth } from '../../components/Providers';
+import { useAuthGuard } from '../../lib/useAuthGuard';
 
 export default function MapPage() {
+  const { isLoading, isAuthorized } = useAuthGuard(true);
   const router = useRouter();
   const { user } = useAuth();
   const isAdmin = user && (user.role === 'ADMIN' || user.role === 'admin');
@@ -38,6 +40,20 @@ export default function MapPage() {
   // Centre Madagascar par défaut
   const MADAGASCAR_CENTER = [-18.7669, 46.8691];
   const hasParcelles = parcelles && parcelles.length > 0;
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>

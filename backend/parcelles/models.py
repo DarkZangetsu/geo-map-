@@ -125,15 +125,8 @@ class SiegeImage(models.Model):
         return f"Photo {self.ordre} - {self.siege.nom}"
 
 class Pepiniere(models.Model):
-    CATEGORIE_CHOICES = (
-        ('national', 'National'),
-        ('régional', 'Régional'),
-        ('bureau', 'Bureau'),
-    )
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pepinieres')
     nom = models.CharField(max_length=100)
-    categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES, default='bureau', help_text="Catégorie de la pépinière")
     adresse = models.CharField(max_length=255)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)

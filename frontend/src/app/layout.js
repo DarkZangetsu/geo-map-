@@ -94,7 +94,7 @@ function LayoutContent({ children }) {
                       <a href="/sieges-globaux" className="text-purple-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-purple-50 hover:bg-purple-100 border border-purple-100">
                         Sièges globaux
                       </a>
-                      <a href="/pepiniere" className="text-orange-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-orange-50 hover:bg-orange-100 border border-orange-100">
+                      <a href="/pepinieres" className="text-orange-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-orange-50 hover:bg-orange-100 border border-orange-100">
                         Mes pépinières
                       </a>
                       <a href="/pepinieres-globales" className="text-orange-700 hover:underline font-semibold text-base px-3 py-1 rounded transition bg-orange-50 hover:bg-orange-100 border border-orange-100">

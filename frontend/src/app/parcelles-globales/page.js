@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_ALL_PARCELLES, GET_ALL_USERS } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
+import { useAuthGuard } from '../../lib/useAuthGuard';
 import ParcellesGlobalesTable from '../../components/ParcellesGlobalesTable';
 import MemberFilter from '../../components/MemberFilter';
 import CSVExport from '../../components/CSVExport';
 
 export default function ParcellesGlobalesPage() {
+  const { isLoading, isAuthorized } = useAuthGuard(true);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredParcelles, setFilteredParcelles] = useState([]);
   const { showError } = useToast();
@@ -74,6 +76,20 @@ export default function ParcellesGlobalesPage() {
     }));
   };
 
+  // Afficher un loader pendant la vérification d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (parcellesLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -88,10 +104,10 @@ export default function ParcellesGlobalesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Parcelles Globales
+            Sites de référence globaux
           </h1>
           <p className="text-gray-600">
-            Consultez toutes les parcelles de tous les membres de la plateforme
+            Consultez tous les sites de référence de tous les membres de la plateforme
           </p>
         </div>
 
@@ -111,7 +127,7 @@ export default function ParcellesGlobalesPage() {
             <div className="lg:ml-4">
               <CSVExport
                 data={filteredParcelles}
-                filename="parcelles_globales"
+                filename="sites_de_reference_globaux"
                 onExport={handleExportCSV}
                 disabled={filteredParcelles.length === 0}
               />
@@ -124,7 +140,7 @@ export default function ParcellesGlobalesPage() {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium text-gray-900">
-                Parcelles ({filteredParcelles.length})
+                Sites de référence ({filteredParcelles.length})
               </h3>
               {selectedMembers.length > 0 && (
                 <span className="text-sm text-gray-500">

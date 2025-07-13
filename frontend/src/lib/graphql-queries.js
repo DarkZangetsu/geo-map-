@@ -292,7 +292,6 @@ export const GET_MY_PEPINIERES = gql`
       latitude
       longitude
       description
-      categorie
       nomGestionnaire
       posteGestionnaire
       telephoneGestionnaire
@@ -326,7 +325,6 @@ export const GET_ALL_PEPINIERES = gql`
       latitude
       longitude
       description
-      categorie
       nomGestionnaire
       posteGestionnaire
       telephoneGestionnaire
@@ -366,7 +364,6 @@ export const GET_PEPINIERE = gql`
       latitude
       longitude
       description
-      categorie
       nomGestionnaire
       posteGestionnaire
       telephoneGestionnaire
@@ -855,7 +852,6 @@ export const CREATE_PEPINIERE = gql`
     $latitude: Decimal!
     $longitude: Decimal!
     $description: String
-    $categorie: String
     $nomGestionnaire: String
     $posteGestionnaire: String
     $telephoneGestionnaire: String
@@ -871,7 +867,6 @@ export const CREATE_PEPINIERE = gql`
       latitude: $latitude
       longitude: $longitude
       description: $description
-      categorie: $categorie
       nomGestionnaire: $nomGestionnaire
       posteGestionnaire: $posteGestionnaire
       telephoneGestionnaire: $telephoneGestionnaire
@@ -890,7 +885,6 @@ export const CREATE_PEPINIERE = gql`
         latitude
         longitude
         description
-        categorie
         nomGestionnaire
         posteGestionnaire
         telephoneGestionnaire
@@ -924,7 +918,6 @@ export const UPDATE_PEPINIERE = gql`
     $latitude: Decimal
     $longitude: Decimal
     $description: String
-    $categorie: String
     $nomGestionnaire: String
     $posteGestionnaire: String
     $telephoneGestionnaire: String
@@ -941,7 +934,6 @@ export const UPDATE_PEPINIERE = gql`
       latitude: $latitude
       longitude: $longitude
       description: $description
-      categorie: $categorie
       nomGestionnaire: $nomGestionnaire
       posteGestionnaire: $posteGestionnaire
       telephoneGestionnaire: $telephoneGestionnaire
@@ -960,7 +952,6 @@ export const UPDATE_PEPINIERE = gql`
         latitude
         longitude
         description
-        categorie
         nomGestionnaire
         posteGestionnaire
         telephoneGestionnaire
@@ -1112,19 +1103,17 @@ export const UPDATE_USER_LOGO = gql`
 `;
 
 export const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($firstName: String, $lastName: String, $email: String) {
-    updateUserProfile(firstName: $firstName, lastName: $lastName, email: $email) {
+  mutation UpdateUserProfile($nomInstitution: String, $nomProjet: String, $email: String) {
+    updateUserProfile(nomInstitution: $nomInstitution, nomProjet: $nomProjet, email: $email) {
       success
       message
       user {
         id
-        firstName
-        lastName
+        nomInstitution
+        nomProjet
         email
         abreviation
         logo
-        nomInstitution
-        nomProjet
       }
     }
   }

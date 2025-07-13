@@ -20,7 +20,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
   if (!parcelles || parcelles.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Aucune parcelle trouvée</p>
+        <p className="text-gray-500">Aucun site de référence trouvé</p>
       </div>
     );
   }
@@ -65,7 +65,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
         </div>
         
         <div className="text-sm text-gray-700">
-          Affichage de {startIndex + 1} à {Math.min(endIndex, parcelles.length)} sur {parcelles.length} parcelles
+          Affichage de {startIndex + 1} à {Math.min(endIndex, parcelles.length)} sur {parcelles.length} sites de référence
         </div>
       </div>
 

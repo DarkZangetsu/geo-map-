@@ -17,18 +17,29 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = authUtils.getToken();
-    const savedUser = authUtils.getUser();
-    if (token && savedUser && !authUtils.isTokenExpired(token)) {
-      setUser(savedUser);
-      setIsAuthenticated(true);
-    } else {
-      setUser(null);
-      setIsAuthenticated(false);
-      authUtils.clearAuthData();
-    }
-    setIsLoading(false);
-  }, []);
+    const checkAuth = () => {
+      const token = authUtils.getToken();
+      const savedUser = authUtils.getUser();
+      
+      if (token && savedUser && !authUtils.isTokenExpired(token)) {
+        setUser(savedUser);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        authUtils.clearAuthData();
+        
+        // Rediriger vers la page de login si on n'est pas déjà sur la page d'accueil
+        if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+          console.log('Token invalide ou expiré, redirection vers login...');
+          router.push('/');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [router]);
 
   const login = (userData, token) => {
     authUtils.setAuthData(token, userData);

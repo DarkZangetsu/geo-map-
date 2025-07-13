@@ -826,7 +826,6 @@ class CreatePepiniere(graphene.Mutation):
         latitude = graphene.Decimal(required=True)
         longitude = graphene.Decimal(required=True)
         description = graphene.String()
-        categorie = graphene.String()
         # Champs spécifiques à la pépinière
         nom_gestionnaire = graphene.String()
         poste_gestionnaire = graphene.String()
@@ -838,7 +837,7 @@ class CreatePepiniere(graphene.Mutation):
         photos = graphene.List(Upload)
 
     @login_required
-    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='bureau', nom_gestionnaire="", poste_gestionnaire="", telephone_gestionnaire="", email_gestionnaire="", especes_produites="", capacite=None, quantite_production_generale="", photos=None):
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, nom_gestionnaire="", poste_gestionnaire="", telephone_gestionnaire="", email_gestionnaire="", especes_produites="", capacite=None, quantite_production_generale="", photos=None):
         try:
             user = info.context.user
             pepiniere = Pepiniere.objects.create(
@@ -848,7 +847,6 @@ class CreatePepiniere(graphene.Mutation):
                 latitude=latitude,
                 longitude=longitude,
                 description=description,
-                categorie=categorie,
                 nom_gestionnaire=nom_gestionnaire,
                 poste_gestionnaire=poste_gestionnaire,
                 telephone_gestionnaire=telephone_gestionnaire,
@@ -884,7 +882,6 @@ class UpdatePepiniere(graphene.Mutation):
         latitude = graphene.Decimal()
         longitude = graphene.Decimal()
         description = graphene.String()
-        categorie = graphene.String()
         nom_gestionnaire = graphene.String()
         poste_gestionnaire = graphene.String()
         telephone_gestionnaire = graphene.String()

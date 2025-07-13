@@ -6,10 +6,12 @@ import { GET_ALL_PEPINIERES } from '../../lib/graphql-queries';
 import PepinieresGlobalesTable from '../../components/PepinieresGlobalesTable';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
 import { useToast } from '../../lib/useToast';
+import { useAuthGuard } from '../../lib/useAuthGuard';
 import { Upload, Download, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function PepinieresGlobalesPage() {
+  const { isLoading, isAuthorized } = useAuthGuard(true);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -27,6 +29,20 @@ export default function PepinieresGlobalesPage() {
   const handleViewOnMap = () => {
     router.push('/map?type=pepinieres');
   };
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -60,45 +76,47 @@ export default function PepinieresGlobalesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Pépinières Globales</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Pépinières Globales</h1>
+          <p className="text-gray-600 text-sm lg:text-base">
             Consultez toutes les pépinières enregistrées par tous les utilisateurs
           </p>
         </div>
 
         {/* Actions */}
-        <div className="mb-6 flex flex-wrap gap-4">
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleViewOnMap}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-sm transition flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-sm transition flex items-center justify-center gap-2 text-sm"
           >
-            <Map size={20} />
-            Voir sur la carte
+            <Map size={16} />
+            <span className="hidden sm:inline">Voir sur la carte</span>
+            <span className="sm:hidden">Carte</span>
           </button>
           <button
             onClick={() => setShowCSVModal(true)}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow-sm transition flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow-sm transition flex items-center justify-center gap-2 text-sm"
           >
-            <Upload size={20} />
-            Import/Export CSV
+            <Upload size={16} />
+            <span className="hidden sm:inline">Import/Export CSV</span>
+            <span className="sm:hidden">CSV</span>
           </button>
         </div>
 
         {/* Stats */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Total Pépinières</h3>
-            <p className="text-3xl font-bold text-indigo-600">{pepinieres.length}</p>
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Total Pépinières</h3>
+            <p className="text-2xl lg:text-3xl font-bold text-indigo-600">{pepinieres.length}</p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Pépinières Publiques</h3>
-            <p className="text-3xl font-bold text-green-600">
+          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Publiques</h3>
+            <p className="text-2xl lg:text-3xl font-bold text-green-600">
               {pepinieres.filter(p => p.categorie === 'publique').length}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Pépinières Privées</h3>
-            <p className="text-3xl font-bold text-purple-600">
+          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Privées</h3>
+            <p className="text-2xl lg:text-3xl font-bold text-purple-600">
               {pepinieres.filter(p => p.categorie === 'privee').length}
             </p>
           </div>

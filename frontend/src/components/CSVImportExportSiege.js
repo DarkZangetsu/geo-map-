@@ -35,7 +35,7 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `sieges_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', `locaux_export_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -100,13 +100,13 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
-      <h3 className="text-xl font-semibold mb-6 text-gray-800">Import/Export CSV des sièges</h3>
+      <h3 className="text-xl font-semibold mb-6 text-gray-800">Import/Export CSV des locaux</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Export Section */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-700">Exporter les sièges</h4>
+          <h4 className="text-lg font-medium text-gray-700">Exporter les locaux</h4>
           <p className="text-sm text-gray-600">
-            Téléchargez tous vos sièges au format CSV pour sauvegarder ou partager vos données.
+            Téléchargez tous vos locaux au format CSV pour sauvegarder ou partager vos données.
           </p>
           <button
             onClick={handleExport}
@@ -133,9 +133,9 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
         </div>
         {/* Import Section */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-700">Importer des sièges</h4>
+          <h4 className="text-lg font-medium text-gray-700">Importer des locaux</h4>
           <p className="text-sm text-gray-600">
-            Importez des sièges depuis un fichier CSV. Téléchargez d'abord le modèle pour voir le format attendu.
+            Importez des locaux depuis un fichier CSV. Téléchargez d'abord le modèle pour voir le format attendu.
           </p>
           <div className="space-y-3">
             <button

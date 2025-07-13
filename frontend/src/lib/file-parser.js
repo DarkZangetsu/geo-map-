@@ -85,7 +85,7 @@ async function parseKML(file) {
 }
 
 // Fonction pour exporter en GeoJSON
-export function exportToGeoJSON(data, filename = 'parcelles.geojson') {
+export function exportToGeoJSON(data, filename = 'sites_de_reference.geojson') {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: 'application/json'
   });

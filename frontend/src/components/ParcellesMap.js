@@ -55,7 +55,9 @@ const orangeIcon = new L.Icon({
 
 const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick, onSiegeClick, onPepiniereClick, mapStyle = 'street', style, center }) => {
   const [selectedParcelle, setSelectedParcelle] = useState(null);
+  const [selectedSiege, setSelectedSiege] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
+  const [showSiegeGallery, setShowSiegeGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
   const galleryRef = useRef(null);
@@ -293,16 +295,12 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
             position={[parseFloat(siege.latitude), parseFloat(siege.longitude)]}
             icon={greenIcon}
             eventHandlers={{
-              click: () => onSiegeClick && onSiegeClick(siege)
+              click: () => {
+                setSelectedSiege(siege);
+                if (onSiegeClick) onSiegeClick(siege);
+              }
             }}
           >
-            <Popup>
-              <div>
-                <strong>{siege.nom}</strong><br />
-                {siege.adresse}<br />
-                Lat: {siege.latitude}, Lng: {siege.longitude}
-              </div>
-            </Popup>
           </Marker>
         ))}
         {/* Affichage des pépinières (marqueurs orange) */}
@@ -319,7 +317,6 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
               <div>
                 <strong>{pepiniere.nom}</strong><br />
                 {pepiniere.adresse}<br />
-                Catégorie: {pepiniere.categorie}<br />
                 Lat: {pepiniere.latitude}, Lng: {pepiniere.longitude}
               </div>
             </Popup>
@@ -335,7 +332,7 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
               <span className="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full shadow">
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 20l-5.447-2.724A2 2 0 013 15.382V6a2 2 0 012-2h14a2 2 0 012 2v9.382a2 2 0 01-1.553 1.894L15 20m-6 0v-2a2 2 0 012-2h2a2 2 0 012 2v2' /></svg>
               </span>
-              <h3 className="text-2xl font-bold text-gray-900 tracking-tight ml-2">Détails de la parcelle</h3>
+              <h3 className="text-2xl font-bold text-gray-900 tracking-tight ml-2">Détails du site de référence</h3>
             </div>
             <button
               onClick={() => setSelectedParcelle(null)}
@@ -475,6 +472,123 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
               </button>
             </div>
           )}
+        </div>
+      )}
+      {/* Panneau latéral pour les détails du siège sélectionné */}
+      {selectedSiege && (
+        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col border border-gray-200 rounded-2xl m-4 max-w-[440px]">
+          {/* Header fixe */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full shadow">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 20l-5.447-2.724A2 2 0 013 15.382V6a2 2 0 012-2h14a2 2 0 012 2v9.382a2 2 0 01-1.553 1.894L15 20m-6 0v-2a2 2 0 012-2h2a2 2 0 012 2v2' /></svg>
+              </span>
+              <h3 className="text-2xl font-bold text-green-900 tracking-tight ml-2">Détails du local</h3>
+            </div>
+            <button
+              onClick={() => setSelectedSiege(null)}
+              className="text-gray-400 hover:text-green-600 text-3xl font-bold transition-colors duration-150 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-green-300"
+              title="Fermer"
+            >
+              ×
+            </button>
+          </div>
+          {/* Contenu scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            <div className="bg-gray-50 rounded-xl shadow p-3 flex items-center gap-4">
+              <div>
+                <h3 className="font-bold text-xl text-green-900 leading-tight">{selectedSiege.nom}</h3>
+                <div className="text-xs text-gray-500 font-semibold mt-1">Catégorie : <span className="font-bold text-green-700">{selectedSiege.categorie}</span></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2h5' /></svg>
+                Adresse
+              </div>
+              <div className="text-base font-medium text-gray-900">{selectedSiege.adresse}</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
+                Point de contact
+              </div>
+              <div className="text-base font-medium text-gray-900">{selectedSiege.nomPointContact || '-'}</div>
+              <div className="text-xs text-gray-500">{selectedSiege.poste || '-'}</div>
+              <div className="text-xs text-gray-500">{selectedSiege.telephone || '-'}</div>
+              <div className="text-xs text-gray-500">{selectedSiege.email || '-'}</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
+                Horaires
+              </div>
+              <div className="text-xs text-gray-700"><span className="font-semibold">Matin :</span> {selectedSiege.horaireMatin || '-'}</div>
+              <div className="text-xs text-gray-700"><span className="font-semibold">Après-midi :</span> {selectedSiege.horaireApresMidi || '-'}</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 20h9' /></svg>
+                Description
+              </div>
+              <div className="text-base text-gray-800">{selectedSiege.description || '-'}</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3' /></svg>
+                Coordonnées GPS
+              </div>
+              <div className="text-xs text-gray-700">Lat : {selectedSiege.latitude}, Lng : {selectedSiege.longitude}</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3">
+              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
+                Date de création
+              </div>
+              <div className="text-xs text-gray-700">{selectedSiege.createdAt ? new Date(selectedSiege.createdAt).toLocaleDateString('fr-FR') : '-'}</div>
+            </div>
+            {/* Bouton voir images */}
+            {Array.isArray(selectedSiege.photosBatiment) && selectedSiege.photosBatiment.length > 0 && !showSiegeGallery && (
+              <button
+                onClick={() => setShowSiegeGallery(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white text-base rounded-xl font-semibold hover:bg-green-700 transition shadow-lg mt-4"
+              >
+                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
+                Voir les images ({selectedSiege.photosBatiment.length})
+              </button>
+            )}
+            {/* Galerie d'images */}
+            {showSiegeGallery && Array.isArray(selectedSiege.photosBatiment) && selectedSiege.photosBatiment.length > 0 && (
+              <div className="p-4 border-t border-gray-100 bg-white rounded-b-2xl">
+                <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-green-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
+                  Galerie d'images
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
+                  <ImageGallery
+                    items={selectedSiege.photosBatiment.map(photo => ({
+                      original: `http://localhost:8000/media/${photo.image}`,
+                      thumbnail: `http://localhost:8000/media/${photo.image}`,
+                      description: photo.titre ? `${photo.titre}${photo.description ? ' - ' + photo.description : ''}` : photo.description || ''
+                    }))}
+                    showPlayButton={false}
+                    showFullscreenButton={true}
+                    showNav={true}
+                    showThumbnails={true}
+                    slideInterval={3000}
+                    slideOnThumbnailOver={true}
+                    additionalClass="custom-gallery"
+                  />
+                </div>
+                <button
+                  onClick={() => setShowSiegeGallery(false)}
+                  className="mt-2 w-full px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 font-semibold"
+                >
+                  Fermer la galerie
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

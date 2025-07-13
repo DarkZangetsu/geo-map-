@@ -1,92 +1,46 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_MY_PEPINIERES, DELETE_PEPINIERE } from '../lib/graphql-queries';
-import { useToast } from '../lib/useToast';
-import PepiniereModal from './PepiniereModal';
-import ConfirmationDialog from './ConfirmationDialog';
+import React from 'react';
+import { Map, Edit, Trash } from 'lucide-react';
 
-const PepinieresTable = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [editingPepiniere, setEditingPepiniere] = useState(null);
-  const [deletePepiniere, setDeletePepiniere] = useState(null);
-  const { showSuccess, showError } = useToast();
-
-  const { data, loading, error, refetch } = useQuery(GET_MY_PEPINIERES);
-  const [deletePepiniereMutation] = useMutation(DELETE_PEPINIERE);
-
-  const handleEdit = (pepiniere) => {
-    setEditingPepiniere(pepiniere);
-    setShowModal(true);
-  };
-
-  const handleDelete = async () => {
-    if (!deletePepiniere) return;
-
-    try {
-      const { data } = await deletePepiniereMutation({
-        variables: { id: deletePepiniere.id }
-      });
-
-      if (data.deletePepiniere.success) {
-        showSuccess('Pépinière supprimée avec succès');
-        refetch();
-      } else {
-        showError(data.deletePepiniere.message);
-      }
-    } catch (error) {
-      showError('Erreur lors de la suppression');
-    } finally {
-      setDeletePepiniere(null);
-    }
-  };
-
-  const handleSuccess = () => {
-    refetch();
-    setEditingPepiniere(null);
-  };
-
-  if (loading) return <div className="text-center py-4">Chargement...</div>;
-  if (error) return <div className="text-center py-4 text-red-600">Erreur: {error.message}</div>;
-
-  const pepinieres = data?.myPepinieres || [];
+const PepinieresTable = ({ pepinieres = [], onShowOnMap, onEdit, onDelete, visibleColumns = [] }) => {
+  if (!pepinieres || pepinieres.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Aucune pépinière trouvée</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Mes Pépinières</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
-        >
-          Ajouter une pépinière
-        </button>
-      </div>
-
-      {pepinieres.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          Aucune pépinière trouvée. Ajoutez votre première pépinière !
-        </div>
-      ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            {visibleColumns.includes('nom') && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nom
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Catégorie
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            )}
+            {visibleColumns.includes('adresse') && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Adresse
+              </th>
+            )}
+            {visibleColumns.includes('nomGestionnaire') && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Gestionnaire
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            )}
+            {visibleColumns.includes('especesProduites') && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Espèces produites
+              </th>
+            )}
+            {visibleColumns.includes('capacite') && (
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Capacité
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date création
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            )}
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -94,68 +48,68 @@ const PepinieresTable = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {pepinieres.map((pepiniere) => (
                 <tr key={pepiniere.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{pepiniere.nom}</div>
-                    <div className="text-sm text-gray-500">{pepiniere.adresse}</div>
+              {visibleColumns.includes('nom') && (
+                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
+                  {pepiniere.nom}
+                </td>
+              )}
+              {visibleColumns.includes('adresse') && (
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  {pepiniere.adresse}
+                </td>
+              )}
+              {visibleColumns.includes('nomGestionnaire') && (
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{pepiniere.nomGestionnaire || '-'}</div>
+                    <div className="text-xs text-gray-500">{pepiniere.posteGestionnaire || '-'}</div>
+                  </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      pepiniere.categorie === 'national' ? 'bg-blue-100 text-blue-800' :
-                      pepiniere.categorie === 'régional' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {pepiniere.categorie}
-                    </span>
+              )}
+              {visibleColumns.includes('especesProduites') && (
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  {pepiniere.especesProduites ? (
+                    <div className="max-w-xs truncate" title={pepiniere.especesProduites}>
+                      {pepiniere.especesProduites}
+                    </div>
+                  ) : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{pepiniere.nomGestionnaire || '-'}</div>
-                    <div className="text-sm text-gray-500">{pepiniere.posteGestionnaire || '-'}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              )}
+              {visibleColumns.includes('capacite') && (
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                     {pepiniere.capacite ? `${pepiniere.capacite}` : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(pepiniere.createdAt).toLocaleDateString('fr-FR')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              )}
+              <td className="px-4 py-3 whitespace-nowrap flex gap-2">
+                <button
+                  className="inline-flex items-center px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-xs font-bold transition shadow-sm"
+                  onClick={() => onShowOnMap && onShowOnMap(pepiniere)}
+                  title="Voir la pépinière sur la carte"
+                >
+                  <Map size={14} className="mr-1" />
+                  <span className="hidden sm:inline">Carte</span>
+                </button>
                     <button
-                      onClick={() => handleEdit(pepiniere)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                  className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
+                  onClick={() => onEdit && onEdit(pepiniere)}
+                  title="Modifier la pépinière"
                     >
-                      Modifier
+                  <Edit size={14} className="mr-1" />
+                  <span className="hidden sm:inline">Modifier</span>
                     </button>
                     <button
-                      onClick={() => setDeletePepiniere(pepiniere)}
-                      className="text-red-600 hover:text-red-900"
+                  className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
+                  onClick={() => onDelete && onDelete(pepiniere)}
+                  title="Supprimer la pépinière"
                     >
-                      Supprimer
+                  <Trash size={14} className="mr-1" />
+                  <span className="hidden sm:inline">Supprimer</span>
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      <PepiniereModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingPepiniere(null);
-        }}
-        onSuccess={handleSuccess}
-        initialData={editingPepiniere}
-        mode={editingPepiniere ? 'edit' : 'add'}
-      />
-
-      <ConfirmationDialog
-        isOpen={!!deletePepiniere}
-        onClose={() => setDeletePepiniere(null)}
-        onConfirm={handleDelete}
-        title="Supprimer la pépinière"
-        message={`Êtes-vous sûr de vouloir supprimer la pépinière "${deletePepiniere?.nom}" ? Cette action est irréversible.`}
-      />
     </div>
   );
 };

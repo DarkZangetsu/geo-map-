@@ -56,7 +56,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Détails de la parcelle : {parcelleComplete?.nom || '-'}
+                Détails du site de référence : {parcelleComplete?.nom || '-'}
               </h3>
               <button
                 onClick={onClose}
