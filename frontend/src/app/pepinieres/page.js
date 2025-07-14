@@ -12,7 +12,7 @@ import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere'
 import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import PepiniereModal from '../../components/PepiniereModal';
-import ParcellesMap from '../../components/ParcellesMap';
+import PepinieresMap from '../../components/PepinieresMap';
 
 export default function PepinieresPage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
@@ -307,14 +307,11 @@ export default function PepinieresPage() {
                     </div>
                   </div>
                 ) : (
-                  <ParcellesMap
-                    parcelles={[]}
-                    sieges={[]}
+                  <PepinieresMap
                     pepinieres={pepinieres}
                     onPepiniereClick={setMapPepiniere}
                     mapStyle={mapStyle}
                     style={{ height: '100%', minHeight: 400 }}
-                    mode="pepinieres"
                   />
                 )}
               </div>

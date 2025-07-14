@@ -171,17 +171,24 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
   };
 
   const prepareGalleryImages = (images) => {
-    if (!images || images.length === 0) return [];
+    if (!images || !Array.isArray(images) || images.length === 0) return [];
+    
+    // Filtrer les images valides
+    const validImages = images.filter(img => img && img.image);
+    
+    if (validImages.length === 0) return [];
+    
     // Si toutes les images ont ordre 0 ou pas de champ ordre, ne pas trier
-    const hasValidOrder = images.some(img => typeof img.ordre === 'number' && img.ordre !== 0);
+    const hasValidOrder = validImages.some(img => typeof img.ordre === 'number' && img.ordre !== 0);
     const sorted = hasValidOrder
-      ? [...images].sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
-      : [...images];
+      ? [...validImages].sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
+      : [...validImages];
+      
     return sorted.map((img, idx) => ({
       original: `http://localhost:8000/media/${img.image}`,
       thumbnail: `http://localhost:8000/media/${img.image}`,
       description: `Image ${img.ordre !== undefined ? img.ordre + 1 : idx + 1}`
-      }));
+    }));
   };
 
   const formatDate = (dateString) => {
@@ -298,39 +305,61 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
           );
         })}
         {/* Affichage des sièges uniquement si mode === 'siege' */}
-        {mode === 'siege' && sieges.map((siege) => (
-          <Marker
-            key={siege.id}
-            position={[parseFloat(siege.latitude), parseFloat(siege.longitude)]}
-            icon={greenIcon}
-            eventHandlers={{
-              click: () => {
-                setSelectedSiege(siege);
-                if (onSiegeClick) onSiegeClick(siege);
-              }
-            }}
-          >
-          </Marker>
-        ))}
+        {mode === 'siege' && sieges.map((siege) => {
+          // Vérification et conversion sécurisée des coordonnées
+          const lat = siege.latitude ? parseFloat(siege.latitude) : null;
+          const lng = siege.longitude ? parseFloat(siege.longitude) : null;
+          
+          // Ne pas afficher le marqueur si les coordonnées sont invalides
+          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+            return null;
+          }
+          
+          return (
+            <Marker
+              key={siege.id}
+              position={[lat, lng]}
+              icon={greenIcon}
+              eventHandlers={{
+                click: () => {
+                  setSelectedSiege(siege);
+                  if (onSiegeClick) onSiegeClick(siege);
+                }
+              }}
+            >
+            </Marker>
+          );
+        })}
         {/* Affichage des pépinières uniquement si mode === 'pepinieres' */}
-        {mode === 'pepinieres' && pepinieres.map((pepiniere) => (
-          <Marker
-            key={pepiniere.id}
-            position={[parseFloat(pepiniere.latitude), parseFloat(pepiniere.longitude)]}
-            icon={orangeIcon}
-            eventHandlers={{
-              click: () => onPepiniereClick && onPepiniereClick(pepiniere)
-            }}
-          >
-            <Popup>
-              <div>
-                <strong>{pepiniere.nom}</strong><br />
-                {pepiniere.adresse}<br />
-                Lat: {pepiniere.latitude}, Lng: {pepiniere.longitude}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {mode === 'pepinieres' && pepinieres.map((pepiniere) => {
+          // Vérification et conversion sécurisée des coordonnées
+          const lat = pepiniere.latitude ? parseFloat(pepiniere.latitude) : null;
+          const lng = pepiniere.longitude ? parseFloat(pepiniere.longitude) : null;
+          
+          // Ne pas afficher le marqueur si les coordonnées sont invalides
+          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+            return null;
+          }
+          
+          return (
+            <Marker
+              key={pepiniere.id}
+              position={[lat, lng]}
+              icon={orangeIcon}
+              eventHandlers={{
+                click: () => onPepiniereClick && onPepiniereClick(pepiniere)
+              }}
+            >
+              <Popup>
+                <div>
+                  <strong>{pepiniere.nom}</strong><br />
+                  {pepiniere.adresse}<br />
+                  Lat: {pepiniere.latitude}, Lng: {pepiniere.longitude}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       {/* Panneau latéral pour les détails de la parcelle sélectionnée */}
@@ -362,9 +391,9 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                   />
                 )}
                 <div>
-                  <h3 className="font-bold text-xl text-gray-900 leading-tight">{selectedParcelle.nom}</h3>
+                  <h3 className="font-bold text-xl text-gray-900 leading-tight">{selectedParcelle.nom || 'Sans nom'}</h3>
                   <p className="text-base text-gray-700 font-normal mt-1">
-                    {selectedParcelle.user?.firstName} {selectedParcelle.user?.lastName}
+                    {selectedParcelle.user?.firstName || ''} {selectedParcelle.user?.lastName || ''}
                   </p>
                 </div>
               </div>
@@ -373,14 +402,14 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                   <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
                   Culture
                 </div>
-                <div className="text-base font-medium text-gray-900">{selectedParcelle.culture}</div>
+                <div className="text-base font-medium text-gray-900">{selectedParcelle.culture || 'Non définie'}</div>
               </div>
               <div className="bg-white rounded-xl shadow p-2">
                 <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
                   <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z' /></svg>
                   Propriétaire
                 </div>
-                <div className="text-base font-medium text-gray-900">{selectedParcelle.proprietaire}</div>
+                <div className="text-base font-medium text-gray-900">{selectedParcelle.proprietaire || 'Non défini'}</div>
               </div>
               {selectedParcelle.superficie && (
                 <div className="bg-white rounded-xl shadow p-2">
@@ -506,8 +535,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             <div className="bg-gray-50 rounded-xl shadow p-3 flex items-center gap-4">
               <div>
-                <h3 className="font-bold text-xl text-green-900 leading-tight">{selectedSiege.nom}</h3>
-                <div className="text-xs text-gray-500 font-semibold mt-1">Catégorie : <span className="font-bold text-green-700">{selectedSiege.categorie}</span></div>
+                <h3 className="font-bold text-xl text-green-900 leading-tight">{selectedSiege.nom || 'Sans nom'}</h3>
+                <div className="text-xs text-gray-500 font-semibold mt-1">Catégorie : <span className="font-bold text-green-700">{selectedSiege.categorie || 'Non définie'}</span></div>
               </div>
             </div>
             <div className="bg-white rounded-xl shadow p-3">
@@ -515,7 +544,7 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2h5' /></svg>
                 Adresse
               </div>
-              <div className="text-base font-medium text-gray-900">{selectedSiege.adresse}</div>
+              <div className="text-base font-medium text-gray-900">{selectedSiege.adresse || 'Non définie'}</div>
             </div>
             <div className="bg-white rounded-xl shadow p-3">
               <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">

@@ -32,10 +32,10 @@ const CSVExport = ({ data, filename, onExport, disabled = false }) => {
             if (typeof value === 'object') return JSON.stringify(value);
             // Échapper les virgules et guillemets
             const stringValue = String(value);
-            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            if (stringValue && (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n'))) {
               return `"${stringValue.replace(/"/g, '""')}"`;
             }
-            return stringValue;
+            return stringValue || '';
           }).join(',')
         )
       ].join('\n');

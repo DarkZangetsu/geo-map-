@@ -151,7 +151,7 @@ export default function AdminPage() {
           parcelle.coutProduction || '',
           parcelle.certificationBio ? 'Oui' : 'Non',
           parcelle.certificationHve ? 'Oui' : 'Non',
-          `"${(parcelle.notes || '').replace(/"/g, '""')}"`,
+          `"${(parcelle.notes || '').toString().replace(/"/g, '""')}"`,
           new Date(parcelle.createdAt).toLocaleDateString('fr-FR'),
           `${parcelle.user?.firstName || ''} ${parcelle.user?.lastName || ''}`
         ].join(','))

@@ -7,7 +7,7 @@ import { GET_MY_SIEGES, DELETE_SIEGE } from "../../lib/graphql-queries";
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import SiegeForm from "../../components/SiegeForm";
 import SiegeTable from "../../components/SiegeTable";
-import ParcellesMap from "../../components/ParcellesMap";
+import SiegesMap from "../../components/SiegesMap";
 import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import CSVImportExportSiege from '../../components/CSVImportExportSiege';
@@ -72,7 +72,13 @@ export default function SiegePage() {
     refetchSieges();
   };
 
+  const handleSiegeClick = (siege) => {
+    // Gérer le clic sur un siège dans la carte
+    console.log('Siège cliqué:', siege);
+    // Ici vous pouvez ajouter une logique pour afficher les détails du siège
+  };
 
+  const mapStyle = "mapbox://styles/mapbox/streets-v11";
 
   // Recherche et pagination
   const filteredSieges = useMemo(() => {
@@ -312,14 +318,11 @@ export default function SiegePage() {
                 </p>
               </div>
               <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
-                <ParcellesMap
-                  parcelles={[]}
+                <SiegesMap
                   sieges={sieges}
-                  pepinieres={[]}
                   onSiegeClick={handleSiegeClick}
                   mapStyle={mapStyle}
                   style={{ height: '100%', minHeight: 400 }}
-                  mode="siege"
                 />
               </div>
             </div>
