@@ -4,19 +4,15 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { GET_ME, GET_MY_PARCELLES, CREATE_PARCELLE, TOKEN_AUTH_WITH_USER, CREATE_USER, DELETE_PARCELLE, GET_MY_SIEGES } from '../lib/graphql-queries';
-import { exportToGeoJSON } from '../lib/file-parser';
 import { useToast } from '../lib/useToast';
 import { authUtils } from '../lib/utils';
-import client from '../lib/apollo-client';
 import '../lib/test-auth'; // Importer les fonctions de test
 import AuthForm from '../components/AuthForm';
 import ParcellesMap from '../components/ParcellesMap';
 import ParcelleForm from '../components/ParcelleForm';
-import CarteTest from '../components/CarteTest';
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from 'lucide-react';
 import { useAuth } from '../components/Providers';
-import SiegeForm from '../components/SiegeForm';
-import SiegeTable from '../components/SiegeTable';
+
 import CSVImportExport from '../components/CSVImportExport';
 // import AuthDebugger from '../components/AuthDebugger';
 

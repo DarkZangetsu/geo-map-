@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client';
 import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES, GET_MY_PARCELLES, GET_MY_SIEGES, GET_MY_PEPINIERES } from '../../lib/graphql-queries';
 import ParcellesMap from '../../components/ParcellesMap';
+import SiegesMap from '../../components/SiegesMap';
+import PepinieresMap from '../../components/PepinieresMap';
 import { useState } from 'react';
 import { useAuth } from '../../components/Providers';
 import { useAuthGuard } from '../../lib/useAuthGuard';
