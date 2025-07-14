@@ -53,7 +53,7 @@ const orangeIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick, onSiegeClick, onPepiniereClick, mapStyle = 'street', style, center }) => {
+const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick, onSiegeClick, onPepiniereClick, mapStyle = 'street', style, center, mode = 'parcelle' }) => {
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [selectedSiege, setSelectedSiege] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
@@ -189,6 +189,13 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
 
+  // Gestion du clic sur la carte pour fermer les panneaux de détail
+  const handleMapClick = (e) => {
+    setSelectedParcelle(null);
+    setSelectedSiege(null);
+    // (ajouter ici setSelectedPepiniere si besoin)
+  };
+
   if (typeof window === 'undefined') {
   return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -233,6 +240,7 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
             }
           }, 200);
         }}
+        onClick={handleMapClick}
       >
         <TileLayer
           url={mapStyles[mapStyle]}
@@ -254,7 +262,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
           />
         )}
         
-        {Array.isArray(parcelles) && parcelles.length > 0 && parcelles.map((parcelle) => {
+        {/* Affichage des parcelles uniquement si mode === 'parcelle' */}
+        {mode === 'parcelle' && Array.isArray(parcelles) && parcelles.length > 0 && parcelles.map((parcelle) => {
           // S'assurer que geojson est bien un objet
           const geojson = parseGeojson(parcelle.geojson);
           let center = null;
@@ -288,8 +297,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
             </div>
           );
         })}
-        {/* Affichage des sièges (marqueurs verts) */}
-        {sieges.map((siege) => (
+        {/* Affichage des sièges uniquement si mode === 'siege' */}
+        {mode === 'siege' && sieges.map((siege) => (
           <Marker
             key={siege.id}
             position={[parseFloat(siege.latitude), parseFloat(siege.longitude)]}
@@ -303,8 +312,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
           >
           </Marker>
         ))}
-        {/* Affichage des pépinières (marqueurs orange) */}
-        {pepinieres.map((pepiniere) => (
+        {/* Affichage des pépinières uniquement si mode === 'pepinieres' */}
+        {mode === 'pepinieres' && pepinieres.map((pepiniere) => (
           <Marker
             key={pepiniere.id}
             position={[parseFloat(pepiniere.latitude), parseFloat(pepiniere.longitude)]}

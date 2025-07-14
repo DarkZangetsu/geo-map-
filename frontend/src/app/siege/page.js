@@ -314,8 +314,12 @@ export default function SiegePage() {
               <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
                 <ParcellesMap
                   parcelles={[]}
-                  sieges={mapSiege ? [mapSiege] : sieges}
-                  style={{ height: "100vh", width: "100vw" }}
+                  sieges={sieges}
+                  pepinieres={[]}
+                  onSiegeClick={handleSiegeClick}
+                  mapStyle={mapStyle}
+                  style={{ height: '100%', minHeight: 400 }}
+                  mode="siege"
                 />
               </div>
             </div>

@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_ALL_PARCELLES, GET_ALL_USERS } from '../../lib/graphql-queries';
+import { GET_ALL_PARCELLES, GET_ALL_USERS, GET_ALL_SIEGES, GET_ALL_PEPINIERES } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ParcellesGlobalesTable from '../../components/ParcellesGlobalesTable';
 import MemberFilter from '../../components/MemberFilter';
 import CSVExport from '../../components/CSVExport';
+import ParcellesMap from '../../components/ParcellesMap';
 
 export default function ParcellesGlobalesPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -18,6 +19,8 @@ export default function ParcellesGlobalesPage() {
   // Récupération des données
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
+  const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
+  const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
   
 
 
@@ -46,6 +49,16 @@ export default function ParcellesGlobalesPage() {
   if (usersError) {
     showError('Erreur lors du chargement des utilisateurs');
     console.error('Users error:', usersError);
+  }
+
+  // Gestion des erreurs supplémentaires
+  if (siegesError) {
+    showError('Erreur lors du chargement des locaux');
+    console.error('Sieges error:', siegesError);
+  }
+  if (pepinieresError) {
+    showError('Erreur lors du chargement des pépinières');
+    console.error('Pepinieres error:', pepinieresError);
   }
 
   const handleMemberFilterChange = (memberIds) => {
@@ -104,38 +117,26 @@ export default function ParcellesGlobalesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Sites de référence globaux
+            Carte globale des sites de référence, locaux et pépinières
           </h1>
           <p className="text-gray-600">
-            Consultez tous les sites de référence de tous les membres de la plateforme
+            Consultez tous les sites de référence, locaux et pépinières de tous les membres de la plateforme sur une seule carte.
           </p>
         </div>
-
-        {/* Filtres et actions */}
+        {/* Carte globale avec tous les types d'entités */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">
-                Filtrer par membre
-              </h3>
-              <MemberFilter
-                users={usersData?.allUsers || []}
-                selectedMembers={selectedMembers}
-                onFilterChange={handleMemberFilterChange}
-              />
-            </div>
-            <div className="lg:ml-4">
-              <CSVExport
-                data={filteredParcelles}
-                filename="sites_de_reference_globaux"
-                onExport={handleExportCSV}
-                disabled={filteredParcelles.length === 0}
-              />
-            </div>
+          <div style={{ height: 600, width: '100%' }}>
+            <ParcellesMap
+              parcelles={filteredParcelles}
+              sieges={siegesData?.allSieges || []}
+              pepinieres={pepinieresData?.allPepinieres || []}
+              // onParcelleClick, onSiegeClick, onPepiniereClick peuvent être ajoutés si besoin
+              style={{ height: 600, width: '100%' }}
+              // mode non défini pour affichage simultané
+            />
           </div>
         </div>
-
-        {/* Tableau des parcelles */}
+        {/* Tableau des parcelles (inchangé) */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">

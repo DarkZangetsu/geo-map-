@@ -9,10 +9,10 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col border border-gray-200 rounded-2xl m-4 max-w-[440px] transition-all duration-300 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        {/* Header fixé */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Building className="h-6 w-6 text-orange-600" />
@@ -30,8 +30,8 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
+        {/* Contenu scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Informations générales */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -176,16 +176,6 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
-          >
-            Fermer
-          </button>
         </div>
       </div>
     </div>

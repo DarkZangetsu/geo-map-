@@ -6,6 +6,7 @@ import ParcellesMap from '../../components/ParcellesMap';
 import { useState } from 'react';
 import { useAuth } from '../../components/Providers';
 import { useAuthGuard } from '../../lib/useAuthGuard';
+import MapGlobal from '../../components/MapGlobal';
 
 export default function MapPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -75,7 +76,7 @@ export default function MapPage() {
               onChange={() => setShowParcelles(v => !v)}
               className="accent-blue-600"
             />
-            Parcelles
+            Sites de référence
             <span className="ml-1 text-xs bg-blue-200 text-blue-900 rounded px-2 py-0.5 font-bold">{allParcelles.length}</span>
           </label>
           <label className="flex items-center gap-2 text-green-900 font-semibold bg-green-50 px-3 py-2 rounded-lg border border-green-100">
@@ -85,7 +86,7 @@ export default function MapPage() {
               onChange={() => setShowSieges(v => !v)}
               className="accent-green-600"
             />
-            Sièges
+            Locaux
             <span className="ml-1 text-xs bg-green-200 text-green-900 rounded px-2 py-0.5 font-bold">{allSieges.length}</span>
           </label>
           <label className="flex items-center gap-2 text-orange-900 font-semibold bg-orange-50 px-3 py-2 rounded-lg border border-orange-100">
@@ -120,14 +121,11 @@ export default function MapPage() {
           <div className="flex items-center justify-center h-full text-lg text-red-700 font-semibold">Erreur d'accès aux pépinières : {pepinieresError.message}</div>
         ) : (
           <div style={{ height: '100%', width: '100%' }}>
-            <ParcellesMap
+            <MapGlobal
               parcelles={parcelles}
               sieges={sieges}
               pepinieres={pepinieres}
               mapStyle={mapStyle}
-              onParcelleClick={() => {}}
-              onSiegeClick={() => {}}
-              onPepiniereClick={() => {}}
               style={{ height: '100%', width: '100%' }}
               key={parcelles.length + '-' + sieges.length + '-' + pepinieres.length + '-' + mapStyle}
               center={!hasParcelles ? MADAGASCAR_CENTER : undefined}

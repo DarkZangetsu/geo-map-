@@ -534,10 +534,12 @@ export default function HomePage() {
                 ) : (
                   <ParcellesMap
                     parcelles={parcelles}
-                    sieges={mapSiege ? [mapSiege] : sieges}
-                    mapStyle={mapStyle}
+                    sieges={[]}
+                    pepinieres={[]}
                     onParcelleClick={handleParcelleClick}
-                    style={mapFullscreen ? {height: '100vh', width: '100vw'} : {height: '600px', width: '100%'}}
+                    mapStyle={mapStyle}
+                    style={{ height: '100%', minHeight: 400 }}
+                    mode="parcelle"
                   />
                 )}
               </div>
