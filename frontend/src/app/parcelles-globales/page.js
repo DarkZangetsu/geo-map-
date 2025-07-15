@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_ALL_PARCELLES, GET_ALL_USERS, GET_ALL_SIEGES, GET_ALL_PEPINIERES } from '../../lib/graphql-queries';
+import { GET_ALL_PARCELLES, GET_ALL_USERS } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ParcellesGlobalesTable from '../../components/ParcellesGlobalesTable';
@@ -16,8 +16,6 @@ export default function ParcellesGlobalesPage() {
   // Récupération des données
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
-  const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
-  const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
   
 
 

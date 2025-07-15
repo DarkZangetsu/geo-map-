@@ -6,8 +6,6 @@ import { useAuth } from '../../components/Providers';
 import { useRouter } from 'next/navigation';
 import { GET_MY_PEPINIERES, DELETE_PEPINIERE } from '../../lib/graphql-queries';
 import { useAuthGuard } from '../../lib/useAuthGuard';
-import PepiniereForm from '../../components/PepiniereForm';
-import PepinieresTable from '../../components/PepinieresTable';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
 import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from '../../lib/useToast';
@@ -18,7 +16,6 @@ export default function PepinieresPage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [showPepiniereForm, setShowPepiniereForm] = useState(false);
   const [mapPepiniere, setMapPepiniere] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
@@ -92,11 +89,6 @@ export default function PepinieresPage() {
     setShowPepiniereModal(false);
     setEditingPepiniere(null);
     refetchPepinieres();
-  };
-
-  const handleShowOnMap = (pepiniere) => {
-    setMapPepiniere(pepiniere);
-    setShowMap(true);
   };
 
   const handleEditPepiniere = (pepiniere) => {
@@ -424,29 +416,22 @@ export default function PepinieresPage() {
                            pepiniere[colKey]}
                         </td>
                       ))}
-                      <td className="px-3 py-2 whitespace-nowrap flex gap-2">
-                        <button
-                          onClick={() => handleShowOnMap(pepiniere)}
-                          className="inline-flex items-center px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-xs font-bold transition shadow-sm"
-                          title="Voir la pépinière sur la carte"
-                        >
-                          <Map size={15} className="mr-1" />
-                        </button>
-                        <button
-                          onClick={() => handleEditPepiniere(pepiniere)}
-                          className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
-                          title="Modifier la pépinière"
-                        >
-                          <Edit size={15} className="mr-1" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePepiniere(pepiniere)}
-                          className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
-                          title="Supprimer la pépinière"
-                        >
-                          <Trash size={15} className="mr-1" />
-                        </button>
-                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleEditPepiniere(pepiniere)}
+                            className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
+                            title="Modifier la pépinière"
+                          >
+                            <Edit size={15} className="mr-1" />
+                          </button>
+                          <button
+                            onClick={() => handleDeletePepiniere(pepiniere)}
+                            className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
+                            title="Supprimer la pépinière"
+                          >
+                            <Trash size={15} className="mr-1" />
+                          </button>
+                        </td>
                     </tr>
                   ))}
                 </tbody>

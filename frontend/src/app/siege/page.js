@@ -158,16 +158,6 @@ export default function SiegePage() {
             >
               <Plus size={16} /> Ajouter un local
             </button>
-            {/* Bouton principal Voir la carte */}
-            <button
-              onClick={() => setShowMap(true)}
-              className="px-4 py-2 bg-white text-blue-800 border border-blue-300 rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
-              title="Voir la carte"
-            >
-              <Map size={16} />
-              <span className="hidden sm:inline">Voir la carte</span>
-              <span className="sm:hidden">Carte</span>
-            </button>
             {/* Menu déroulant pour les actions secondaires */}
             <div className="relative actions-dropdown">
               <button
@@ -218,6 +208,18 @@ export default function SiegePage() {
             </div>
           </div>
         </div>
+        {/* Bouton Voir la carte juste avant le tableau, comme dans page.js */}
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => setShowMap(true)}
+            className="px-4 py-2 bg-white text-blue-800 border border-blue-300 rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
+            title="Voir la carte"
+          >
+            <Map size={16} />
+            <span className="hidden sm:inline">Voir la carte</span>
+            <span className="sm:hidden">Carte</span>
+          </button>
+        </div>
         {/* Recherche et colonnes dynamiques */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-blue-100 bg-white rounded-t-lg">
           <div className="flex items-center gap-2">
@@ -231,7 +233,7 @@ export default function SiegePage() {
               style={{ minWidth: 180 }}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full">
             <div className="relative">
               <button
                 type="button"

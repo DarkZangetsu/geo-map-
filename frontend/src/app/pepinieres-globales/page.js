@@ -21,7 +21,7 @@ export default function PepinieresGlobalesPage() {
   const pepinieres = data?.allPepinieres ?? [];
 
   // Sécurisation des compteurs
-  const totalPepinieres = Array.isArray(pepinieres);
+  const totalPepinieres = Array.isArray(pepinieres) ? pepinieres.length : 0;
   const totalPubliques = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'publique').length : 0;
   const totalPrivees = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'privee').length : 0;
 
