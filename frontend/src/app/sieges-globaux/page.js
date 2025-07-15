@@ -76,7 +76,7 @@ export default function SiegesGlobauxPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Sièges Globaux
+            Tout les locaux
           </h1>
           <p className="text-gray-600">
             Consultez tous les sièges de tous les membres de la plateforme

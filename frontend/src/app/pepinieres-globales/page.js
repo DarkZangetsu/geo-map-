@@ -7,7 +7,7 @@ import PepinieresGlobalesTable from '../../components/PepinieresGlobalesTable';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
 import { useToast } from '../../lib/useToast';
 import { useAuthGuard } from '../../lib/useAuthGuard';
-import { Upload, Download, Map } from 'lucide-react';
+import { Upload, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function PepinieresGlobalesPage() {
@@ -18,7 +18,12 @@ export default function PepinieresGlobalesPage() {
 
   const { loading, error, data, refetch } = useQuery(GET_ALL_PEPINIERES);
 
-  const pepinieres = data?.allPepinieres || [];
+  const pepinieres = data?.allPepinieres ?? [];
+
+  // Sécurisation des compteurs
+  const totalPepinieres = Array.isArray(pepinieres);
+  const totalPubliques = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'publique').length : 0;
+  const totalPrivees = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'privee').length : 0;
 
   const handleCSVSuccess = () => {
     setShowCSVModal(false);
@@ -106,18 +111,18 @@ export default function PepinieresGlobalesPage() {
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
             <h3 className="text-base lg:text-lg font-semibold text-gray-900">Total Pépinières</h3>
-            <p className="text-2xl lg:text-3xl font-bold text-indigo-600">{pepinieres.length}</p>
+            <p className="text-2xl lg:text-3xl font-bold text-indigo-600">{totalPepinieres}</p>
           </div>
           <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
             <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Publiques</h3>
             <p className="text-2xl lg:text-3xl font-bold text-green-600">
-              {pepinieres.filter(p => p.categorie === 'publique').length}
+              {totalPubliques}
             </p>
           </div>
           <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
             <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Privées</h3>
             <p className="text-2xl lg:text-3xl font-bold text-purple-600">
-              {pepinieres.filter(p => p.categorie === 'privee').length}
+              {totalPrivees}
             </p>
           </div>
         </div>

@@ -8,7 +8,6 @@ const ALL_COLUMNS = [
   { key: 'pointContact', label: 'Point de Contact' },
   { key: 'horaires', label: 'Horaires' },
   { key: 'description', label: 'Description' },
-  { key: 'createdAt', label: 'Date de création' },
 ];
 
 const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
@@ -34,9 +33,6 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
             )}
             {visibleColumns.includes('description') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Description</th>
-            )}
-            {visibleColumns.includes('createdAt') && (
-              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Date de création</th>
             )}
             <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
           </tr>
@@ -86,12 +82,7 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                   </div>
                 </td>
               )}
-              {visibleColumns.includes('createdAt') && (
-                <td className="px-3 py-2 text-xs text-gray-500">
-                  {siege.createdAt ? new Date(siege.createdAt).toLocaleDateString('fr-FR') : '-'}
-                </td>
-              )}
-              <td className="px-3 py-2 whitespace-nowrap flex gap-2">
+              <td className="px-3 py-2 whitespace-nowrap flex justify-center items-center gap-2">
                 <button
                   onClick={() => onEdit && onEdit(siege)}
                   className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
@@ -105,9 +96,9 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                   title="Supprimer le local"
                 >
                   <Trash size={15} className="mr-1" />
-                  Supprimer
                 </button>
               </td>
+
             </tr>
           ))}
         </tbody>

@@ -96,9 +96,6 @@ const SiegesGlobauxTable = ({ sieges, loading }) => {
                 Description
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Créé le
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -142,9 +139,6 @@ const SiegesGlobauxTable = ({ sieges, loading }) => {
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
                   {siege.description || '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(siege.createdAt).toLocaleDateString('fr-FR')}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">

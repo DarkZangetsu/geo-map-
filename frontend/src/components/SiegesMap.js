@@ -75,12 +75,15 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
         if (sieges && sieges.length > 0) {
           const bounds = [];
           sieges.forEach(siege => {
-            if (siege.latitude && siege.longitude) {
-              const lat = parseFloat(siege.latitude);
-              const lng = parseFloat(siege.longitude);
-              if (!isNaN(lat) && !isNaN(lng)) {
-                bounds.push([lat, lng]);
-              }
+            const lat = Number(siege.latitude);
+            const lng = Number(siege.longitude);
+            if (
+              typeof lat === 'number' && typeof lng === 'number' &&
+              !isNaN(lat) && !isNaN(lng)
+            ) {
+              bounds.push([lat, lng]);
+            } else {
+              console.warn('Coordonnées invalides pour le siège (fitBounds)', siege);
             }
           });
           
@@ -108,12 +111,15 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
       onSiegeClick(siege);
     }
     // Zoom sur le siège
-    if (siege.latitude && siege.longitude && mapRef.current) {
-      const lat = parseFloat(siege.latitude);
-      const lng = parseFloat(siege.longitude);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        mapRef.current.setView([lat, lng], 15);
-      }
+    const lat = Number(siege.latitude);
+    const lng = Number(siege.longitude);
+    if (
+      typeof lat === 'number' && typeof lng === 'number' &&
+      !isNaN(lat) && !isNaN(lng) && mapRef.current
+    ) {
+      mapRef.current.setView([lat, lng], 15);
+    } else {
+      console.warn('Coordonnées invalides pour le siège (setView)', siege);
     }
   };
 
@@ -174,8 +180,8 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
         onClick={handleMapClick}
       >
         <TileLayer
-          url={mapStyles[mapStyle]}
-          attribution={attribution[mapStyle]}
+          url={mapStyles[mapStyle] || mapStyles['street']}
+          attribution={attribution[mapStyle] || attribution['street']}
         />
         {/* Satellite + labels */}
         {mapStyle === 'satellite' && (
@@ -195,15 +201,16 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
         
         {/* Affichage des sièges */}
         {Array.isArray(sieges) && sieges.length > 0 && sieges.map((siege) => {
-          // Vérification et conversion sécurisée des coordonnées
-          const lat = siege.latitude ? parseFloat(siege.latitude) : null;
-          const lng = siege.longitude ? parseFloat(siege.longitude) : null;
-          
-          // Ne pas afficher le marqueur si les coordonnées sont invalides
-          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+          // Validation renforcée des coordonnées
+          const lat = Number(siege.latitude);
+          const lng = Number(siege.longitude);
+          if (
+            typeof lat !== 'number' || typeof lng !== 'number' ||
+            isNaN(lat) || isNaN(lng)
+          ) {
+            console.warn('Coordonnées invalides pour le siège', siege);
             return null;
           }
-          
           return (
             <Marker
               key={siege.id}
@@ -310,11 +317,13 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                   <ImageGallery
-                    items={selectedSiege.photosBatiment.map(photo => ({
-                      original: `http://localhost:8000/media/${photo.image}`,
-                      thumbnail: `http://localhost:8000/media/${photo.image}`,
-                      description: photo.titre ? `${photo.titre}${photo.description ? ' - ' + photo.description : ''}` : photo.description || ''
-                    }))}
+                    items={selectedSiege.photosBatiment
+                      .filter(photo => !!photo.image)
+                      .map(photo => ({
+                        original: `http://localhost:8000/media/${photo.image}`,
+                        thumbnail: `http://localhost:8000/media/${photo.image}`,
+                        description: photo.titre ? `${photo.titre}${photo.description ? ' - ' + photo.description : ''}` : photo.description || ''
+                      }))}
                     showPlayButton={false}
                     showFullscreenButton={true}
                     showNav={true}

@@ -108,13 +108,13 @@ function LayoutContent({ children }) {
                               Carte globale
                             </a>
                             <a href="/parcelles-globales" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                              Parcelles globales
+                              Liste des Sites de référence
                             </a>
                             <a href="/sieges-globaux" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                              Sièges globaux
+                              Liste des Locaux
                             </a>
                             <a href="/pepinieres-globales" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                              Pépinières globales
+                              Liste des Pépinières
                             </a>
                           </div>
                         )}

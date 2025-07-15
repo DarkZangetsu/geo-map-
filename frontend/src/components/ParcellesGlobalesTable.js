@@ -111,9 +111,6 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                 Certifications
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Créé le
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -194,9 +191,6 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                       <span className="text-gray-400">-</span>
                     )}
                   </div>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(parcelle.createdAt).toLocaleDateString('fr-FR')}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                   <button

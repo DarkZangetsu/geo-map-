@@ -178,10 +178,6 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                         <h4 className="text-md font-semibold text-gray-900 mb-3">Dates</h4>
                         <dl className="space-y-2">
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Créé le</dt>
-                            <dd className="text-sm text-gray-900">{formatDate(siegeComplete?.createdAt)}</dd>
-                          </div>
-                          <div>
                             <dt className="text-sm font-medium text-gray-500">Modifié le</dt>
                             <dd className="text-sm text-gray-900">{formatDate(siegeComplete?.updatedAt)}</dd>
                           </div>

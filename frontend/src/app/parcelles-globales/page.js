@@ -6,9 +6,6 @@ import { GET_ALL_PARCELLES, GET_ALL_USERS, GET_ALL_SIEGES, GET_ALL_PEPINIERES } 
 import { useToast } from '../../lib/useToast';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ParcellesGlobalesTable from '../../components/ParcellesGlobalesTable';
-import MemberFilter from '../../components/MemberFilter';
-import CSVExport from '../../components/CSVExport';
-import ParcellesMap from '../../components/ParcellesMap';
 
 export default function ParcellesGlobalesPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -122,19 +119,6 @@ export default function ParcellesGlobalesPage() {
           <p className="text-gray-600">
             Consultez tous les sites de référence, locaux et pépinières de tous les membres de la plateforme sur une seule carte.
           </p>
-        </div>
-        {/* Carte globale avec tous les types d'entités */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div style={{ height: 600, width: '100%' }}>
-            <ParcellesMap
-              parcelles={filteredParcelles}
-              sieges={siegesData?.allSieges || []}
-              pepinieres={pepinieresData?.allPepinieres || []}
-              // onParcelleClick, onSiegeClick, onPepiniereClick peuvent être ajoutés si besoin
-              style={{ height: 600, width: '100%' }}
-              // mode non défini pour affichage simultané
-            />
-          </div>
         </div>
         {/* Tableau des parcelles (inchangé) */}
         <div className="bg-white rounded-lg shadow-sm border">

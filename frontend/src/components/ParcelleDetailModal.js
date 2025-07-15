@@ -258,10 +258,6 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                         <h4 className="text-md font-semibold text-gray-900 mb-3">Dates</h4>
                         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Créé le</dt>
-                            <dd className="text-sm text-gray-900">{formatDate(parcelleComplete?.createdAt)}</dd>
-                          </div>
-                          <div>
                             <dt className="text-sm font-medium text-gray-500">Modifié le</dt>
                             <dd className="text-sm text-gray-900">{formatDate(parcelleComplete?.updatedAt)}</dd>
                           </div>

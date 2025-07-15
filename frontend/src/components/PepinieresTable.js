@@ -9,7 +9,7 @@ const ALL_COLUMNS = [
   { key: 'capacite', label: 'Capacité' },
 ];
 
-const PepinieresTable = ({ pepinieres = [], onShowOnMap, onEdit, onDelete, visibleColumns = [] }) => {
+const PepinieresTable = ({ pepinieres = [], onEdit, onDelete, visibleColumns = [] }) => {
   if (!pepinieres || pepinieres.length === 0) {
     return (
       <div className="text-center py-8">
@@ -56,14 +56,7 @@ const PepinieresTable = ({ pepinieres = [], onShowOnMap, onEdit, onDelete, visib
               {visibleColumns.includes('capacite') && (
                 <td className="px-3 py-2">{pepiniere.capacite ? `${pepiniere.capacite}` : '-'}</td>
               )}
-              <td className="px-3 py-2 whitespace-nowrap flex gap-2">
-                <button
-                  onClick={() => onShowOnMap && onShowOnMap(pepiniere)}
-                  className="inline-flex items-center px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-xs font-bold transition shadow-sm"
-                  title="Voir la pépinière sur la carte"
-                >
-                  <Map size={15} className="mr-1" />
-                </button>
+              <td className="px-3 py-2 whitespace-nowrap flex gap-2 items-center">
                     <button
                   onClick={() => onEdit && onEdit(pepiniere)}
                   className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"

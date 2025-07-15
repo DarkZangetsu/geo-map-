@@ -1,21 +1,17 @@
 import { useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_ALL_PEPINIERES } from '../lib/graphql-queries';
 import MemberFilter from './MemberFilter';
 
-const PepinieresGlobalesTable = () => {
+const PepinieresGlobalesTable = ({ pepinieres }) => {
   const [selectedUser, setSelectedUser] = useState('');
-  const { data, loading, error } = useQuery(GET_ALL_PEPINIERES);
 
-  if (loading) return <div className="text-center py-4">Chargement...</div>;
-  if (error) return <div className="text-center py-4 text-red-600">Erreur: {error.message}</div>;
+  // Sécuriser la prop pepinieres
+  const safePepinieres = Array.isArray(pepinieres) ? pepinieres : [];
 
-  const pepinieres = data?.allPepinieres || [];
-  
   // Filtrer par utilisateur si sélectionné
   const filteredPepinieres = selectedUser 
-    ? pepinieres.filter(pepiniere => pepiniere.user.id === selectedUser)
-    : pepinieres;
+    ? safePepinieres.filter(pepiniere => pepiniere.user && pepiniere.user.id === selectedUser)
+    : safePepinieres;
+  const safeFilteredPepinieres = Array.isArray(filteredPepinieres) ? filteredPepinieres : [];
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -28,7 +24,7 @@ const PepinieresGlobalesTable = () => {
         />
       </div>
 
-      {filteredPepinieres.length === 0 ? (
+      {safeFilteredPepinieres.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           {selectedUser ? 'Aucune pépinière trouvée pour ce membre.' : 'Aucune pépinière trouvée.'}
         </div>
@@ -49,13 +45,10 @@ const PepinieresGlobalesTable = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Membre
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date création
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPepinieres.map((pepiniere) => (
+              {safeFilteredPepinieres.map((pepiniere) => (
                 <tr key={pepiniere.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{pepiniere.nom}</div>
@@ -70,7 +63,7 @@ const PepinieresGlobalesTable = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {pepiniere.user.logo && (
+                      {pepiniere.user && pepiniere.user.logo && (
                         <img
                           src={pepiniere.user.logo}
                           alt="Logo"
@@ -79,16 +72,13 @@ const PepinieresGlobalesTable = () => {
                       )}
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {pepiniere.user.nomInstitution || pepiniere.user.username}
+                          {pepiniere.user ? (pepiniere.user.nomInstitution || pepiniere.user.username) : '-'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {pepiniere.user.nomProjet || pepiniere.user.abreviation}
+                          {pepiniere.user ? (pepiniere.user.nomProjet || pepiniere.user.abreviation) : ''}
                         </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(pepiniere.createdAt).toLocaleDateString('fr-FR')}
                   </td>
                 </tr>
               ))}
@@ -99,7 +89,7 @@ const PepinieresGlobalesTable = () => {
 
       <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
         <div className="text-sm text-gray-500">
-          Total: {filteredPepinieres.length} pépinière{filteredPepinieres.length !== 1 ? 's' : ''}
+          Total: {safeFilteredPepinieres.length} pépinière{safeFilteredPepinieres.length !== 1 ? 's' : ''}
         </div>
       </div>
     </div>

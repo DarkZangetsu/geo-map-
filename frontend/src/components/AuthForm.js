@@ -105,16 +105,19 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isLogin ? 'Connexion à Alliance-Agroforesterie' : 'Inscription à Alliance-Agroforesterie'}
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 leading-tight">
+            <div>{isLogin ? 'Connexion' : 'Inscription'}</div>
+            <div className="text-lg">à</div>
+            <div>Alliance-Agroforesterie</div>
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          {/* <p className="mt-2 text-center text-sm text-gray-600">
             {isLogin ? 'Accédez à votre espace agricole' : 'Créez votre compte agricole'}
-          </p>
+          </p> */}
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          {/* Utilisation d'une grille responsive pour l'inscription */}
+          <div className={`rounded-md shadow-sm -space-y-px ${!isLogin ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' : ''}`}> 
             {!isLogin && (
               <>
                 <div className="mb-4">
@@ -178,6 +181,37 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     placeholder="Email"
                   />
                 </div>
+
+                <div className="mb-4">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirmer le mot de passe *
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    placeholder="Confirmer le mot de passe"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                    Rôle *
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    disabled
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                  >
+                    <option value="membre">Membre</option>
+                  </select>
+                </div>
               </>
             )}
 
@@ -212,41 +246,6 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                 placeholder="Mot de passe"
               />
             </div>
-
-            {!isLogin && (
-              <>
-                <div className="mb-4">
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirmer le mot de passe *
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                    placeholder="Confirmer le mot de passe"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                    Rôle *
-                  </label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    disabled
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
-                  >
-                    <option value="membre">Membre (Agriculteur)</option>
-                  </select>
-                </div>
-              </>
-            )}
           </div>
 
           <div>

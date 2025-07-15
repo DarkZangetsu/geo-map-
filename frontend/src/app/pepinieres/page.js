@@ -37,7 +37,6 @@ export default function PepinieresPage() {
     { key: 'nomGestionnaire', label: 'Gestionnaire' },
     { key: 'especesProduites', label: 'Espèces produites' },
     { key: 'capacite', label: 'Capacité' },
-    { key: 'createdAt', label: 'Créée le' }
   ];
   
   // Colonnes visibles pour le tableau (filtrage dynamique)
