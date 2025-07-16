@@ -6,7 +6,6 @@ import { CREATE_PARCELLE, UPDATE_PARCELLE, GET_ME } from '../lib/graphql-queries
 import { useToast } from '../lib/useToast';
 import MapDrawModal from './MapDrawModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { useAuth } from '../components/Providers';
 
 const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0 }) => {
   const { data: meData } = useQuery(GET_ME);
@@ -175,13 +174,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
 
   return (
     <>
-      {/* Header fixe - complètement séparé */}
-      <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {parcelle ? 'Modifier le site de référence' : 'Ajouter un nouveau site de référence'}
-        </h2>
-      </div>
-
+      {/* Header supprimé, géré par le Dialog parent */}
       {/* Contenu scrollable - section séparée */}
       <div className="bg-white overflow-y-auto max-h-[60vh]">
         <div className="p-6">
