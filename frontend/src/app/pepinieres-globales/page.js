@@ -1,142 +1,164 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_ALL_PEPINIERES } from '../../lib/graphql-queries';
-import PepinieresGlobalesTable from '../../components/PepinieresGlobalesTable';
-import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
-import { useToast } from '../../lib/useToast';
-import { useAuthGuard } from '../../lib/useAuthGuard';
-import { Upload, Map } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { GET_ALL_PEPINIERES, GET_ALL_USERS } from "../../lib/graphql-queries";
+import { useToast } from "../../lib/useToast";
+import { useAuthGuard } from "../../lib/useAuthGuard";
+import { pepinieresColumns } from "./columns";
+import { DataTable } from "@/components/ui/table-data-table";
+import MemberFilter from "@/components/MemberFilter";
+import CSVImportExportPepiniere from "../../components/CSVImportExportPepiniere";
+import { exportToCSV } from "../../lib/export-csv";
+import { Button } from "@/components/ui/button";
 
 export default function PepinieresGlobalesPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [filteredPepinieres, setFilteredPepinieres] = useState([]);
+  const { showError, showToast } = useToast();
   const [showCSVModal, setShowCSVModal] = useState(false);
-  const { showToast } = useToast();
-  const router = useRouter();
 
-  const { loading, error, data, refetch } = useQuery(GET_ALL_PEPINIERES);
+  // Récupération des données
+  const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
+  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
 
-  const pepinieres = data?.allPepinieres ?? [];
+  // Filtrage des pépinières selon les membres sélectionnés
+  useEffect(() => {
+    if (pepinieresData?.allPepinieres) {
+      if (selectedMembers.length === 0) {
+        setFilteredPepinieres(pepinieresData.allPepinieres);
+      } else {
+        const filtered = pepinieresData.allPepinieres.filter(pepin =>
+          selectedMembers.includes(pepin.user.id)
+        );
+        setFilteredPepinieres(filtered);
+      }
+    }
+  }, [pepinieresData, selectedMembers]);
 
-  // Sécurisation des compteurs
-  const totalPepinieres = Array.isArray(pepinieres) ? pepinieres.length : 0;
-  const totalPubliques = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'publique').length : 0;
-  const totalPrivees = Array.isArray(pepinieres) ? pepinieres.filter(p => p.categorie === 'privee').length : 0;
+  // Gestion des erreurs
+  if (pepinieresError) {
+    showError("Erreur lors du chargement des pépinières");
+    console.error("Pepinieres error:", pepinieresError);
+  }
+  if (usersError) {
+    showError("Erreur lors du chargement des utilisateurs");
+    console.error("Users error:", usersError);
+  }
 
-  const handleCSVSuccess = () => {
-    setShowCSVModal(false);
-    refetch();
-    showToast('Import/Export CSV terminé avec succès', 'success');
-  };
-
-  const handleViewOnMap = () => {
-    router.push('/map?type=pepinieres');
-  };
-
-  // Afficher un loader pendant la vérification d'authentification
+  // Loader d'authentification
   if (isLoading || !isAuthorized) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">
-            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
+            {isLoading ? "Vérification de l'authentification..." : "Redirection vers la page de connexion..."}
           </p>
         </div>
       </div>
     );
   }
 
-  if (loading) {
+  if (pepinieresLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des pépinières...</p>
-        </div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Erreur lors du chargement des pépinières</p>
-          <button 
-            onClick={() => refetch()} 
-            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Handler pour le filtre membre
+  const handleMemberFilterChange = (memberIds) => {
+    setSelectedMembers(memberIds);
+  };
+
+  // Handler pour l'export CSV
+  const handleExportCSV = () => {
+    const data = filteredPepinieres.map(pepin => ({
+      nom: pepin.nom,
+      categorie: pepin.categorie,
+      adresse: pepin.adresse,
+      membre: `${pepin.user?.firstName} ${pepin.user?.lastName}`,
+      username: pepin.user?.username,
+      abreviation: pepin.user?.abreviation || '',
+      superficie_ha: pepin.superficie || '',
+      variete: pepin.variete || '',
+      date_creation: pepin.createdAt ? new Date(pepin.createdAt).toLocaleDateString('fr-FR') : '',
+    }));
+    exportToCSV(data, "pepinieres_globales.csv");
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Pépinières Globales</h1>
-          <p className="text-gray-600 text-sm lg:text-base">
-            Consultez toutes les pépinières enregistrées par tous les utilisateurs
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Liste des pépinières
+          </h1>
+          <p className="text-gray-600">
+            Consultez toutes les pépinières de tous les membres de la plateforme.
           </p>
         </div>
-
-        {/* Actions */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={handleViewOnMap}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-sm transition flex items-center justify-center gap-2 text-sm"
-          >
-            <Map size={16} />
-            <span className="hidden sm:inline">Voir sur la carte</span>
-            <span className="sm:hidden">Carte</span>
-          </button>
-          <button
-            onClick={() => setShowCSVModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow-sm transition flex items-center justify-center gap-2 text-sm"
-          >
-            <Upload size={16} />
-            <span className="hidden sm:inline">Import/Export CSV</span>
-            <span className="sm:hidden">CSV</span>
-          </button>
-        </div>
-
-        {/* Stats */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Total Pépinières</h3>
-            <p className="text-2xl lg:text-3xl font-bold text-indigo-600">{totalPepinieres}</p>
-          </div>
-          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Publiques</h3>
-            <p className="text-2xl lg:text-3xl font-bold text-green-600">
-              {totalPubliques}
-            </p>
-          </div>
-          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Pépinières Privées</h3>
-            <p className="text-2xl lg:text-3xl font-bold text-purple-600">
-              {totalPrivees}
-            </p>
+        {/* Filtres */}
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">
+                Filtrer par membre
+              </h3>
+              <MemberFilter
+                users={usersData?.allUsers || []}
+                selectedMembers={selectedMembers}
+                onFilterChange={handleMemberFilterChange}
+              />
+            </div>
           </div>
         </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <PepinieresGlobalesTable pepinieres={pepinieres} />
+        {/* DataTable */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">
+                Pépinières ({filteredPepinieres.length})
+              </h3>
+              {selectedMembers.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  Filtré par {selectedMembers.length} membre(s)
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="p-6">
+            <DataTable
+              columns={pepinieresColumns(() => {})}
+              data={filteredPepinieres}
+              filterKey="nom"
+              filterPlaceholder="Rechercher par nom..."
+              actions={
+                <>
+                  <Button variant="outline" onClick={handleExportCSV} disabled={filteredPepinieres.length === 0}>
+                    Exporter CSV
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowCSVModal(true)} className="ml-2">
+                    Importer CSV
+                  </Button>
+                </>
+              }
+            />
+          </div>
         </div>
-
-        {/* CSV Modal */}
+        {/* Modal d'import CSV */}
         {showCSVModal && (
           <CSVImportExportPepiniere
             onClose={() => setShowCSVModal(false)}
-            onSuccess={handleCSVSuccess}
+            onSuccess={() => {
+              setShowCSVModal(false);
+              if (typeof refetch === 'function') refetch();
+              showToast('Import/Export CSV terminé avec succès', 'success');
+            }}
           />
         )}
       </div>

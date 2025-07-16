@@ -1,17 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_ALL_SIEGES, GET_ALL_USERS } from '../../lib/graphql-queries';
-import { useToast } from '../../lib/useToast';
-import SiegesGlobauxTable from '../../components/SiegesGlobauxTable';
-import MemberFilter from '../../components/MemberFilter';
-import CSVExport from '../../components/CSVExport';
+import { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { GET_ALL_SIEGES, GET_ALL_USERS } from "../../lib/graphql-queries";
+import { useToast } from "../../lib/useToast";
+import { siegesColumns } from "./columns";
+import { DataTable } from "@/components/ui/table-data-table";
+import MemberFilter from "@/components/MemberFilter";
+import { exportToCSV } from "../../lib/export-csv";
+import { Button } from "@/components/ui/button";
 
 export default function SiegesGlobauxPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredSieges, setFilteredSieges] = useState([]);
   const { showError } = useToast();
+  const [detailModal, setDetailModal] = useState({ open: false, siege: null });
 
   // Récupération des données
   const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
@@ -21,11 +24,9 @@ export default function SiegesGlobauxPage() {
   useEffect(() => {
     if (siegesData?.allSieges) {
       if (selectedMembers.length === 0) {
-        // Si aucun membre sélectionné, afficher tous les sièges
         setFilteredSieges(siegesData.allSieges);
       } else {
-        // Filtrer par les membres sélectionnés
-        const filtered = siegesData.allSieges.filter(siege => 
+        const filtered = siegesData.allSieges.filter(siege =>
           selectedMembers.includes(siege.user.id)
         );
         setFilteredSieges(filtered);
@@ -35,22 +36,30 @@ export default function SiegesGlobauxPage() {
 
   // Gestion des erreurs
   if (siegesError) {
-    showError('Erreur lors du chargement des sièges');
-    console.error('Sieges error:', siegesError);
+    showError("Erreur lors du chargement des sièges");
+    console.error("Sieges error:", siegesError);
   }
-
   if (usersError) {
-    showError('Erreur lors du chargement des utilisateurs');
-    console.error('Users error:', usersError);
+    showError("Erreur lors du chargement des utilisateurs");
+    console.error("Users error:", usersError);
   }
 
+  // Handler pour ouvrir le modal de détail (à implémenter si besoin)
+  const handleViewDetails = (siege) => {
+    setDetailModal({ open: true, siege });
+  };
+  const handleCloseDetailModal = () => {
+    setDetailModal({ open: false, siege: null });
+  };
+
+  // Handler pour le filtre membre
   const handleMemberFilterChange = (memberIds) => {
     setSelectedMembers(memberIds);
   };
 
-  const handleExportCSV = (data) => {
-    // Formater les données pour l'export CSV des sièges
-    return data.map(siege => ({
+  // Handler pour l'export CSV
+  const handleExportCSV = () => {
+    const data = filteredSieges.map(siege => ({
       nom: siege.nom,
       adresse: siege.adresse,
       membre: `${siege.user?.firstName} ${siege.user?.lastName}`,
@@ -60,6 +69,7 @@ export default function SiegesGlobauxPage() {
       description: siege.description || '',
       date_creation: new Date(siege.createdAt).toLocaleDateString('fr-FR')
     }));
+    exportToCSV(data, "sieges_globaux.csv");
   };
 
   if (siegesLoading || usersLoading) {
@@ -76,13 +86,12 @@ export default function SiegesGlobauxPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Tout les locaux
+            Tous les locaux
           </h1>
           <p className="text-gray-600">
             Consultez tous les sièges de tous les membres de la plateforme
           </p>
         </div>
-
         {/* Filtres et actions */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -96,18 +105,9 @@ export default function SiegesGlobauxPage() {
                 onFilterChange={handleMemberFilterChange}
               />
             </div>
-            <div className="lg:ml-4">
-              <CSVExport
-                data={filteredSieges}
-                filename="sieges_globaux"
-                onExport={handleExportCSV}
-                disabled={filteredSieges.length === 0}
-              />
-            </div>
           </div>
         </div>
-
-        {/* Tableau des sièges */}
+        {/* DataTable */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -122,12 +122,26 @@ export default function SiegesGlobauxPage() {
             </div>
           </div>
           <div className="p-6">
-            <SiegesGlobauxTable 
-              sieges={filteredSieges}
-              loading={siegesLoading}
+            <DataTable
+              columns={siegesColumns(handleViewDetails)}
+              data={filteredSieges}
+              filterKey="nom"
+              filterPlaceholder="Rechercher par nom..."
+              actions={
+                <Button variant="outline" onClick={handleExportCSV} disabled={filteredSieges.length === 0}>
+                  Exporter CSV
+                </Button>
+              }
             />
           </div>
         </div>
+        {/* Modal de détail (à implémenter si besoin) */}
+        {/* {detailModal.open && (
+          <SiegeDetailModal
+            siege={detailModal.siege}
+            onClose={handleCloseDetailModal}
+          />
+        )} */}
       </div>
     </div>
   );

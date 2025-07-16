@@ -1,4 +1,10 @@
 import { jwtDecode } from 'jwt-decode';
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
 
 // Fonction pour normaliser les rôles (gérer majuscules/minuscules)
 export const isAdmin = (role) => {

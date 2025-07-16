@@ -1,33 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_ALL_PARCELLES, GET_ALL_USERS } from '../../lib/graphql-queries';
-import { useToast } from '../../lib/useToast';
-import { useAuthGuard } from '../../lib/useAuthGuard';
-import ParcellesGlobalesTable from '../../components/ParcellesGlobalesTable';
+import { useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { GET_ALL_PARCELLES, GET_ALL_USERS } from "../../lib/graphql-queries";
+import { useToast } from "../../lib/useToast";
+import { useAuthGuard } from "../../lib/useAuthGuard";
+import { parcellesColumns } from "./columns";
+import { DataTable } from "@/components/ui/table-data-table";
+import MemberFilter from "@/components/MemberFilter";
+import ParcelleDetailModal from "@/components/ParcelleDetailModal";
+import { exportToCSV } from "../../lib/export-csv";
+import { Button } from "@/components/ui/button";
 
 export default function ParcellesGlobalesPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredParcelles, setFilteredParcelles] = useState([]);
   const { showError } = useToast();
+  const [detailModal, setDetailModal] = useState({ open: false, parcelle: null });
 
   // Récupération des données
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
-  
-
 
   // Filtrage des parcelles selon les membres sélectionnés
   useEffect(() => {
     if (parcellesData?.allParcelles) {
       if (selectedMembers.length === 0) {
-        // Si aucun membre sélectionné, afficher toutes les parcelles
         setFilteredParcelles(parcellesData.allParcelles);
       } else {
-        // Filtrer par les membres sélectionnés
-        const filtered = parcellesData.allParcelles.filter(parcelle => 
+        const filtered = parcellesData.allParcelles.filter(parcelle =>
           selectedMembers.includes(parcelle.user.id)
         );
         setFilteredParcelles(filtered);
@@ -37,32 +39,54 @@ export default function ParcellesGlobalesPage() {
 
   // Gestion des erreurs
   if (parcellesError) {
-    showError('Erreur lors du chargement des parcelles');
-    console.error('Parcelles error:', parcellesError);
+    showError("Erreur lors du chargement des parcelles");
+    console.error("Parcelles error:", parcellesError);
   }
-
   if (usersError) {
-    showError('Erreur lors du chargement des utilisateurs');
-    console.error('Users error:', usersError);
+    showError("Erreur lors du chargement des utilisateurs");
+    console.error("Users error:", usersError);
   }
 
-  // Gestion des erreurs supplémentaires
-  if (siegesError) {
-    showError('Erreur lors du chargement des locaux');
-    console.error('Sieges error:', siegesError);
-  }
-  if (pepinieresError) {
-    showError('Erreur lors du chargement des pépinières');
-    console.error('Pepinieres error:', pepinieresError);
+  // Loader d'authentification
+  if (isLoading || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isLoading ? "Vérification de l'authentification..." : "Redirection vers la page de connexion..."}
+          </p>
+        </div>
+      </div>
+    );
   }
 
+  if (parcellesLoading || usersLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  // Handler pour ouvrir le modal de détail
+  const handleViewDetails = (parcelle) => {
+    setDetailModal({ open: true, parcelle });
+  };
+
+  // Handler pour fermer le modal de détail
+  const handleCloseDetailModal = () => {
+    setDetailModal({ open: false, parcelle: null });
+  };
+
+  // Handler pour le filtre membre
   const handleMemberFilterChange = (memberIds) => {
     setSelectedMembers(memberIds);
   };
 
-  const handleExportCSV = (data) => {
-    // Formater les données pour l'export CSV des parcelles
-    return data.map(parcelle => ({
+  // Handler pour l'export CSV
+  const handleExportCSV = () => {
+    const data = filteredParcelles.map(parcelle => ({
       nom: parcelle.nom,
       culture: parcelle.culture,
       proprietaire: parcelle.proprietaire,
@@ -82,29 +106,8 @@ export default function ParcellesGlobalesPage() {
       notes: parcelle.notes || '',
       date_creation: new Date(parcelle.createdAt).toLocaleDateString('fr-FR')
     }));
+    exportToCSV(data, "parcelles_globales.csv");
   };
-
-  // Afficher un loader pendant la vérification d'authentification
-  if (isLoading || !isAuthorized) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (parcellesLoading || usersLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -112,13 +115,28 @@ export default function ParcellesGlobalesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Carte globale des sites de référence, locaux et pépinières
+            Liste des sites de référence
           </h1>
           <p className="text-gray-600">
-            Consultez tous les sites de référence, locaux et pépinières de tous les membres de la plateforme sur une seule carte.
+            Consultez tous les sites de référence tous les membres de la plateforme.
           </p>
         </div>
-        {/* Tableau des parcelles (inchangé) */}
+        {/* Filtres */}
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">
+                Filtrer par membre
+              </h3>
+              <MemberFilter
+                users={usersData?.allUsers || []}
+                selectedMembers={selectedMembers}
+                onFilterChange={handleMemberFilterChange}
+              />
+            </div>
+          </div>
+        </div>
+        {/* DataTable */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -133,13 +151,27 @@ export default function ParcellesGlobalesPage() {
             </div>
           </div>
           <div className="p-6">
-            <ParcellesGlobalesTable 
-              parcelles={filteredParcelles}
-              loading={parcellesLoading}
+            <DataTable
+              columns={parcellesColumns(handleViewDetails)}
+              data={filteredParcelles}
+              filterKey="nom"
+              filterPlaceholder="Rechercher par nom..."
+              actions={
+                <Button variant="outline" onClick={handleExportCSV} disabled={filteredParcelles.length === 0}>
+                  Exporter CSV
+                </Button>
+              }
             />
           </div>
         </div>
       </div>
+      {/* Modal de détail */}
+      {detailModal.open && (
+        <ParcelleDetailModal
+          parcelle={detailModal.parcelle}
+          onClose={handleCloseDetailModal}
+        />
+      )}
     </div>
   );
 } 
