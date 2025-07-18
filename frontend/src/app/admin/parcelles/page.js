@@ -43,14 +43,14 @@ export default function AdminParcellesPage() {
     return (
       <div className="flex items-center justify-center min-h-[300px] py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <span className="ml-4 text-gray-600">Chargement des parcelles...</span>
+        <span className="ml-4 text-gray-600">Chargement des sites de reference...</span>
       </div>
     );
   }
 
   if (error || usersError) {
     return (
-      <div className="text-center text-red-600 py-8">Erreur lors du chargement des parcelles ou des membres.</div>
+      <div className="text-center text-red-600 py-8">Erreur lors du chargement des sites de référence ou des membres.</div>
     );
   }
 
@@ -58,11 +58,11 @@ export default function AdminParcellesPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-blue-900">Gestion des parcelles</h1>
-          <p className="text-gray-600 text-sm mt-1">Liste de toutes les parcelles enregistrées</p>
+          <h1 className="text-2xl font-bold text-blue-900">Gestion des sites de référence</h1>
+          <p className="text-gray-600 text-sm mt-1">Liste de toutes les sites de référence enregistrées</p>
         </div>
         <Button onClick={() => setShowAdd(true)} className="gap-2">
-          <Plus size={16} /> Ajouter une parcelle
+          <Plus size={16} /> Ajouter une site de référence
         </Button>
       </div>
       <div className="mb-4 max-w-xs">

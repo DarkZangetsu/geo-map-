@@ -66,14 +66,14 @@ export default function AdminSiegesPage() {
     return (
       <div className="flex items-center justify-center min-h-[300px] py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <span className="ml-4 text-gray-600">Chargement des sièges...</span>
+        <span className="ml-4 text-gray-600">Chargement des locaux...</span>
       </div>
     );
   }
 
   if (error || usersError) {
     return (
-      <div className="text-center text-red-600 py-8">Erreur lors du chargement des sièges ou des membres.</div>
+      <div className="text-center text-red-600 py-8">Erreur lors du chargement des locaux ou des membres.</div>
     );
   }
 
