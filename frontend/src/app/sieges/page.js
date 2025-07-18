@@ -1,18 +1,18 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { useAuth } from "../../components/Providers";
 import { useRouter } from "next/navigation";
 import { GET_MY_SIEGES, DELETE_SIEGE } from "../../lib/graphql-queries";
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import SiegeForm from "../../components/SiegeForm";
-import SiegeTable from "../../components/SiegeTable";
 import SiegesMap from "../../components/SiegesMap";
 import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import CSVImportExportSiege from '../../components/CSVImportExportSiege';
 import SiegeModal from '../../components/SiegeModal';
-import { useEffect } from "react";
+import { DataTable } from '../../components/ui/table-data-table';
+import { Button } from '../../components/ui/button';
 
 export default function SiegePage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
@@ -124,6 +124,89 @@ export default function SiegePage() {
     }
   };
 
+  // Colonnes DataTable shadcn/ui
+  const columns = useMemo(() => [
+    visibleColumns.includes('nom') && {
+      accessorKey: 'nom',
+      header: 'Nom',
+      cell: info => info.getValue(),
+    },
+    visibleColumns.includes('categorie') && {
+      accessorKey: 'categorie',
+      header: 'Catégorie',
+      cell: info => info.getValue() || '-',
+    },
+    visibleColumns.includes('adresse') && {
+      accessorKey: 'adresse',
+      header: 'Adresse',
+      cell: info => info.getValue(),
+    },
+    visibleColumns.includes('pointContact') && {
+      id: 'pointContact',
+      header: 'Point de Contact',
+      cell: info => {
+        const s = info.row.original;
+        return (
+          <div>
+            <div className="text-sm font-medium">{s.nomPointContact || '-'}</div>
+            <div className="text-xs text-gray-500">{s.poste || '-'}</div>
+            <div className="text-xs text-gray-500">{s.telephone || '-'}</div>
+            <div className="text-xs text-gray-500">{s.email || '-'}</div>
+          </div>
+        );
+      },
+    },
+    visibleColumns.includes('horaires') && {
+      id: 'horaires',
+      header: 'Horaires',
+      cell: info => {
+        const s = info.row.original;
+        return (
+          <div className="text-xs">
+            <div><span className="font-medium">Matin:</span> {s.horaireMatin || '-'}</div>
+            <div><span className="font-medium">Après-midi:</span> {s.horaireApresMidi || '-'}</div>
+          </div>
+        );
+      },
+    },
+    visibleColumns.includes('description') && {
+      accessorKey: 'description',
+      header: 'Description',
+      cell: info => info.getValue() || '-',
+    },
+    visibleColumns.includes('createdAt') && {
+      accessorKey: 'createdAt',
+      header: 'Date de création',
+      cell: info => info.getValue() ? new Date(info.getValue()).toLocaleDateString('fr-FR') : '-',
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleEditSiege(row.original)}
+            title="Modifier le local"
+          >
+            <Edit size={15} />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDeleteSiege(row.original)}
+            title="Supprimer le local"
+          >
+            <Trash size={15} />
+          </Button>
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+  ].filter(Boolean), [visibleColumns]);
+
   // Fermer le dropdown des actions quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -182,57 +265,61 @@ export default function SiegePage() {
           {/* Contrôles principaux */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Bouton principal d'ajout */}
-            <button
+            <Button
               onClick={handleAddSiege}
-              className="px-4 py-2 midnight-blue-btn rounded-md flex items-center justify-center gap-2 font-bold transition text-sm"
+              className="midnight-blue-btn rounded-md flex items-center justify-center gap-2 font-bold transition text-sm"
               title="Ajouter un nouveau local"
             >
               <Plus size={16} /> Ajouter un local
-            </button>
+            </Button>
             {/* Menu déroulant pour les actions secondaires */}
             <div className="relative actions-dropdown">
-              <button
+              <Button
                 onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium transition flex items-center justify-center gap-2 border border-gray-300 text-sm"
+                variant="outline"
+                className="px-4 py-2 text-gray-700 font-medium transition flex items-center justify-center gap-2 border border-gray-300 text-sm"
                 title="Autres actions"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                 </svg>
                 Actions
-              </button>
+              </Button>
               {/* Dropdown des actions */}
               {showActionsDropdown && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                   <div className="py-1">
-                    <button
+                    <Button
                       onClick={() => { setShowCSVModal(true); setShowActionsDropdown(false); }}
+                      variant="ghost"
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       Import/Export CSV
-                    </button>
+                    </Button>
                     <hr className="my-1" />
-                    <button
+                    <Button
                       onClick={() => { router.push('/pepinieres'); setShowActionsDropdown(false); }}
+                      variant="ghost"
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H7a4 4 0 01-4-4V7a4 4 0 014-4h1a4 4 0 014 4z" />
                       </svg>
                       Gérer mes pépinières
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => { router.push('/'); setShowActionsDropdown(false); }}
+                      variant="ghost"
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
                       </svg>
                       Tableau des sites de référence
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -241,95 +328,43 @@ export default function SiegePage() {
         </div>
         {/* Bouton Voir la carte juste avant le tableau, comme dans page.js */}
         <div className="flex justify-end mb-2">
-          <button
+          <Button
             onClick={() => setShowMap(true)}
-            className="px-4 py-2 bg-white midnight-blue-text midnight-blue-border border rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
+            variant="outline"
+            className="midnight-blue-text midnight-blue-border border rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
             title="Voir la carte"
           >
             <Map size={16} />
             <span className="hidden sm:inline">Voir la carte</span>
             <span className="sm:hidden">Carte</span>
-          </button>
+          </Button>
         </div>
-        {/* Recherche et colonnes dynamiques */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-blue-100 bg-white rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <Search size={20} className="text-blue-400" />
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="border border-gray-300 px-3 py-2 rounded-lg w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
-              style={{ minWidth: 180 }}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full">
-            <div className="relative">
-              <button
-                type="button"
-                className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
-                onClick={() => setShowColumnsDropdown(v => !v)}
-                style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
-              >
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
-                <span className="hidden sm:inline">Colonnes</span>
-              </button>
-              {showColumnsDropdown && (
-                <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
-                  {[
-                    { key: "nom", label: "Nom" },
-                    { key: "categorie", label: "Catégorie" },
-                    { key: "adresse", label: "Adresse" },
-                    { key: "pointContact", label: "Point de Contact" },
-                    { key: "horaires", label: "Horaires" },
-                    { key: "description", label: "Description" },
-                    { key: "createdAt", label: "Date de création" }
-                  ].map(col => (
-                    <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns.includes(col.key)}
-                        onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
-                        className="accent-blue-600 rounded"
-                      />
-                      {col.label}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800 text-sm">
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-sm text-gray-500 hidden sm:inline">par page</span>
-            </div>
-          </div>
-        </div>
-        {/* Tableau */}
+        {/* Tableau shadcn/ui */}
         <div className="bg-white rounded-b-lg shadow-lg overflow-hidden">
-          <SiegeTable
-            sieges={paginatedSieges}
-            onEdit={handleEditSiege}
-            onDelete={handleDeleteSiege}
-            visibleColumns={visibleColumns}
+          <DataTable
+            columns={columns}
+            data={paginatedSieges}
+            filterKey="nom"
+            filterPlaceholder="Rechercher par nom..."
           />
-          
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
             <div className="text-sm text-blue-900 font-semibold">
               Page {page} sur {totalPages}
             </div>
             <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 text-blue-900 font-bold shadow border border-gray-200 hover:from-gray-200 hover:to-gray-300 disabled:opacity-50 transition flex items-center gap-1 text-sm">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="flex items-center gap-1">
                 <ChevronLeft size={14} /> <span className="hidden sm:inline">Précédent</span>
-              </button>
-              <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 text-blue-900 font-bold shadow border border-gray-200 hover:from-gray-200 hover:to-gray-300 disabled:opacity-50 transition flex items-center gap-1 text-sm">
+              </Button>
+              <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="flex items-center gap-1">
                 <span className="hidden sm:inline">Suivant</span> <ChevronRight size={14} />
-              </button>
+              </Button>
+              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800 text-sm ml-2">
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+              <span className="text-sm text-gray-500 hidden sm:inline">par page</span>
             </div>
           </div>
         </div>
@@ -345,13 +380,13 @@ export default function SiegePage() {
         {showMap && (
           <div className="fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center">
             <div className="w-full h-full flex flex-col bg-white rounded-none shadow-none relative">
-              <button
+              <Button
                 onClick={() => setShowMap(false)}
                 className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
                 title="Fermer la carte"
               >
                 Fermer la carte
-              </button>
+              </Button>
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold text-gray-900">Carte des locaux</h2>
                 <p className="text-sm text-gray-600">
@@ -373,13 +408,13 @@ export default function SiegePage() {
         {showCSVModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
             <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6 relative">
-              <button
+              <Button
                 onClick={() => setShowCSVModal(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
                 title="Fermer"
               >
                 ×
-              </button>
+              </Button>
               <CSVImportExportSiege onImportSuccess={() => { setShowCSVModal(false); refetchSieges(); }} />
             </div>
           </div>
