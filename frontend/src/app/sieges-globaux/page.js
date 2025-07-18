@@ -16,6 +16,37 @@ export default function SiegesGlobauxPage() {
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, siege: null });
 
+  // Ajout d'une variable CSS pour la couleur midnight blue
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :root {
+        --midnight-blue: rgb(0,70,144);
+      }
+      .midnight-blue-bg {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+      }
+      .midnight-blue-text {
+        color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-border {
+        border-color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+        border: 1px solid var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn:hover {
+        background-color: #003366 !important;
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
   // Récupération des données
   const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
@@ -85,7 +116,7 @@ export default function SiegesGlobauxPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold midnight-blue-text mb-2">
             Tous les locaux
           </h1>
           <p className="text-gray-600">
@@ -96,7 +127,7 @@ export default function SiegesGlobauxPage() {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">
                 Filtrer par membre
               </h3>
               <MemberFilter
@@ -111,7 +142,7 @@ export default function SiegesGlobauxPage() {
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium midnight-blue-text">
                 Sièges ({filteredSieges.length})
               </h3>
               {selectedMembers.length > 0 && (
@@ -128,7 +159,7 @@ export default function SiegesGlobauxPage() {
               filterKey="nom"
               filterPlaceholder="Rechercher par nom..."
               actions={
-                <Button variant="outline" onClick={handleExportCSV} disabled={filteredSieges.length === 0}>
+                <Button className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" onClick={handleExportCSV} disabled={filteredSieges.length === 0}>
                   Exporter CSV
                 </Button>
               }

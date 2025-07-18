@@ -81,9 +81,10 @@ class ParcelleImage(models.Model):
 
 class Siege(models.Model):
     CATEGORIE_CHOICES = (
-        ('national', 'National'),
-        ('régional', 'Régional'),
-        ('bureau', 'Bureau'),
+        ('social', 'Siège social'),
+        ('regional', 'Siège régional'),
+        ('technique', 'Siège technique'),
+        ('provisoire', 'Siège provisoire'),
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sieges')
