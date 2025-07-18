@@ -13,6 +13,9 @@ import ParcelleForm from '../components/ParcelleForm';
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from 'lucide-react';
 import { useAuth } from '../components/Providers';
 import CSVImportExport from '../components/CSVImportExport';
+import { DataTable } from '../components/ui/table-data-table';
+import { Button } from '../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 export default function HomePage() {
   // TOUS LES HOOKS DÉCLARÉS EN PREMIER
@@ -54,6 +57,66 @@ export default function HomePage() {
   // Colonnes visibles pour le tableau (filtrage dynamique)
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
   const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
+
+  // Colonnes DataTable shadcn/ui
+  const columnsDT = [
+    {
+      id: 'select',
+      header: '',
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          checked={selected.includes(row.original.id)}
+          onChange={e => setSelected(e.target.checked ? [...selected, row.original.id] : selected.filter(id => id !== row.original.id))}
+          className="accent-blue-600 rounded"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    ...visibleColumns.map(colKey => {
+      const col = columns.find(c => c.key === colKey);
+      return col && {
+        accessorKey: col.key,
+        header: col.label,
+        cell: info => {
+          const parcelle = info.row.original;
+          if (col.key === 'superficie') return parcelle.superficie ? `${parcelle.superficie} ha` : '-';
+          if (col.key === 'irrigation') return parcelle.irrigation ? 'Oui' : 'Non';
+          if (col.key === 'certificationBio') return parcelle.certificationBio ? 'Oui' : '';
+          if (col.key === 'certificationHve') return parcelle.certificationHve ? 'Oui' : '';
+          if (col.key === 'createdAt') return parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '';
+          return parcelle[col.key];
+        },
+      };
+    }).filter(Boolean),
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleEditParcelle(row.original)}
+            title="Modifier le site de référence"
+          >
+            <Edit size={15} />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDeleteParcelle(row.original.id)}
+            title="Supprimer le site de référence"
+          >
+            <Trash size={15} />
+          </Button>
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+  ];
 
   // Redirection automatique si admin
   useEffect(() => {
@@ -365,6 +428,25 @@ export default function HomePage() {
   const totalPages = Math.ceil(filteredParcelles.length / rowsPerPage);
   const sieges = siegesData?.mySieges || [];
 
+  const rowsPerPageOptions = [10, 25, 50];
+  const dataTableActions = (
+    <div className="flex items-center gap-2">
+      <Select
+        value={String(rowsPerPage)}
+        onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}
+      >
+        <SelectTrigger className="w-32">
+          <SelectValue placeholder="Lignes par page" />
+        </SelectTrigger>
+        <SelectContent>
+          {rowsPerPageOptions.map(opt => (
+            <SelectItem key={opt} value={String(opt)}>{opt} par page</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   let content = null;
   if (isLoading) {
     content = (
@@ -565,126 +647,25 @@ export default function HomePage() {
               </button>
             </div>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              {/* Barre de contrôle du datatable intégrée au bloc */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-blue-100 bg-white">
-                {/* Recherche à gauche avec icône */}
-                <div className="flex items-center gap-2">
-                  <Search size={20} className="text-blue-400" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher..."
-                    value={search}
-                    onChange={e => { setSearch(e.target.value); setPage(1); }}
-                    className="border border-gray-300 px-3 py-2 rounded-lg w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-gray-800"
-                    style={{ minWidth: 180 }}
-                  />
-                </div>
-                {/* Filtres à droite */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 px-3 py-2 border-none rounded-xl bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 hover:from-blue-200 hover:to-blue-300 shadow-md text-xs font-semibold transition-all duration-150"
-                      onClick={() => setShowColumnsDropdown(v => !v)}
-                      style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.08)' }}
-                    >
-                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/><rect x="3" y="16" width="18" height="2" rx="1" fill="currentColor"/></svg>
-                      <span className="hidden sm:inline">Colonnes</span>
-                    </button>
-                    {showColumnsDropdown && (
-                      <div className="absolute left-0 mt-2 w-52 bg-white border border-blue-100 rounded-2xl shadow-2xl z-50 p-3 flex flex-col gap-2 animate-fade-in" style={{ boxShadow: '0 8px 32px 0 rgba(30, 64, 175, 0.10)' }}>
-                        {columns.map(col => (
-                          <label key={col.key} className="flex items-center gap-2 text-xs font-semibold text-blue-900 cursor-pointer hover:bg-blue-50 rounded-lg px-2 py-1 transition">
-                            <input
-                              type="checkbox"
-                              checked={visibleColumns.includes(col.key)}
-                              onChange={() => setVisibleColumns(v => v.includes(col.key) ? v.filter(k => k !== col.key) : [...v, col.key])}
-                              className="accent-blue-600 rounded"
-                            />
-                            {col.label}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800 text-sm">
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                  </select>
-                    <span className="text-sm text-gray-500 hidden sm:inline">par page</span>
-                  </div>
-                </div>
-              </div>
-              <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
-                <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm rounded-2xl overflow-hidden">
-                  <thead className="sticky top-0 z-10 bg-white shadow-sm">
-                    <tr>
-                      <th className="px-3 py-2">
-                        <input type="checkbox" checked={selected.length === paginatedParcelles.length && paginatedParcelles.length > 0} onChange={e => setSelected(e.target.checked ? paginatedParcelles.map(p => p.id) : [])} className="accent-blue-600 rounded" />
-                      </th>
-                      {visibleColumns.map(colKey => {
-                        const col = columns.find(c => c.key === colKey);
-                        return (
-                          <th key={colKey} className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">
-                            {col?.label}
-                          </th>
-                        );
-                      })}
-                      <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedParcelles.map((parcelle, idx) => (
-                      <tr key={parcelle.id} className={"hover:bg-indigo-50 transition-all " + (idx % 2 === 0 ? 'bg-white' : 'bg-blue-50')} style={{ borderRadius: 12 }}>
-                        <td className="px-3 py-2">
-                          <input type="checkbox" checked={selected.includes(parcelle.id)} onChange={e => setSelected(e.target.checked ? [...selected, parcelle.id] : selected.filter(id => id !== parcelle.id))} className="accent-blue-600 rounded" />
-                        </td>
-                        {visibleColumns.map(colKey => (
-                          <td key={colKey} className={colKey === 'nom' ? 'px-3 py-2 font-bold text-blue-900' : 'px-3 py-2'}>
-                            {colKey === 'superficie' ? (parcelle.superficie ? `${parcelle.superficie} ha` : '-') :
-                             colKey === 'irrigation' ? (parcelle.irrigation ? 'Oui' : 'Non') :
-                             colKey === 'certificationBio' ? (parcelle.certificationBio ? 'Oui' : '') :
-                             colKey === 'certificationHve' ? (parcelle.certificationHve ? 'Oui' : '') :
-                             colKey === 'createdAt' ? (parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '') :
-                             parcelle[colKey]}
-                          </td>
-                        ))}
-                        <td className="px-3 py-2 whitespace-nowrap flex gap-2">
-                          <button
-                            onClick={() => handleEditParcelle(parcelle)}
-                            className="inline-flex items-center px-2 py-1 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition shadow-sm"
-                            title="Modifier le site de référence"
-                          >
-                            <Edit size={15} className="mr-1" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteParcelle(parcelle.id)}
-                            className="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-xs font-bold transition shadow-sm"
-                            title="Supprimer le site de référence"
-                          >
-                            <Trash size={15} className="mr-1" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
+              <DataTable
+                columns={columnsDT}
+                data={paginatedParcelles}
+                filterKey="nom"
+                filterPlaceholder="Rechercher par nom..."
+                actions={dataTableActions}
+              />
+              {/* Pagination sous le DataTable */}
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
                 <div className="text-sm text-blue-900 font-semibold">
                   Page {page} sur {totalPages}
                 </div>
                 <div className="flex gap-2">
-                  <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-3 py-1 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 text-blue-900 font-bold shadow border border-gray-200 hover:from-gray-200 hover:to-gray-300 disabled:opacity-50 transition flex items-center gap-1 text-sm">
+                  <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="flex items-center gap-1">
                     <ChevronLeft size={14} /> <span className="hidden sm:inline">Précédent</span>
-                  </button>
-                  <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 text-blue-900 font-bold shadow border border-gray-200 hover:from-gray-200 hover:to-gray-300 disabled:opacity-50 transition flex items-center gap-1 text-sm">
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="flex items-center gap-1">
                     <span className="hidden sm:inline">Suivant</span> <ChevronRight size={14} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
