@@ -13,6 +13,7 @@ import CSVImportExportSiege from '../../components/CSVImportExportSiege';
 import SiegeModal from '../../components/SiegeModal';
 import { DataTable } from '../../components/ui/table-data-table';
 import { Button } from '../../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 export default function SiegePage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
@@ -207,6 +208,25 @@ export default function SiegePage() {
     },
   ].filter(Boolean), [visibleColumns]);
 
+  const rowsPerPageOptions = [10, 25, 50];
+  const dataTableActions = (
+    <div className="flex items-center gap-2">
+      <Select
+        value={String(rowsPerPage)}
+        onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}
+      >
+        <SelectTrigger className="w-32">
+          <SelectValue placeholder="Lignes par page" />
+        </SelectTrigger>
+        <SelectContent>
+          {rowsPerPageOptions.map(opt => (
+            <SelectItem key={opt} value={String(opt)}>{opt} par page</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   // Fermer le dropdown des actions quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -346,6 +366,7 @@ export default function SiegePage() {
             data={paginatedSieges}
             filterKey="nom"
             filterPlaceholder="Rechercher par nom..."
+            actions={dataTableActions}
           />
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
@@ -359,12 +380,6 @@ export default function SiegePage() {
               <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="flex items-center gap-1">
                 <span className="hidden sm:inline">Suivant</span> <ChevronRight size={14} />
               </Button>
-              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border border-gray-300 px-2 py-1 rounded-lg bg-gray-50 text-gray-800 text-sm ml-2">
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-sm text-gray-500 hidden sm:inline">par page</span>
             </div>
           </div>
         </div>
