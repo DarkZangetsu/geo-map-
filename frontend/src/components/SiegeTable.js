@@ -11,27 +11,32 @@ const ALL_COLUMNS = [
 ];
 
 const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
+  // Correction : garantir que visibleColumns est toujours un tableau
+  const columns = Array.isArray(visibleColumns) && visibleColumns.length > 0
+    ? visibleColumns
+    : ALL_COLUMNS.map(col => col.key);
+
   return (
     <div className="overflow-x-auto rounded-2xl border border-blue-100 shadow-xl bg-white">
       <table className="min-w-full divide-y divide-blue-100 text-blue-900 text-sm rounded-2xl overflow-hidden">
         <thead className="sticky top-0 z-10 bg-white shadow-sm">
           <tr>
-            {visibleColumns.includes('nom') && (
+            {columns.includes('nom') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Nom</th>
             )}
-            {visibleColumns.includes('categorie') && (
+            {columns.includes('categorie') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Catégorie</th>
             )}
-            {visibleColumns.includes('adresse') && (
+            {columns.includes('adresse') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Adresse</th>
             )}
-            {visibleColumns.includes('pointContact') && (
+            {columns.includes('pointContact') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Point de Contact</th>
             )}
-            {visibleColumns.includes('horaires') && (
+            {columns.includes('horaires') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Horaires</th>
             )}
-            {visibleColumns.includes('description') && (
+            {columns.includes('description') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Description</th>
             )}
             <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider">Actions</th>
@@ -40,10 +45,10 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
         <tbody>
           {sieges.map((siege, idx) => (
             <tr key={siege.id} className={"hover:bg-indigo-50 transition-all " + (idx % 2 === 0 ? 'bg-white' : 'bg-blue-50')} style={{ borderRadius: 12 }}>
-              {visibleColumns.includes('nom') && (
+              {columns.includes('nom') && (
                 <td className="px-3 py-2 font-bold text-blue-900">{siege.nom}</td>
               )}
-              {visibleColumns.includes('categorie') && (
+              {columns.includes('categorie') && (
                 <td className="px-3 py-2">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     siege.categorie === 'national' ? 'bg-blue-100 text-blue-800' :
@@ -54,10 +59,10 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                   </span>
                 </td>
               )}
-              {visibleColumns.includes('adresse') && (
+              {columns.includes('adresse') && (
                 <td className="px-3 py-2">{siege.adresse}</td>
               )}
-              {visibleColumns.includes('pointContact') && (
+              {columns.includes('pointContact') && (
                 <td className="px-3 py-2">
                   <div>
                     <div className="text-sm font-medium">{siege.nomPointContact || '-'}</div>
@@ -67,7 +72,7 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                   </div>
                 </td>
               )}
-              {visibleColumns.includes('horaires') && (
+              {columns.includes('horaires') && (
                 <td className="px-3 py-2">
                   <div className="text-xs">
                     <div><span className="font-medium">Matin:</span> {siege.horaireMatin || '-'}</div>
@@ -75,7 +80,7 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                   </div>
                 </td>
               )}
-              {visibleColumns.includes('description') && (
+              {columns.includes('description') && (
                 <td className="px-3 py-2">
                   <div className="max-w-xs truncate" title={siege.description || '-'}>
                     {siege.description || '-'}

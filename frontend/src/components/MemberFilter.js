@@ -2,30 +2,31 @@
 
 import { useState } from 'react';
 
-const MemberFilter = ({ users, selectedMembers, onFilterChange }) => {
+const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
 
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeSelectedMembers = Array.isArray(selectedMembers) ? selectedMembers : [];
 
   const handleSelectAll = () => {
-    if (selectedMembers.length === users.length) {
+    if (safeSelectedMembers.length === safeUsers.length) {
       // Si tous sont sélectionnés, désélectionner tous
       onFilterChange([]);
     } else {
       // Sinon, sélectionner tous
-      onFilterChange(users.map(user => user.id));
+      onFilterChange(safeUsers.map(user => user.id));
     }
   };
 
   const handleMemberToggle = (memberId) => {
-    const newSelection = selectedMembers.includes(memberId)
-      ? selectedMembers.filter(id => id !== memberId)
-      : [...selectedMembers, memberId];
+    const newSelection = safeSelectedMembers.includes(memberId)
+      ? safeSelectedMembers.filter(id => id !== memberId)
+      : [...safeSelectedMembers, memberId];
     onFilterChange(newSelection);
   };
 
-  const selectedCount = selectedMembers.length;
-  const totalCount = users.length;
+  const selectedCount = safeSelectedMembers.length;
+  const totalCount = safeUsers.length;
 
   return (
     <div className="relative">
@@ -72,14 +73,14 @@ const MemberFilter = ({ users, selectedMembers, onFilterChange }) => {
             <div className="border-t border-gray-200 my-2"></div>
 
             {/* Liste des membres */}
-            {users.map((user) => (
+            {safeUsers.map((user) => (
               <label
                 key={user.id}
                 className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 rounded cursor-pointer"
               >
                 <input
                   type="checkbox"
-                  checked={selectedMembers.includes(user.id)}
+                  checked={safeSelectedMembers.includes(user.id)}
                   onChange={() => handleMemberToggle(user.id)}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />

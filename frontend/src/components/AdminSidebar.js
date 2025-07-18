@@ -19,7 +19,7 @@ const AdminSidebar = ({ onLogout }) => {
   return (
     <aside className="h-screen w-64 bg-white text-blue-900 flex flex-col shadow-2xl fixed left-0 top-0 z-40 rounded-r-3xl border-r border-blue-100">
       <div className="flex items-center gap-2 px-6 py-6 border-b border-blue-100">
-        <span className="font-extrabold text-2xl tracking-tight">GeoMap Admin</span>
+        <span className="font-extrabold text-2xl tracking-tight">ADMINISTRATION</span>
       </div>
       <nav className="flex-1 py-6 px-2 space-y-2">
         {navItems.map(item => (
