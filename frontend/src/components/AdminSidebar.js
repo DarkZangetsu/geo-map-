@@ -8,8 +8,8 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: <Home size={20} /> },
   { label: 'Utilisateurs', href: '/admin/utilisateurs', icon: <User size={20} /> },
-  { label: 'Parcelles', href: '/admin/parcelles', icon: <Layers size={20} /> },
-  { label: 'Sièges', href: '/admin/sieges', icon: <Map size={20} /> },
+  { label: 'Sites de référence', href: '/admin/parcelles', icon: <Layers size={20} /> },
+  { label: 'Locaux', href: '/admin/sieges', icon: <Map size={20} /> },
   { label: 'Pépinières', href: '/admin/pepinieres', icon: <Layers size={20} /> },
   { label: 'Import/Export', href: '/admin/import', icon: <FileText size={20} /> },
 ];
