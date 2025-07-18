@@ -203,9 +203,10 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
                   value={formData.categorie} 
                   onChange={handleInputChange}
                 >
-                  <option value="bureau">Bureau</option>
-                  <option value="régional">Régional</option>
-                  <option value="national">National</option>
+                  <option value="social">Siège social</option>
+                  <option value="regional">Siège régional</option>
+                  <option value="technique">Siège technique</option>
+                  <option value="provisoire">Siège provisoire</option>
                 </select>
               </div>
             </div>
