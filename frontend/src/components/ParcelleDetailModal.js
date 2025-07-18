@@ -58,14 +58,58 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
               <h3 className="text-lg leading-6 font-medium text-gray-900">
                 Détails du site de référence : {parcelleComplete?.nom || '-'}
               </h3>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex gap-2 items-center">
+                <button
+                  className="midnight-blue-btn px-3 py-1 rounded-md text-sm font-bold"
+                  onClick={() => {
+                    const data = [parcelleComplete];
+                    const csv = [
+                      [
+                        'Nom', 'Culture', 'Propriétaire', 'Superficie', 'Variété', 'Date Semis', 'Date Récolte', 'Type Sol', 'Irrigation', 'Type Irrigation', 'Rendement', 'Coût', 'Bio', 'HVE', 'Notes', 'Créé le'
+                      ],
+                      [
+                        parcelleComplete?.nom || '',
+                        parcelleComplete?.culture || '',
+                        parcelleComplete?.proprietaire || '',
+                        parcelleComplete?.superficie || '',
+                        parcelleComplete?.variete || '',
+                        parcelleComplete?.dateSemis || '',
+                        parcelleComplete?.dateRecoltePrevue || '',
+                        parcelleComplete?.typeSol || '',
+                        parcelleComplete?.irrigation ? 'Oui' : 'Non',
+                        parcelleComplete?.typeIrrigation || '',
+                        parcelleComplete?.rendementPrevue || '',
+                        parcelleComplete?.coutProduction || '',
+                        parcelleComplete?.certificationBio ? 'Oui' : 'Non',
+                        parcelleComplete?.certificationHve ? 'Oui' : 'Non',
+                        parcelleComplete?.notes || '',
+                        parcelleComplete?.createdAt || ''
+                      ]
+                    ];
+                    const blob = new Blob([
+                      csv.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+                    ], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `parcelle_${parcelleComplete?.nom || 'detail'}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }}
+                  title="Exporter en CSV"
+                >
+                  Exporter CSV
+                </button>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Loading state */}

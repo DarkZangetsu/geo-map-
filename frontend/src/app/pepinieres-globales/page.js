@@ -8,9 +8,9 @@ import { useAuthGuard } from "../../lib/useAuthGuard";
 import { pepinieresColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
-import CSVImportExportPepiniere from "../../components/CSVImportExportPepiniere";
 import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
+import CSVImportExportPepiniere from "../../components/CSVImportExportPepiniere";
 
 export default function PepinieresGlobalesPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -18,6 +18,37 @@ export default function PepinieresGlobalesPage() {
   const [filteredPepinieres, setFilteredPepinieres] = useState([]);
   const { showError, showToast } = useToast();
   const [showCSVModal, setShowCSVModal] = useState(false);
+
+  // Ajout d'une variable CSS pour la couleur midnight blue
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :root {
+        --midnight-blue: rgb(0,70,144);
+      }
+      .midnight-blue-bg {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+      }
+      .midnight-blue-text {
+        color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-border {
+        border-color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+        border: 1px solid var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn:hover {
+        background-color: #003366 !important;
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
 
   // Récupération des données
   const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
@@ -95,7 +126,7 @@ export default function PepinieresGlobalesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold midnight-blue-text mb-2">
             Liste des pépinières
           </h1>
           <p className="text-gray-600">
@@ -106,7 +137,7 @@ export default function PepinieresGlobalesPage() {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">
                 Filtrer par membre
               </h3>
               <MemberFilter
@@ -121,7 +152,7 @@ export default function PepinieresGlobalesPage() {
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium midnight-blue-text">
                 Pépinières ({filteredPepinieres.length})
               </h3>
               {selectedMembers.length > 0 && (
@@ -139,11 +170,8 @@ export default function PepinieresGlobalesPage() {
               filterPlaceholder="Rechercher par nom..."
               actions={
                 <>
-                  <Button variant="outline" onClick={handleExportCSV} disabled={filteredPepinieres.length === 0}>
+                  <Button className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" onClick={handleExportCSV} disabled={filteredPepinieres.length === 0}>
                     Exporter CSV
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowCSVModal(true)} className="ml-2">
-                    Importer CSV
                   </Button>
                 </>
               }
@@ -157,7 +185,7 @@ export default function PepinieresGlobalesPage() {
             onSuccess={() => {
               setShowCSVModal(false);
               if (typeof refetch === 'function') refetch();
-              showToast('Import/Export CSV terminé avec succès', 'success');
+              showToast('Export CSV terminé avec succès', 'success');
             }}
           />
         )}

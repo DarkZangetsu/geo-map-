@@ -14,7 +14,6 @@ import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from '
 import { useAuth } from '../components/Providers';
 
 import CSVImportExport from '../components/CSVImportExport';
-// import AuthDebugger from '../components/AuthDebugger';
 
 export default function HomePage() {
   const { user, isAuthenticated, login, logout, isLoading, isLoggingOut } = useAuth();
@@ -365,14 +364,45 @@ export default function HomePage() {
   const parcelles = parcellesData?.myParcelles || [];
   const loading = parcellesLoading;
 
+  // Ajout d'une variable CSS pour la couleur midnight blue
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :root {
+        --midnight-blue: rgb(0,70,144);
+      }
+      .midnight-blue-bg {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+      }
+      .midnight-blue-text {
+        color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-border {
+        border-color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+        border: 1px solid var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn:hover {
+        background-color: #003366 !important;
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100">
+    <div className="min-h-screen bg-white">
       {/* Header et contrôles */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
           {/* Titre et statistiques */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-blue-900 drop-shadow-sm">
+            <h1 className="text-2xl lg:text-3xl font-extrabold midnight-blue-text drop-shadow-sm">
               Mes sites de référence
             </h1>
             <p className="text-gray-700 mt-1 font-medium text-sm lg:text-base">
@@ -385,7 +415,7 @@ export default function HomePage() {
             {/* Bouton principal d'ajout */}
             <button
               onClick={() => setShowForm(true)}
-              className="px-4 py-2 bg-blue-700 text-white rounded-md shadow hover:bg-blue-800 font-bold transition flex items-center justify-center gap-2 border border-blue-900 text-sm"
+              className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
               title="Ajouter un nouveau site de référence"
             >
               <Plus size={16} /> Ajouter un site
@@ -465,7 +495,7 @@ export default function HomePage() {
                   {!mapFullscreen && (
                     <button
                       onClick={() => setMapFullscreen(true)}
-                    className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-semibold shadow-sm transition text-sm"
+                    className="px-3 py-2 midnight-blue-btn rounded-md font-semibold shadow-sm transition text-sm"
                       title="Afficher la carte en plein écran"
                     >
                       Plein écran
@@ -493,7 +523,7 @@ export default function HomePage() {
           <div className="flex justify-end mb-2">
             <button
               onClick={() => setShowMap(false)}
-              className="px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+              className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
             >
               <Map size={16} />
               <span className="hidden sm:inline">Voir le tableau</span>
@@ -547,7 +577,7 @@ export default function HomePage() {
           <div className="flex justify-end mb-2">
             <button
               onClick={() => setShowMap(true)}
-              className="px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+              className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
             >
               <Map size={16} />
               <span className="hidden sm:inline">Voir la carte</span>

@@ -138,13 +138,44 @@ export default function SiegePage() {
     };
   }, [showActionsDropdown]);
 
+  // Ajout d'une variable CSS pour la couleur midnight blue
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :root {
+        --midnight-blue: rgb(0,70,144);
+      }
+      .midnight-blue-bg {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+      }
+      .midnight-blue-text {
+        color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-border {
+        border-color: var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn {
+        background-color: var(--midnight-blue) !important;
+        color: #fff !important;
+        border: 1px solid var(--midnight-blue) !important;
+      }
+      .midnight-blue-btn:hover {
+        background-color: #003366 !important;
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
           {/* Titre et statistiques */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-blue-900 drop-shadow-sm">Mes locaux</h1>
+            <h1 className="text-2xl lg:text-3xl font-extrabold midnight-blue-text drop-shadow-sm">Mes locaux</h1>
             <p className="text-gray-700 mt-1 font-medium text-sm lg:text-base">{sieges.length} local{sieges.length !== 1 ? "s" : ""} au total</p>
           </div>
 
@@ -153,7 +184,7 @@ export default function SiegePage() {
             {/* Bouton principal d'ajout */}
             <button
               onClick={handleAddSiege}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center justify-center gap-2 font-bold transition text-sm"
+              className="px-4 py-2 midnight-blue-btn rounded-md flex items-center justify-center gap-2 font-bold transition text-sm"
               title="Ajouter un nouveau local"
             >
               <Plus size={16} /> Ajouter un local
@@ -212,7 +243,7 @@ export default function SiegePage() {
         <div className="flex justify-end mb-2">
           <button
             onClick={() => setShowMap(true)}
-            className="px-4 py-2 bg-white text-blue-800 border border-blue-300 rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
+            className="px-4 py-2 bg-white midnight-blue-text midnight-blue-border border rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
             title="Voir la carte"
           >
             <Map size={16} />
