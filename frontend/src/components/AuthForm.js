@@ -100,8 +100,8 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
       
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
-            <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(0,70,144,0.1)' }}>
+            <svg className="h-8 w-8" style={{ color: 'rgb(0,70,144)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -130,14 +130,14 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     type="text"
                     value={formData.nomInstitution}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Nom de l'institution"
                   />
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="nomProjet" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nom du projet
+                    Projet rattaché
                   </label>
                   <input
                     id="nomProjet"
@@ -145,7 +145,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     type="text"
                     value={formData.nomProjet}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Nom du projet"
                   />
                 </div>
@@ -161,7 +161,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     required
                     value={formData.abreviation}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Abréviation (ex: JD)"
                   />
                 </div>
@@ -177,7 +177,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Email"
                   />
                 </div>
@@ -193,7 +193,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     required
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Confirmer le mot de passe"
                   />
                 </div>
@@ -207,7 +207,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                     name="role"
                     value={formData.role}
                     disabled
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-gray-100 cursor-not-allowed"
                   >
                     <option value="membre">Membre</option>
                   </select>
@@ -226,7 +226,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                 required
                 value={formData.username}
                 onChange={handleInputChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Nom d'utilisateur"
               />
             </div>
@@ -242,7 +242,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Mot de passe"
               />
             </div>
@@ -252,7 +252,13 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
             <button
               type="submit"
               disabled={isSubmitting || loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ 
+                backgroundColor: 'rgb(0,70,144)',
+                '--tw-ring-color': 'rgb(0,70,144)'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(0,51,102)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgb(0,70,144)'}
             >
               {isSubmitting || loading ? (
                 <div className="flex items-center">
@@ -272,7 +278,12 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
                 setIsLogin(!isLogin);
                 resetForm();
               }}
-              className="text-sm text-green-600 hover:text-green-500"
+              className="text-sm"
+              style={{ 
+                color: 'rgb(0,70,144)'
+              }}
+              onMouseEnter={(e) => e.target.style.color = 'rgb(0,51,102)'}
+              onMouseLeave={(e) => e.target.style.color = 'rgb(0,70,144)'}
             >
               {isLogin ? 'Pas encore de compte ? S\'inscrire' : 'Déjà un compte ? Se connecter'}
             </button>

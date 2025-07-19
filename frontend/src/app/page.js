@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
@@ -10,7 +10,7 @@ import '../lib/test-auth'; // Importer les fonctions de test
 import AuthForm from '../components/AuthForm';
 import ParcellesMap from '../components/ParcellesMap';
 import ParcelleForm from '../components/ParcelleForm';
-import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search } from 'lucide-react';
+import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Bug, Search, Eye } from 'lucide-react';
 import { useAuth } from '../components/Providers';
 import CSVImportExport from '../components/CSVImportExport';
 import { DataTable } from '../components/ui/table-data-table';
@@ -23,6 +23,9 @@ export default function HomePage() {
   const router = useRouter();
   const { showSuccess, showError } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [selectedParcelle, setSelectedParcelle] = useState(null);
+  const [showParcelleDetails, setShowParcelleDetails] = useState(false);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [mapStyle, setMapStyle] = useState('street');
   const [search, setSearch] = useState('');
@@ -35,7 +38,8 @@ export default function HomePage() {
   const [showSiegeForm, setShowSiegeForm] = useState(false);
   const [mapSiege, setMapSiege] = useState(null);
   const [showCSVModal, setShowCSVModal] = useState(false);
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedParcelleDetails, setSelectedParcelleDetails] = useState(null);
 
   // Colonnes du tableau (configurable)
   const columns = [
@@ -89,9 +93,18 @@ export default function HomePage() {
     }).filter(Boolean),
     {
       id: 'actions',
-      header: 'Actions',
+      header: () => <div className="text-center">Actions</div>,
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShowDetails(row.original)}
+            title="Voir les détails"
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <Eye size={15} />
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -150,9 +163,7 @@ export default function HomePage() {
 
   // Mutations
   const [tokenAuth] = useMutation(TOKEN_AUTH_WITH_USER);
-
-  // Queries
-  const { data: parcellesData, loading: parcellesLoading, refetch: refetchParcelles } = useQuery(GET_MY_PARCELLES, { skip: !isAuthenticated });
+  const [createUser] = useMutation(CREATE_USER);
   const [createParcelle] = useMutation(CREATE_PARCELLE);
   const [deleteParcelle] = useMutation(DELETE_PARCELLE);
 
@@ -162,18 +173,7 @@ export default function HomePage() {
     }
   }, [isLoggingOut, isAuthenticated, isLoading, showSuccess]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showActionsDropdown && !event.target.closest('.actions-dropdown')) {
-        setShowActionsDropdown(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showActionsDropdown]);
 
   const filteredParcelles = useMemo(() => {
     let data = parcellesData?.myParcelles || [];
@@ -370,6 +370,11 @@ export default function HomePage() {
     setShowForm(true);
   };
 
+  const handleShowDetails = (parcelle) => {
+    setSelectedParcelleDetails(parcelle);
+    setShowDetailsModal(true);
+  };
+
   const handleSiegeSuccess = () => {
     setShowSiegeForm(false);
     refetchSieges();
@@ -461,7 +466,7 @@ export default function HomePage() {
       <AuthForm 
         onLogin={handleLogin}
         onRegister={handleRegister}
-        loading={isLoading}
+        loading={meLoading}
       />
     );
   } else {
@@ -488,61 +493,16 @@ export default function HomePage() {
               >
                 <Plus size={16} /> Ajouter un site
               </button>
-              <div className="relative actions-dropdown">
-                <button
-                  onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium transition flex items-center justify-center gap-2 border border-gray-300 text-sm"
-                  title="Autres actions"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg>
-                  Actions
-                </button>
-                {showActionsDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                    <div className="py-1">
-                      <button
-                        onClick={() => { setShowCSVModal(true); setShowActionsDropdown(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Import/Export CSV
-                      </button>
-                      <button
-                        onClick={() => { exportToGeoJSON(parcelles); setShowActionsDropdown(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
-                        </svg>
-                        Export GeoJSON
-                      </button>
-                      <hr className="my-1" />
-                      <button
-                        onClick={() => { router.push('/sieges'); setShowActionsDropdown(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        Gérer mes locaux
-                      </button>
-                      <button
-                        onClick={() => { router.push('/pepinieres'); setShowActionsDropdown(false); }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-                        </svg>
-                        Gérer mes pépinières
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={() => setShowCSVModal(true)}
+                className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
+                title="Import/Export CSV"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Import/Export CSV
+              </button>
               {(showMap || mapFullscreen) && (
                 <div className="flex items-center gap-2">
                   <select
@@ -704,6 +664,158 @@ export default function HomePage() {
                 ×
               </button>
               <CSVImportExport onImportSuccess={() => { setShowCSVModal(false); refetchParcelles(); }} />
+            </div>
+          </div>
+        )}
+
+        {/* Modal de détails du site de référence */}
+        {showDetailsModal && selectedParcelleDetails && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+              <button
+                onClick={() => { setShowDetailsModal(false); setSelectedParcelleDetails(null); }}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+                title="Fermer"
+              >
+                ×
+              </button>
+              
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold midnight-blue-text mb-2">
+                  Détails du site de référence
+                </h2>
+                <div className="w-20 h-1 bg-blue-600 rounded"></div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Informations générales */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nom du site</label>
+                        <p className="text-gray-900 font-medium">{selectedParcelleDetails.nom || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Culture</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.culture || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Propriétaire</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.proprietaire || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Superficie</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.superficie ? `${selectedParcelleDetails.superficie} ha` : '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Variété</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.variete || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations techniques */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations techniques</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Type de sol</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.typeSol || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Irrigation</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.irrigation ? 'Oui' : 'Non'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Type d'irrigation</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.typeIrrigation || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Rendement prévu</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.rendementPrevue || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Coût de production</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.coutProduction || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Certifications */}
+                <div className="md:col-span-2">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Certifications</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Certification Bio</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.certificationBio ? 'Oui' : 'Non'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Certification HVE</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.certificationHve ? 'Oui' : 'Non'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dates et notes */}
+                <div className="md:col-span-2">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Dates et notes</h3>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Date de semis</label>
+                          <p className="text-gray-900">
+                            {selectedParcelleDetails.dateSemis ? new Date(selectedParcelleDetails.dateSemis).toLocaleDateString('fr-FR') : '-'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Date de récolte prévue</label>
+                          <p className="text-gray-900">
+                            {selectedParcelleDetails.dateRecoltePrevue ? new Date(selectedParcelleDetails.dateRecoltePrevue).toLocaleDateString('fr-FR') : '-'}
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Notes</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.notes || 'Aucune note disponible'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Date de création</label>
+                        <p className="text-gray-900">
+                          {selectedParcelleDetails.createdAt ? new Date(selectedParcelleDetails.createdAt).toLocaleDateString('fr-FR') : '-'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => { setShowDetailsModal(false); setSelectedParcelleDetails(null); }}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                >
+                  Fermer
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedParcelleDetails(null);
+                    handleEditParcelle(selectedParcelleDetails);
+                  }}
+                  className="px-4 py-2 midnight-blue-btn rounded-md transition"
+                >
+                  Modifier
+                </button>
+              </div>
             </div>
           </div>
         )}

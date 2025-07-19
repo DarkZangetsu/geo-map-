@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { GET_MY_PEPINIERES, DELETE_PEPINIERE } from '../../lib/graphql-queries';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
-import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import PepiniereModal from '../../components/PepiniereModal';
 import PepinieresMap from '../../components/PepinieresMap';
@@ -47,7 +47,8 @@ export default function PepinieresPage() {
   const [deletePepiniere] = useMutation(DELETE_PEPINIERE);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [showPepiniereModal, setShowPepiniereModal] = useState(false);
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedPepiniere, setSelectedPepiniere] = useState(null);
 
   const { data: pepinieresData, loading: pepinieresLoading, refetch: refetchPepinieres } = useQuery(GET_MY_PEPINIERES, {
     skip: !isAuthenticated || (user && (user.role === "ADMIN" || user.role === "admin")),
@@ -74,19 +75,7 @@ export default function PepinieresPage() {
     return null;
   }
 
-  // Fermer le dropdown des actions quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showActionsDropdown && !event.target.closest('.actions-dropdown')) {
-        setShowActionsDropdown(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showActionsDropdown]);
 
   const handlePepiniereSuccess = () => {
     setShowPepiniereModal(false);
@@ -117,6 +106,11 @@ export default function PepinieresPage() {
     } catch (e) {
       showError('Erreur lors de la suppression');
     }
+  };
+
+  const handleShowDetails = (pepiniere) => {
+    setSelectedPepiniere(pepiniere);
+    setShowDetailsModal(true);
   };
 
   // Filtrage, tri et pagination des pépinières
@@ -220,9 +214,18 @@ export default function PepinieresPage() {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: () => <div className="text-center">Actions</div>,
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShowDetails(row.original)}
+            title="Voir les détails"
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <Eye size={15} />
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -290,56 +293,16 @@ export default function PepinieresPage() {
             >
               <Plus size={16} /> Ajouter une pépinière
             </Button>
-
-            {/* Menu déroulant pour les actions secondaires */}
-            <div className="relative actions-dropdown">
-              <Button
-                onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium transition flex items-center justify-center gap-2 border border-gray-300 text-sm"
-                title="Autres actions"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-                Actions
-              </Button>
-              
-              {/* Dropdown des actions */}
-              {showActionsDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                  <div className="py-1">
-                    <Button
-                      onClick={() => { setShowCSVModal(true); setShowActionsDropdown(false); }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Import/Export CSV
-                    </Button>
-                    <hr className="my-1" />
-                    <Button
-                      onClick={() => { router.push('/'); setShowActionsDropdown(false); }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
-                      </svg>
-                      Tableau des sites de référence
-                    </Button>
-                    <Button
-                      onClick={() => { router.push('/sieges'); setShowActionsDropdown(false); }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                      Gérer mes locaux
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Button
+              onClick={() => setShowCSVModal(true)}
+              className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
+              title="Import/Export CSV"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Import/Export CSV
+            </Button>
 
             {/* Contrôles de carte (seulement si carte active) */}
             {(showMap || mapFullscreen) && (
@@ -489,6 +452,120 @@ export default function PepinieresPage() {
                   ×
                 </Button>
                 <CSVImportExportPepiniere onImportSuccess={() => { setShowCSVModal(false); refetchPepinieres(); }} />
+              </div>
+            </div>
+          )}
+
+          {/* Modal de détails de la pépinière */}
+          {showDetailsModal && selectedPepiniere && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+                <Button
+                  onClick={() => { setShowDetailsModal(false); setSelectedPepiniere(null); }}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+                  title="Fermer"
+                >
+                  ×
+                </Button>
+                
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold midnight-blue-text mb-2">
+                    Détails de la pépinière
+                  </h2>
+                  <div className="w-20 h-1 bg-blue-600 rounded"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Informations générales */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Nom de la pépinière</label>
+                          <p className="text-gray-900 font-medium">{selectedPepiniere.nom || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Adresse</label>
+                          <p className="text-gray-900">{selectedPepiniere.adresse || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Espèces produites</label>
+                          <p className="text-gray-900">{selectedPepiniere.especesProduites || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Capacité</label>
+                          <p className="text-gray-900">{selectedPepiniere.capacite || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations du gestionnaire */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Gestionnaire</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Nom</label>
+                          <p className="text-gray-900 font-medium">{selectedPepiniere.nomGestionnaire || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Poste</label>
+                          <p className="text-gray-900">{selectedPepiniere.posteGestionnaire || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Téléphone</label>
+                          <p className="text-gray-900">{selectedPepiniere.telephoneGestionnaire || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Email</label>
+                          <p className="text-gray-900">{selectedPepiniere.emailGestionnaire || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations supplémentaires */}
+                  <div className="md:col-span-2">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Description</label>
+                          <p className="text-gray-900">{selectedPepiniere.description || 'Aucune description disponible'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Date de création</label>
+                          <p className="text-gray-900">
+                            {selectedPepiniere.createdAt ? new Date(selectedPepiniere.createdAt).toLocaleDateString('fr-FR') : '-'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                  <Button
+                    onClick={() => { setShowDetailsModal(false); setSelectedPepiniere(null); }}
+                    variant="outline"
+                    className="px-4 py-2"
+                  >
+                    Fermer
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowDetailsModal(false);
+                      setSelectedPepiniere(null);
+                      handleEditPepiniere(selectedPepiniere);
+                    }}
+                    className="midnight-blue-btn px-4 py-2"
+                  >
+                    Modifier
+                  </Button>
+                </div>
               </div>
             </div>
           )}

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { GET_MY_SIEGES, DELETE_SIEGE } from "../../lib/graphql-queries";
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import SiegesMap from "../../components/SiegesMap";
-import { Map, Plus, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+import { Map, Plus, Edit, Trash, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import CSVImportExportSiege from '../../components/CSVImportExportSiege';
 import SiegeModal from '../../components/SiegeModal';
@@ -39,7 +39,8 @@ export default function SiegePage() {
   const [deleteSiege] = useMutation(DELETE_SIEGE);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [showSiegeModal, setShowSiegeModal] = useState(false);
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedSiege, setSelectedSiege] = useState(null);
 
   const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
     skip: !isAuthenticated || (user && (user.role === "ADMIN" || user.role === "admin")),
@@ -124,6 +125,11 @@ export default function SiegePage() {
     }
   };
 
+  const handleShowDetails = (siege) => {
+    setSelectedSiege(siege);
+    setShowDetailsModal(true);
+  };
+
   // Colonnes DataTable shadcn/ui
   const columns = useMemo(() => [
     visibleColumns.includes('nom') && {
@@ -181,9 +187,18 @@ export default function SiegePage() {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: () => <div className="text-center">Actions</div>,
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShowDetails(row.original)}
+            title="Voir les détails"
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <Eye size={15} />
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -226,19 +241,7 @@ export default function SiegePage() {
     </div>
   );
 
-  // Fermer le dropdown des actions quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showActionsDropdown && !event.target.closest('.actions-dropdown')) {
-        setShowActionsDropdown(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showActionsDropdown]);
 
   // Ajout d'une variable CSS pour la couleur midnight blue
   useEffect(() => {
@@ -291,58 +294,16 @@ export default function SiegePage() {
             >
               <Plus size={16} /> Ajouter un local
             </Button>
-            {/* Menu déroulant pour les actions secondaires */}
-            <div className="relative actions-dropdown">
-              <Button
-                onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-                variant="outline"
-                className="px-4 py-2 text-gray-700 font-medium transition flex items-center justify-center gap-2 border border-gray-300 text-sm"
-                title="Autres actions"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-                Actions
-              </Button>
-              {/* Dropdown des actions */}
-              {showActionsDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                  <div className="py-1">
-                    <Button
-                      onClick={() => { setShowCSVModal(true); setShowActionsDropdown(false); }}
-                      variant="ghost"
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Import/Export CSV
-                    </Button>
-                    <hr className="my-1" />
-                    <Button
-                      onClick={() => { router.push('/pepinieres'); setShowActionsDropdown(false); }}
-                      variant="ghost"
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 01-8 0M12 3v4m0 0a4 4 0 01-4 4H7a4 4 0 01-4-4V7a4 4 0 014-4h1a4 4 0 014 4z" />
-                      </svg>
-                      Gérer mes pépinières
-                    </Button>
-                    <Button
-                      onClick={() => { router.push('/'); setShowActionsDropdown(false); }}
-                      variant="ghost"
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
-                      </svg>
-                      Tableau des sites de référence
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Button
+              onClick={() => setShowCSVModal(true)}
+              className="midnight-blue-btn rounded-md flex items-center justify-center gap-2 font-bold transition text-sm"
+              title="Import/Export CSV"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Import/Export CSV
+            </Button>
           </div>
         </div>
         {/* Bouton Voir la carte juste avant le tableau, comme dans page.js */}
@@ -430,6 +391,133 @@ export default function SiegePage() {
                 ×
               </Button>
               <CSVImportExportSiege onImportSuccess={() => { setShowCSVModal(false); refetchSieges(); }} />
+            </div>
+          </div>
+        )}
+
+        {/* Modal de détails du local */}
+        {showDetailsModal && selectedSiege && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+              <Button
+                onClick={() => { setShowDetailsModal(false); setSelectedSiege(null); }}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+                title="Fermer"
+              >
+                ×
+              </Button>
+              
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold midnight-blue-text mb-2">
+                  Détails du local
+                </h2>
+                <div className="w-20 h-1 bg-blue-600 rounded"></div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Informations générales */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nom du local</label>
+                        <p className="text-gray-900 font-medium">{selectedSiege.nom || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Catégorie</label>
+                        <p className="text-gray-900">{selectedSiege.categorie || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Adresse</label>
+                        <p className="text-gray-900">{selectedSiege.adresse || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Description</label>
+                        <p className="text-gray-900">{selectedSiege.description || 'Aucune description disponible'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Point de contact */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Point de contact</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nom</label>
+                        <p className="text-gray-900 font-medium">{selectedSiege.nomPointContact || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Poste</label>
+                        <p className="text-gray-900">{selectedSiege.poste || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Téléphone</label>
+                        <p className="text-gray-900">{selectedSiege.telephone || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Email</label>
+                        <p className="text-gray-900">{selectedSiege.email || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Horaires */}
+                <div className="md:col-span-2">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Horaires d'ouverture</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Matin</label>
+                        <p className="text-gray-900">{selectedSiege.horaireMatin || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Après-midi</label>
+                        <p className="text-gray-900">{selectedSiege.horaireApresMidi || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations supplémentaires */}
+                <div className="md:col-span-2">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Date de création</label>
+                        <p className="text-gray-900">
+                          {selectedSiege.createdAt ? new Date(selectedSiege.createdAt).toLocaleDateString('fr-FR') : '-'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  onClick={() => { setShowDetailsModal(false); setSelectedSiege(null); }}
+                  variant="outline"
+                  className="px-4 py-2"
+                >
+                  Fermer
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setSelectedSiege(null);
+                    handleEditSiege(selectedSiege);
+                  }}
+                  className="midnight-blue-btn px-4 py-2"
+                >
+                  Modifier
+                </Button>
+              </div>
             </div>
           </div>
         )}
