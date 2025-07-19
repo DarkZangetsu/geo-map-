@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client';
-import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES, GET_MY_PARCELLES, GET_MY_SIEGES, GET_MY_PEPINIERES } from '../../lib/graphql-queries';
+import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES } from '../../lib/graphql-queries';
 import ParcellesMap from '../../components/ParcellesMap';
 import SiegesMap from '../../components/SiegesMap';
 import PepinieresMap from '../../components/PepinieresMap';
@@ -13,27 +13,21 @@ import MapGlobal from '../../components/MapGlobal';
 export default function MapPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
   const router = useRouter();
-  const { user } = useAuth();
-  const isAdmin = user && (user.role === 'ADMIN' || user.role === 'admin');
+  // const { user } = useAuth();
+  // const isAdmin = user && (user.role === 'ADMIN' || user.role === 'admin');
 
-  // Queries dynamiques selon le rôle
-  const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(
-    isAdmin ? GET_ALL_PARCELLES : GET_MY_PARCELLES
-  );
-  const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(
-    isAdmin ? GET_ALL_SIEGES : GET_MY_SIEGES
-  );
-  const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(
-    isAdmin ? GET_ALL_PEPINIERES : GET_MY_PEPINIERES
-  );
+  // Toujours utiliser les queries globales pour la carte globale
+  const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
+  const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
+  const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
   const [mapStyle, setMapStyle] = useState('street');
   const [showParcelles, setShowParcelles] = useState(true);
   const [showSieges, setShowSieges] = useState(true);
   const [showPepinieres, setShowPepinieres] = useState(true);
 
-  const allParcelles = isAdmin ? (parcellesData?.allParcelles || []) : (parcellesData?.myParcelles || []);
-  const allSieges = isAdmin ? (siegesData?.allSieges || []) : (siegesData?.mySieges || []);
-  const allPepinieres = isAdmin ? (pepinieresData?.allPepinieres || []) : (pepinieresData?.myPepinieres || []);
+  const allParcelles = parcellesData?.allParcelles || [];
+  const allSieges = siegesData?.allSieges || [];
+  const allPepinieres = pepinieresData?.allPepinieres || [];
 
   // Filtres d'affichage
   const parcelles = showParcelles ? allParcelles : [];
