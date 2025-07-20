@@ -78,10 +78,13 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                 Nom
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Culture
+                Propriétaire
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Propriétaire
+                Pratique
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nom Projet
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Membre
@@ -91,24 +94,6 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Superficie (ha)
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Variété
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date Semis
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date Récolte
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Type Sol
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Irrigation
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Certifications
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -122,10 +107,13 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                   {parcelle.nom}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.culture}
+                  {parcelle.proprietaire}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.proprietaire}
+                  {parcelle.pratique || '-'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  {parcelle.nomProjet || '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center">
@@ -138,10 +126,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                     )}
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {parcelle.user?.firstName} {parcelle.user?.lastName}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {parcelle.user?.username}
+                        {parcelle.user?.firstName} {parcelle.user?.lastName} {parcelle.user?.email}
                       </div>
                     </div>
                   </div>
@@ -151,46 +136,6 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                   {parcelle.superficie ? `${parcelle.superficie} ha` : '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.variete || '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.dateSemis ? new Date(parcelle.dateSemis).toLocaleDateString('fr-FR') : '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.dateRecoltePrevue ? new Date(parcelle.dateRecoltePrevue).toLocaleDateString('fr-FR') : '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.typeSol || '-'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.irrigation ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Oui
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      Non
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  <div className="flex flex-wrap gap-1">
-                    {parcelle.certificationBio && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Bio
-                      </span>
-                    )}
-                    {parcelle.certificationHve && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        HVE
-                      </span>
-                    )}
-                    {!parcelle.certificationBio && !parcelle.certificationHve && (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                   <button

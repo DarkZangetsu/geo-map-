@@ -74,7 +74,6 @@ class CreateUser(graphene.Mutation):
     message = graphene.String()
 
     class Arguments:
-        username = graphene.String(required=True)
         email = graphene.String(required=True)
         password = graphene.String(required=True)
         first_name = graphene.String()
@@ -85,16 +84,11 @@ class CreateUser(graphene.Mutation):
         nom_institution = graphene.String()
         nom_projet = graphene.String()
 
-    def mutate(self, info, username, email, password, first_name="", last_name="", role="membre", logo=None, abreviation="", nom_institution="", nom_projet=""):
+    def mutate(self, info, email, password, first_name="", last_name="", role="membre", logo=None, abreviation="", nom_institution="", nom_projet=""):
         try:
-            if User.objects.filter(username=username).exists():
-                return CreateUser(success=False, message="Nom d'utilisateur déjà pris")
-            
             if User.objects.filter(email=email).exists():
                 return CreateUser(success=False, message="Email déjà utilisé")
-            
             user = User.objects.create_user(
-                username=username,
                 email=email,
                 password=password,
                 first_name=first_name,
@@ -104,11 +98,9 @@ class CreateUser(graphene.Mutation):
                 nom_institution=nom_institution,
                 nom_projet=nom_projet
             )
-            
             if logo:
                 user.logo = logo
                 user.save()
-                
             return CreateUser(user=user, success=True, message="Utilisateur créé avec succès")
         except Exception as e:
             return CreateUser(success=False, message=str(e))
@@ -120,12 +112,12 @@ class LoginUser(graphene.Mutation):
     token = graphene.String()
 
     class Arguments:
-        username = graphene.String(required=True)
+        email = graphene.String(required=True)
         password = graphene.String(required=True)
 
-    def mutate(self, info, username, password):
+    def mutate(self, info, email, password):
         try:
-            user = authenticate(username=username, password=password)
+            user = authenticate(email=email, password=password)
             if user:
                 if not user.is_active:
                     return LoginUser(
@@ -157,30 +149,21 @@ class CreateParcelle(graphene.Mutation):
 
     class Arguments:
         nom = graphene.String(required=True)
-        culture = graphene.String(required=True)
         proprietaire = graphene.String(required=True)
         geojson = graphene.JSONString(required=True)
         superficie = graphene.Decimal()
-        variete = graphene.String()
-        date_semis = graphene.Date()
-        date_recolte_prevue = graphene.Date()
-        type_sol = graphene.String()
-        irrigation = graphene.Boolean()
-        type_irrigation = graphene.String()
-        rendement_prevue = graphene.Decimal()
-        cout_production = graphene.Decimal()
-        certification_bio = graphene.Boolean()
-        certification_hve = graphene.Boolean()
-        notes = graphene.String()
+        pratique = graphene.String()
+        nom_projet = graphene.String()
+        description = graphene.String()
         images = graphene.List(Upload)
-        # Nouveaux champs
+        # Champs personne référente
         nom_personne_referente = graphene.String()
         poste = graphene.String()
         telephone = graphene.String()
         email = graphene.String()
 
     @login_required
-    def mutate(self, info, nom, culture, proprietaire, geojson, **kwargs):
+    def mutate(self, info, nom, proprietaire, geojson, **kwargs):
         import json
         try:
             user = info.context.user
@@ -194,7 +177,6 @@ class CreateParcelle(graphene.Mutation):
                     pass
             parcelle = Parcelle.objects.create(
                 nom=nom,
-                culture=culture,
                 proprietaire=proprietaire,
                 geojson=geojson,
                 user=user,
@@ -220,23 +202,14 @@ class UpdateParcelle(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
         nom = graphene.String()
-        culture = graphene.String()
         proprietaire = graphene.String()
         geojson = graphene.JSONString()
         superficie = graphene.Decimal()
-        variete = graphene.String()
-        date_semis = graphene.Date()
-        date_recolte_prevue = graphene.Date()
-        type_sol = graphene.String()
-        irrigation = graphene.Boolean()
-        type_irrigation = graphene.String()
-        rendement_prevue = graphene.Decimal()
-        cout_production = graphene.Decimal()
-        certification_bio = graphene.Boolean()
-        certification_hve = graphene.Boolean()
-        notes = graphene.String()
+        pratique = graphene.String()
+        nom_projet = graphene.String()
+        description = graphene.String()
         images = graphene.List(Upload)
-        # Nouveaux champs
+        # Champs personne référente
         nom_personne_referente = graphene.String()
         poste = graphene.String()
         telephone = graphene.String()
@@ -258,13 +231,13 @@ class UpdateParcelle(graphene.Mutation):
                     kwargs['geojson'] = json.loads(kwargs['geojson'])
                 except Exception:
                     pass
+            # Mettre à jour les champs
             for field, value in kwargs.items():
                 if value is not None:
                     setattr(parcelle, field, value)
             parcelle.save()
-            # Mettre à jour les images si fournies
-            if images is not None:
-                parcelle.images.all().delete()
+            # Ajouter les nouvelles images si fournies
+            if images:
                 for i, image_file in enumerate(images):
                     if image_file:
                         ParcelleImage.objects.create(
@@ -272,7 +245,7 @@ class UpdateParcelle(graphene.Mutation):
                             image=image_file,
                             ordre=i
                         )
-            return UpdateParcelle(parcelle=parcelle, success=True, message="Parcelle mise à jour")
+            return UpdateParcelle(parcelle=parcelle, success=True, message="Parcelle mise à jour avec succès")
         except Parcelle.DoesNotExist:
             return UpdateParcelle(success=False, message="Parcelle non trouvée")
         except Exception as e:
@@ -438,23 +411,15 @@ class TokenAuthWithUser(graphene.Mutation):
     message = graphene.String()
 
     class Arguments:
-        username = graphene.String(required=True)
+        email = graphene.String(required=True)
         password = graphene.String(required=True)
 
-    def mutate(self, info, username, password):
+    def mutate(self, info, email, password):
         try:
-            # Authentifier l'utilisateur
-            user = authenticate(username=username, password=password)
-            
+            user = authenticate(email=email, password=password)
             if user and user.is_active:
-                # Créer le token JWT
                 token = get_token(user)
-                
-                # Créer le refresh token
                 refresh_token = create_refresh_token(user)
-                
-                print(f"Token créé pour l'utilisateur {username}")
-                
                 return TokenAuthWithUser(
                     token=token,
                     refreshToken=refresh_token,
@@ -463,16 +428,11 @@ class TokenAuthWithUser(graphene.Mutation):
                     message="Connexion réussie"
                 )
             else:
-                print(f"Échec d'authentification pour {username}")
                 return TokenAuthWithUser(
                     success=False,
                     message="Identifiants incorrects ou compte inactif"
                 )
-                
         except Exception as e:
-            print(f"Erreur dans TokenAuthWithUser: {str(e)}")
-            import traceback
-            traceback.print_exc()
             return TokenAuthWithUser(
                 success=False,
                 message=f"Erreur de connexion: {str(e)}"
@@ -497,37 +457,26 @@ class ExportParcellesCSV(graphene.Mutation):
             
             # En-têtes avec nouveaux champs
             headers = [
-                'ID', 'Nom', 'Culture', 'Propriétaire', 'Nom Personne Référente',
-                'Poste', 'Téléphone', 'Email', 'Superficie', 'Variété',
-                'Date Semis', 'Date Récolte Prévue', 'Type Sol', 'Irrigation',
-                'Type Irrigation', 'Rendement Prévu', 'Coût Production',
-                'Certification Bio', 'Certification HVE', 'Notes',
-                'Utilisateur', 'Date Création', 'Date Modification'
+                'ID', 'Nom', 'Propriétaire', 'Superficie', 
+                'Pratique', 'Nom projet', 'Description', 'Nom Personne Référente',
+                'Poste', 'Téléphone', 'Email', 'Utilisateur', 
+                'Date Création', 'Date Modification'
             ]
             writer.writerow(headers)
             for parcelle in parcelles:
                 row = [
                     parcelle.id,
                     parcelle.nom,
-                    parcelle.culture,
                     parcelle.proprietaire,
+                    str(parcelle.superficie) if parcelle.superficie else '',
+                    parcelle.get_pratique_display() if parcelle.pratique else '',
+                    parcelle.nom_projet or '',
+                    parcelle.description or '',
                     parcelle.nom_personne_referente or '',
                     parcelle.poste or '',
                     parcelle.telephone or '',
                     parcelle.email or '',
-                    str(parcelle.superficie) if parcelle.superficie else '',
-                    parcelle.variete or '',
-                    parcelle.date_semis.strftime('%Y-%m-%d') if parcelle.date_semis else '',
-                    parcelle.date_recolte_prevue.strftime('%Y-%m-%d') if parcelle.date_recolte_prevue else '',
-                    parcelle.type_sol or '',
-                    'Oui' if parcelle.irrigation else 'Non',
-                    parcelle.type_irrigation or '',
-                    str(parcelle.rendement_prevue) if parcelle.rendement_prevue else '',
-                    str(parcelle.cout_production) if parcelle.cout_production else '',
-                    'Oui' if parcelle.certification_bio else 'Non',
-                    'Oui' if parcelle.certification_hve else 'Non',
-                    parcelle.notes or '',
-                    parcelle.user.username,
+                    parcelle.user.email,
                     parcelle.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                     parcelle.updated_at.strftime('%Y-%m-%d %H:%M:%S')
                 ]
@@ -564,8 +513,8 @@ class ImportParcellesCSV(graphene.Mutation):
             csv_reader = csv.DictReader(io.StringIO(csv_content))
             for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    if not row.get('Nom') or not row.get('Culture') or not row.get('Propriétaire'):
-                        errors.append(f"Ligne {row_num}: Nom, Culture et Propriétaire sont requis")
+                    if not row.get('Nom') or not row.get('Propriétaire'):
+                        errors.append(f"Ligne {row_num}: Nom et Propriétaire sont requis")
                         continue
                     superficie = None
                     if row.get('Superficie'):
@@ -654,24 +603,15 @@ class ImportParcellesCSV(graphene.Mutation):
                     parcelle = Parcelle.objects.create(
                         user=user,
                         nom=row['Nom'],
-                        culture=row['Culture'],
                         proprietaire=row['Propriétaire'],
                         nom_personne_referente=row.get('Nom Personne Référente', ''),
                         poste=row.get('Poste', ''),
                         telephone=row.get('Téléphone', ''),
                         email=row.get('Email', ''),
                         superficie=superficie,
-                        variete=row.get('Variété', ''),
-                        date_semis=date_semis,
-                        date_recolte_prevue=date_recolte_prevue,
-                        type_sol=row.get('Type Sol', ''),
-                        irrigation=irrigation,
-                        type_irrigation=row.get('Type Irrigation', ''),
-                        rendement_prevue=rendement_prevue,
-                        cout_production=cout_production,
-                        certification_bio=certification_bio,
-                        certification_hve=certification_hve,
-                        notes=row.get('Notes', ''),
+                        pratique=row.get('Pratique', ''),
+                        nom_projet=row.get('Nom projet', ''),
+                        description=row.get('Description', ''),
                         geojson=geojson
                     )
                     imported_count += 1

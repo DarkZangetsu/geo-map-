@@ -13,14 +13,19 @@ export default function ParcellesDataTable({ parcelles, onDelete }) {
       cell: info => info.getValue(),
     },
     {
-      accessorKey: 'culture',
-      header: 'Culture',
-      cell: info => info.getValue(),
-    },
-    {
       accessorKey: 'proprietaire',
       header: 'Propriétaire',
       cell: info => info.getValue(),
+    },
+    {
+      accessorKey: 'pratique',
+      header: 'Pratique',
+      cell: info => info.getValue() || '-',
+    },
+    {
+      accessorKey: 'nomProjet',
+      header: 'Nom Projet',
+      cell: info => info.getValue() || '-',
     },
     {
       accessorKey: 'superficie',

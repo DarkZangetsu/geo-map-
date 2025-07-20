@@ -146,7 +146,7 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
               {geojson && geojson.coordinates && (
                 <Polygon
                   positions={geojson.coordinates[0].map(coord => [coord[1], coord[0]])}
-                  pathOptions={{ color: parcelle.certificationBio ? '#22c55e' : '#3b82f6', weight: 2, fillOpacity: 0.2 }}
+                  pathOptions={{ color: '#3b82f6', weight: 2, fillOpacity: 0.2 }}
                   eventHandlers={{
                     click: () => {
                       setSelectedParcelle(parcelle);

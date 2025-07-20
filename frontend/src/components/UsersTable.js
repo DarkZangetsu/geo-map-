@@ -12,7 +12,7 @@ export default function UsersTable({ users, onToggleActive, onEditAbreviation, i
       header: "Institution/Projet",
       cell: info => (
         <div>
-          <div className="font-medium">{info.row.original.nomInstitution || info.row.original.username}</div>
+          <div className="font-medium">{info.row.original.nomInstitution || (info.row.original.firstName + ' ' + info.row.original.lastName) || info.row.original.email}</div>
           <div className="text-sm text-gray-500">{info.row.original.nomProjet || '-'}</div>
         </div>
       ),
@@ -106,7 +106,7 @@ export default function UsersTable({ users, onToggleActive, onEditAbreviation, i
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={e => { if (e.target === e.currentTarget) { setEditingUser(null); setNewAbreviation(''); } }}>
           <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4 shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Modifier l'abréviation</h3>
-            <p className="text-sm text-gray-600 mb-4">Modifier l'abréviation pour <strong>{editingUser.nomInstitution || editingUser.username}</strong></p>
+            <p className="text-sm text-gray-600 mb-4">Modifier l'abréviation pour <strong>{editingUser.nomInstitution || (editingUser.firstName + ' ' + editingUser.lastName) || editingUser.email}</strong></p>
             <div className="mb-4">
               <label htmlFor="abreviation" className="block text-sm font-medium text-gray-700 mb-2">Abréviation</label>
               <input

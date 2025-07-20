@@ -98,16 +98,13 @@ const CSVImportExport = ({ onImportSuccess }) => {
 
   const downloadTemplate = () => {
     const templateHeaders = [
-      'nom', 'culture', 'proprietaire', 'superficie', 'variete',
-      'date_semis', 'date_recolte_prevue', 'type_sol', 'irrigation',
-      'type_irrigation', 'rendement_prevue', 'cout_production',
-      'certification_bio', 'certification_hve', 'notes', 'geometrie'
+      'nom', 'proprietaire', 'superficie', 'pratique',
+      'nom_projet', 'description', 'geometrie'
     ];
     // Exemple de géométrie : liste de points [lon,lat],[lon,lat],...
     const templateData = [
-      'Parcelle 1', 'Blé', 'Jean Dupont', '5.5', 'Blé tendre',
-      '2024-10-15', '2025-07-20', 'Argileux', 'Oui', 'Aspersion',
-      '8.5', '1200.50', 'Oui', 'Non', 'Parcelle bien exposée',
+      'Parcelle 1', 'Jean Dupont', '5.5', 'Structure Brise-vent',
+      'Projet Agroforestier', 'Parcelle bien exposée',
       '[44.2834,-20.2967],[44.2847,-20.2967],[44.2847,-20.298],[44.2834,-20.298],[44.2834,-20.2967]'
     ];
     const csvContent = [templateHeaders.join(','), templateData.join(',')].join('\n');
@@ -232,7 +229,7 @@ const CSVImportExport = ({ onImportSuccess }) => {
       <div className="mt-6 p-4 bg-gray-50 rounded-md">
         <h5 className="text-sm font-medium text-gray-700 mb-2">Instructions :</h5>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Les champs <strong>nom</strong>, <strong>culture</strong> et <strong>propriétaire</strong> sont obligatoires</li>
+          <li>• Les champs <strong>nom</strong> et <strong>propriétaire</strong> sont obligatoires</li>
           <li>• Les dates doivent être au format <strong>YYYY-MM-DD</strong> (ex: 2024-10-15)</li>
           <li>• Les valeurs booléennes (irrigation, certifications) acceptent : Oui/Non, Yes/No, True/False, 1/0</li>
           <li>• Les nombres décimaux utilisent le point comme séparateur (ex: 5.5)</li>

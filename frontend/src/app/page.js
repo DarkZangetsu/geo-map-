@@ -44,16 +44,11 @@ export default function HomePage() {
   // Colonnes du tableau (configurable)
   const columns = [
     { key: 'nom', label: 'Site de référence' },
-    { key: 'culture', label: 'Culture' },
     { key: 'proprietaire', label: 'Propriétaire' },
     { key: 'superficie', label: 'Superficie' },
-    { key: 'variete', label: 'Variété' },
-    { key: 'typeSol', label: 'Type de sol' },
-    { key: 'irrigation', label: 'Irrigation' },
-    { key: 'rendementPrevue', label: 'Rendement prévu' },
-    { key: 'certificationBio', label: 'Bio' },
-    { key: 'certificationHve', label: 'HVE' },
-    { key: 'notes', label: 'Notes' },
+    { key: 'pratique', label: 'Pratique' },
+    { key: 'nomProjet', label: 'Nom Projet' },
+    { key: 'description', label: 'Description' },
   ];
   // Colonnes visibles pour le tableau (filtrage dynamique)
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
@@ -83,11 +78,8 @@ export default function HomePage() {
         cell: info => {
           const parcelle = info.row.original;
           if (col.key === 'superficie') return parcelle.superficie ? `${parcelle.superficie} ha` : '-';
-          if (col.key === 'irrigation') return parcelle.irrigation ? 'Oui' : 'Non';
-          if (col.key === 'certificationBio') return parcelle.certificationBio ? 'Oui' : '';
-          if (col.key === 'certificationHve') return parcelle.certificationHve ? 'Oui' : '';
           if (col.key === 'createdAt') return parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '';
-          return parcelle[col.key];
+          return parcelle[col.key] || '-';
         },
       };
     }).filter(Boolean),
@@ -180,8 +172,9 @@ export default function HomePage() {
     if (search) {
       data = data.data.filter(p =>
         (p.nom || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.culture || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.proprietaire || '').toLowerCase().includes(search.toLowerCase())
+        (p.proprietaire || '').toLowerCase().includes(search.toLowerCase()) ||
+        (p.pratique || '').toLowerCase().includes(search.toLowerCase()) ||
+        (p.nomProjet || '').toLowerCase().includes(search.toLowerCase())
       );
     }
     data = [...data].sort((a, b) => {
@@ -255,18 +248,17 @@ export default function HomePage() {
       const { data } = await createUser({
         variables: userData
       });
-
       if (data.createUser.success) {
         // Auto-login after registration
         await handleLogin({
-          username: userData.username,
+          email: userData.email,
           password: userData.password
         });
       } else {
         throw new Error(data.createUser.message);
       }
     } catch (error) {
-      throw new Error(error.message || 'Erreur d\'inscription');
+      throw new Error(error.message || "Erreur d'inscription");
     }
   };
 

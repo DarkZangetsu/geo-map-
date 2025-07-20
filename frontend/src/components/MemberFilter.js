@@ -96,7 +96,7 @@ const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
                     {user.firstName} {user.lastName}
                   </span>
                   <span className="ml-2 text-xs text-gray-500">
-                    ({user.username})
+                    {user.email}
                   </span>
                 </div>
               </label>

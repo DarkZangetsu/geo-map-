@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Parcelle, ParcelleImage, Siege, SiegeImage, Pepiniere, PepiniereImage
 
 class ParcelleImageInline(admin.TabularInline):
@@ -8,60 +8,57 @@ class ParcelleImageInline(admin.TabularInline):
     fields = ('image', 'titre', 'description', 'ordre')
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff', 'date_joined')
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('email', 'first_name', 'last_name', 'role', 'is_staff', 'date_joined')
     list_filter = ('role', 'is_staff', 'is_superuser', 'date_joined')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    search_fields = ('email', 'first_name', 'last_name')
     ordering = ('-date_joined',)
-    
-    fieldsets = UserAdmin.fieldsets + (
-        ('Informations supplémentaires', {
-            'fields': ('role', 'logo')
+    readonly_fields = ('last_login', 'date_joined')
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Informations personnelles', {'fields': ('first_name', 'last_name', 'role', 'logo', 'abreviation', 'nom_institution', 'nom_projet')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Dates importantes', {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'role', 'logo', 'abreviation', 'nom_institution', 'nom_projet', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
     )
-    
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Informations supplémentaires', {
-            'fields': ('role', 'logo')
-        }),
-    )
+    filter_horizontal = ('groups', 'user_permissions')
 
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'culture', 'proprietaire', 'user', 'superficie', 'created_at')
-    list_filter = ('culture', 'type_sol', 'irrigation', 'certification_bio', 'certification_hve', 'created_at')
-    search_fields = ('nom', 'proprietaire', 'user__username')
+    list_display = ('nom', 'proprietaire', 'user', 'superficie', 'pratique', 'created_at')
+    list_filter = ('pratique', 'created_at')
+    search_fields = ('nom', 'proprietaire', 'user__email')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
-    
     fieldsets = (
         ('Informations de base', {
-            'fields': ('nom', 'culture', 'proprietaire', 'user')
+            'fields': ('nom', 'proprietaire', 'user')
         }),
         ('Informations agricoles', {
-            'fields': ('superficie', 'variete', 'date_semis', 'date_recolte_prevue', 'type_sol')
+            'fields': ('superficie', 'pratique')
         }),
-        ('Irrigation', {
-            'fields': ('irrigation', 'type_irrigation')
+        ('Projet', {
+            'fields': ('nom_projet',)
         }),
-        ('Informations économiques', {
-            'fields': ('rendement_prevue', 'cout_production')
-        }),
-        ('Certifications', {
-            'fields': ('certification_bio', 'certification_hve')
+        ('Personne référente', {
+            'fields': ('nom_personne_referente', 'poste', 'telephone', 'email')
         }),
         ('Données géospatiales', {
             'fields': ('geojson',)
         }),
-        ('Notes', {
-            'fields': ('notes',)
+        ('Description', {
+            'fields': ('description',)
         }),
         ('Métadonnées', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
-    
     inlines = [ParcelleImageInline]
 
 @admin.register(ParcelleImage)
@@ -70,7 +67,6 @@ class ParcelleImageAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('parcelle__nom', 'titre', 'description')
     ordering = ('parcelle', 'ordre', 'created_at')
-    
     fieldsets = (
         ('Image', {
             'fields': ('parcelle', 'image')
@@ -94,7 +90,7 @@ class SiegeImageInline(admin.TabularInline):
 class SiegeAdmin(admin.ModelAdmin):
     list_display = ('nom', 'categorie', 'user', 'adresse', 'latitude', 'longitude', 'created_at')
     list_filter = ('categorie', 'created_at')
-    search_fields = ('nom', 'user__username', 'adresse')
+    search_fields = ('nom', 'user__email', 'adresse')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
     fieldsets = (
@@ -146,7 +142,7 @@ class PepiniereImageInline(admin.TabularInline):
 class PepiniereAdmin(admin.ModelAdmin):
     list_display = ('nom', 'user', 'adresse', 'latitude', 'longitude', 'created_at')
     list_filter = ('created_at',)
-    search_fields = ('nom', 'user__username', 'adresse')
+    search_fields = ('nom', 'user__email', 'adresse')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
     fieldsets = (

@@ -188,8 +188,7 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                             <div className="text-sm font-medium text-gray-900">
                               {siegeComplete?.user?.firstName || '-'} {siegeComplete?.user?.lastName || ''}
                             </div>
-                            <div className="text-sm text-gray-500">{siegeComplete?.user?.username || '-'}</div>
-                            <div className="text-sm text-gray-500">{siegeComplete?.user?.email || '-'}</div>
+                            <div className="text-sm text-gray-500">{siegeComplete?.user?.firstName} {siegeComplete?.user?.lastName} {siegeComplete?.user?.email || '-'}</div>
                           </div>
                         </div>
                       </div>

@@ -65,24 +65,15 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                     const data = [parcelleComplete];
                     const csv = [
                       [
-                        'Nom', 'Culture', 'Propriétaire', 'Superficie', 'Variété', 'Date Semis', 'Date Récolte', 'Type Sol', 'Irrigation', 'Type Irrigation', 'Rendement', 'Coût', 'Bio', 'HVE', 'Notes', 'Créé le'
+                        'Nom', 'Propriétaire', 'Superficie', 'Pratique', 'Nom projet', 'Description', 'Créé le'
                       ],
                       [
                         parcelleComplete?.nom || '',
-                        parcelleComplete?.culture || '',
                         parcelleComplete?.proprietaire || '',
                         parcelleComplete?.superficie || '',
-                        parcelleComplete?.variete || '',
-                        parcelleComplete?.dateSemis || '',
-                        parcelleComplete?.dateRecoltePrevue || '',
-                        parcelleComplete?.typeSol || '',
-                        parcelleComplete?.irrigation ? 'Oui' : 'Non',
-                        parcelleComplete?.typeIrrigation || '',
-                        parcelleComplete?.rendementPrevue || '',
-                        parcelleComplete?.coutProduction || '',
-                        parcelleComplete?.certificationBio ? 'Oui' : 'Non',
-                        parcelleComplete?.certificationHve ? 'Oui' : 'Non',
-                        parcelleComplete?.notes || '',
+                        parcelleComplete?.pratique || '',
+                        parcelleComplete?.nomProjet || '',
+                        parcelleComplete?.description || '',
                         parcelleComplete?.createdAt || ''
                       ]
                     ];
@@ -181,89 +172,46 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                             <dd className="text-sm text-gray-900">{parcelleComplete?.nom || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Culture</dt>
-                            <dd className="text-sm text-gray-900">{parcelleComplete?.culture || '-'}</dd>
-                          </div>
-                          <div>
                             <dt className="text-sm font-medium text-gray-500">Propriétaire</dt>
                             <dd className="text-sm text-gray-900">{parcelleComplete?.proprietaire || '-'}</dd>
                           </div>
+
                           <div>
                             <dt className="text-sm font-medium text-gray-500">Superficie</dt>
                             <dd className="text-sm text-gray-900">{formatDecimal(parcelleComplete?.superficie)} ha</dd>
                           </div>
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Variété</dt>
-                            <dd className="text-sm text-gray-900">{parcelleComplete?.variete || '-'}</dd>
+                            <dt className="text-sm font-medium text-gray-500">Pratique</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.pratique || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm font-medium text-gray-500">Nom projet</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.nomProjet || '-'}</dd>
                           </div>
                         </dl>
                       </div>
 
-                      {/* Informations techniques */}
+                      {/* Personne référente */}
                       <div>
-                        <h4 className="text-md font-semibold text-gray-900 mb-3">Informations techniques</h4>
+                        <h4 className="text-md font-semibold text-gray-900 mb-3">Personne référente</h4>
                         <dl className="space-y-2">
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Date de semis</dt>
-                            <dd className="text-sm text-gray-900">{formatDate(parcelleComplete?.dateSemis)}</dd>
+                            <dt className="text-sm font-medium text-gray-500">Nom</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.nomPersonneReferente || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Date de récolte prévue</dt>
-                            <dd className="text-sm text-gray-900">{formatDate(parcelleComplete?.dateRecoltePrevue)}</dd>
+                            <dt className="text-sm font-medium text-gray-500">Poste</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.poste || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Type de sol</dt>
-                            <dd className="text-sm text-gray-900">{parcelleComplete?.typeSol || '-'}</dd>
+                            <dt className="text-sm font-medium text-gray-500">Téléphone</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.telephone || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm font-medium text-gray-500">Irrigation</dt>
-                            <dd className="text-sm text-gray-900">
-                              {typeof parcelleComplete?.irrigation === 'boolean'
-                                ? parcelleComplete.irrigation ? 'Oui' : 'Non'
-                                : '-'}
-                              {parcelleComplete?.irrigation && parcelleComplete?.typeIrrigation && ` (${parcelleComplete.typeIrrigation})`}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm font-medium text-gray-500">Rendement prévu</dt>
-                            <dd className="text-sm text-gray-900">{formatDecimal(parcelleComplete?.rendementPrevue)} t/ha</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm font-medium text-gray-500">Coût de production</dt>
-                            <dd className="text-sm text-gray-900">{formatCurrency(parcelleComplete?.coutProduction)}</dd>
+                            <dt className="text-sm font-medium text-gray-500">Email</dt>
+                            <dd className="text-sm text-gray-900">{parcelleComplete?.email || '-'}</dd>
                           </div>
                         </dl>
-                      </div>
-
-                      {/* Certifications */}
-                      <div>
-                        <h4 className="text-md font-semibold text-gray-900 mb-3">Certifications</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-500">Bio:</span>
-                            {typeof parcelleComplete?.certificationBio === 'boolean' ? (
-                              parcelleComplete.certificationBio ? (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Certifié</span>
-                              ) : (
-                                <span className="text-sm text-gray-900">Non certifié</span>
-                              )
-                            ) : (
-                              <span className="text-sm text-gray-900">-</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-500">HVE:</span>
-                            {typeof parcelleComplete?.certificationHve === 'boolean' ? (
-                              parcelleComplete.certificationHve ? (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Certifié</span>
-                              ) : (
-                                <span className="text-sm text-gray-900">Non certifié</span>
-                              )
-                            ) : (
-                              <span className="text-sm text-gray-900">-</span>
-                            )}
-                          </div>
-                        </div>
                       </div>
 
                       {/* Informations utilisateur */}
@@ -281,18 +229,17 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                             <div className="text-sm font-medium text-gray-900">
                               {parcelleComplete?.user?.firstName || '-'} {parcelleComplete?.user?.lastName || ''}
                             </div>
-                            <div className="text-sm text-gray-500">{parcelleComplete?.user?.username || '-'}</div>
-                            <div className="text-sm text-gray-500">{parcelleComplete?.user?.email || '-'}</div>
+                            <div className="text-sm text-gray-500">{parcelleComplete?.user?.firstName} {parcelleComplete?.user?.lastName} {parcelleComplete?.user?.email || '-'}</div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Notes */}
-                      {parcelleComplete?.notes && typeof parcelleComplete.notes === 'string' && (
+                      {/* Description */}
+                      {parcelleComplete?.description && typeof parcelleComplete.description === 'string' && (
                         <div className="md:col-span-2">
-                          <h4 className="text-md font-semibold text-gray-900 mb-3">Notes</h4>
+                          <h4 className="text-md font-semibold text-gray-900 mb-3">Description</h4>
                           <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">
-                            {parcelleComplete.notes}
+                            {parcelleComplete.description}
                           </p>
                         </div>
                       )}

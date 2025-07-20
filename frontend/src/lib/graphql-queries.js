@@ -5,7 +5,6 @@ export const GET_ME = gql`
   query GetMe {
     me {
       id
-      username
       email
       firstName
       lastName
@@ -23,7 +22,6 @@ export const GET_MY_PARCELLES = gql`
     myParcelles {
       id
       nom
-      culture
       proprietaire
       nomPersonneReferente
       poste
@@ -31,22 +29,14 @@ export const GET_MY_PARCELLES = gql`
       email
       geojson
       superficie
-      variete
-      dateSemis
-      dateRecoltePrevue
-      typeSol
-      irrigation
-      typeIrrigation
-      rendementPrevue
-      coutProduction
-      certificationBio
-      certificationHve
-      notes
+      pratique
+      nomProjet
+      description
       createdAt
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -68,7 +58,6 @@ export const GET_ALL_PARCELLES = gql`
     allParcelles {
       id
       nom
-      culture
       proprietaire
       nomPersonneReferente
       poste
@@ -76,22 +65,14 @@ export const GET_ALL_PARCELLES = gql`
       email
       geojson
       superficie
-      variete
-      dateSemis
-      dateRecoltePrevue
-      typeSol
-      irrigation
-      typeIrrigation
-      rendementPrevue
-      coutProduction
-      certificationBio
-      certificationHve
-      notes
+      pratique
+      nomProjet
+      description
       createdAt
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -113,7 +94,6 @@ export const GET_PARCELLE = gql`
     parcelle(id: $id) {
       id
       nom
-      culture
       proprietaire
       nomPersonneReferente
       poste
@@ -121,22 +101,14 @@ export const GET_PARCELLE = gql`
       email
       geojson
       superficie
-      variete
-      dateSemis
-      dateRecoltePrevue
-      typeSol
-      irrigation
-      typeIrrigation
-      rendementPrevue
-      coutProduction
-      certificationBio
-      certificationHve
-      notes
+      pratique
+      nomProjet
+      description
       createdAt
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -157,7 +129,6 @@ export const GET_ALL_USERS = gql`
   query GetAllUsers {
     allUsers {
       id
-      username
       email
       firstName
       lastName
@@ -191,7 +162,7 @@ export const GET_MY_SIEGES = gql`
       updatedAt
       user {
         id
-        username
+        email
       }
       photosBatiment {
         id
@@ -224,7 +195,7 @@ export const GET_ALL_SIEGES = gql`
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -263,7 +234,7 @@ export const GET_SIEGE = gql`
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -303,7 +274,7 @@ export const GET_MY_PEPINIERES = gql`
       updatedAt
       user {
         id
-        username
+        email
       }
       photos {
         id
@@ -336,7 +307,7 @@ export const GET_ALL_PEPINIERES = gql`
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -375,7 +346,7 @@ export const GET_PEPINIERE = gql`
       updatedAt
       user {
         id
-        username
+        email
         firstName
         lastName
         logo
@@ -397,7 +368,6 @@ export const GET_PEPINIERE = gql`
 // Mutations
 export const CREATE_USER = gql`
   mutation CreateUser(
-    $username: String!
     $email: String!
     $password: String!
     $firstName: String
@@ -409,7 +379,6 @@ export const CREATE_USER = gql`
     $nomProjet: String
   ) {
     createUser(
-      username: $username
       email: $email
       password: $password
       firstName: $firstName
@@ -424,7 +393,6 @@ export const CREATE_USER = gql`
       message
       user {
         id
-        username
         email
         firstName
         lastName
@@ -439,14 +407,13 @@ export const CREATE_USER = gql`
 `;
 
 export const LOGIN_USER = gql`
-  mutation LoginUser($username: String!, $password: String!) {
-    loginUser(username: $username, password: $password) {
+  mutation LoginUser($email: String!, $password: String!) {
+    loginUser(email: $email, password: $password) {
       success
       message
       token
       user {
         id
-        username
         email
         firstName
         lastName
@@ -462,21 +429,12 @@ export const LOGIN_USER = gql`
 export const CREATE_PARCELLE = gql`
   mutation CreateParcelle(
     $nom: String!
-    $culture: String!
     $proprietaire: String!
     $geojson: JSONString!
     $superficie: Decimal
-    $variete: String
-    $dateSemis: Date
-    $dateRecoltePrevue: Date
-    $typeSol: String
-    $irrigation: Boolean
-    $typeIrrigation: String
-    $rendementPrevue: Decimal
-    $coutProduction: Decimal
-    $certificationBio: Boolean
-    $certificationHve: Boolean
-    $notes: String
+    $pratique: String
+    $nomProjet: String
+    $description: String
     $images: [Upload]
     $nomPersonneReferente: String
     $poste: String
@@ -485,21 +443,12 @@ export const CREATE_PARCELLE = gql`
   ) {
     createParcelle(
       nom: $nom
-      culture: $culture
       proprietaire: $proprietaire
       geojson: $geojson
       superficie: $superficie
-      variete: $variete
-      dateSemis: $dateSemis
-      dateRecoltePrevue: $dateRecoltePrevue
-      typeSol: $typeSol
-      irrigation: $irrigation
-      typeIrrigation: $typeIrrigation
-      rendementPrevue: $rendementPrevue
-      coutProduction: $coutProduction
-      certificationBio: $certificationBio
-      certificationHve: $certificationHve
-      notes: $notes
+      pratique: $pratique
+      nomProjet: $nomProjet
+      description: $description
       images: $images
       nomPersonneReferente: $nomPersonneReferente
       poste: $poste
@@ -511,7 +460,6 @@ export const CREATE_PARCELLE = gql`
       parcelle {
         id
         nom
-        culture
         proprietaire
         nomPersonneReferente
         poste
@@ -519,25 +467,18 @@ export const CREATE_PARCELLE = gql`
         email
         geojson
         superficie
-        variete
-        dateSemis
-        dateRecoltePrevue
-        typeSol
-        irrigation
-        typeIrrigation
-        rendementPrevue
-        coutProduction
-        certificationBio
-        certificationHve
-        notes
+        pratique
+        nomProjet
+        description
         createdAt
         updatedAt
         user {
           id
-          username
+          email
           firstName
           lastName
           logo
+          abreviation
           nomInstitution
           nomProjet
         }
@@ -555,21 +496,12 @@ export const UPDATE_PARCELLE = gql`
   mutation UpdateParcelle(
     $id: ID!
     $nom: String
-    $culture: String
     $proprietaire: String
     $geojson: JSONString
     $superficie: Decimal
-    $variete: String
-    $dateSemis: Date
-    $dateRecoltePrevue: Date
-    $typeSol: String
-    $irrigation: Boolean
-    $typeIrrigation: String
-    $rendementPrevue: Decimal
-    $coutProduction: Decimal
-    $certificationBio: Boolean
-    $certificationHve: Boolean
-    $notes: String
+    $pratique: String
+    $nomProjet: String
+    $description: String
     $images: [Upload]
     $nomPersonneReferente: String
     $poste: String
@@ -579,21 +511,12 @@ export const UPDATE_PARCELLE = gql`
     updateParcelle(
       id: $id
       nom: $nom
-      culture: $culture
       proprietaire: $proprietaire
       geojson: $geojson
       superficie: $superficie
-      variete: $variete
-      dateSemis: $dateSemis
-      dateRecoltePrevue: $dateRecoltePrevue
-      typeSol: $typeSol
-      irrigation: $irrigation
-      typeIrrigation: $typeIrrigation
-      rendementPrevue: $rendementPrevue
-      coutProduction: $coutProduction
-      certificationBio: $certificationBio
-      certificationHve: $certificationHve
-      notes: $notes
+      pratique: $pratique
+      nomProjet: $nomProjet
+      description: $description
       images: $images
       nomPersonneReferente: $nomPersonneReferente
       poste: $poste
@@ -605,7 +528,6 @@ export const UPDATE_PARCELLE = gql`
       parcelle {
         id
         nom
-        culture
         proprietaire
         nomPersonneReferente
         poste
@@ -613,25 +535,18 @@ export const UPDATE_PARCELLE = gql`
         email
         geojson
         superficie
-        variete
-        dateSemis
-        dateRecoltePrevue
-        typeSol
-        irrigation
-        typeIrrigation
-        rendementPrevue
-        coutProduction
-        certificationBio
-        certificationHve
-        notes
+        pratique
+        nomProjet
+        description
         createdAt
         updatedAt
         user {
           id
-          username
+          email
           firstName
           lastName
           logo
+          abreviation
           nomInstitution
           nomProjet
         }
@@ -665,13 +580,12 @@ export const TOKEN_AUTH = gql`
 `;
 
 export const TOKEN_AUTH_WITH_USER = gql`
-  mutation TokenAuthWithUser($username: String!, $password: String!) {
-    tokenAuthWithUser(username: $username, password: $password) {
+  mutation TokenAuthWithUser($email: String!, $password: String!) {
+    tokenAuthWithUser(email: $email, password: $password) {
       token
       refreshToken
       user {
         id
-        username
         email
         firstName
         lastName
@@ -754,7 +668,7 @@ export const CREATE_SIEGE = gql`
         updatedAt
         user {
           id
-          username
+          email
         }
         photosBatiment {
           id
@@ -821,7 +735,7 @@ export const UPDATE_SIEGE = gql`
         updatedAt
         user {
           id
-          username
+          email
         }
         photosBatiment {
           id
@@ -896,7 +810,7 @@ export const CREATE_PEPINIERE = gql`
         updatedAt
         user {
           id
-          username
+          email
         }
         photos {
           id
@@ -963,7 +877,7 @@ export const UPDATE_PEPINIERE = gql`
         updatedAt
         user {
           id
-          username
+          email
         }
         photos {
           id

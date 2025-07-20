@@ -174,3 +174,7 @@ main {
     @apply bg-background text-foreground;
   }
 }
+
+.modern-input {
+  @apply appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-base transition-all duration-200 shadow-sm;
+}

@@ -1,26 +1,71 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 
-class User(AbstractUser):
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('L\'email est obligatoire')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Le superuser doit avoir is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Le superuser doit avoir is_superuser=True.')
+        return self.create_user(email, password, **extra_fields)
+
+class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('membre', 'Membre'),
     )
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='membre')
     logo = models.ImageField(upload_to='logos/', null=True, blank=True, help_text="Logo du membre")
     abreviation = models.CharField(max_length=20, blank=True, help_text="Abréviation du membre")
-    
-    # Nouveaux champs pour remplacer nom et prenom
     nom_institution = models.CharField(max_length=200, blank=True, help_text="Nom de l'institution")
     nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")
-    
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
     def __str__(self):
-        return f"{self.username} ({self.role})" 
+        return f"{self.email} ({self.role})"
 
 class Parcelle(models.Model):
+    # Choix pour les pratiques
+    PRATIQUE_CHOICES = (
+        ('structure_brise_vent', 'Structure Brise-vent'),
+        ('structure_pare_feu', 'Structure Pare feu'),
+        ('structures_antierosives', 'Structures antiérosives'),
+        ('structure_cultures_couloir', 'Structure Cultures en Couloir/allée'),
+        ('pratiques_taillage_coupe', 'Pratiques de taillage, coupe et application engrais verts'),
+        ('pratiques_couverture_sol', 'Pratiques couverture du sol'),
+        ('pratiques_conservation_eau', 'Pratiques/structures conservation d\'eau'),
+        ('systeme_multi_etage', 'Système multi-étage diversifié'),
+        ('arbres_autochtones', 'Arbres Autochtones'),
+        ('production_epices', 'Production épices'),
+        ('production_bois_energie', 'Production Bois énergie'),
+        ('production_fruit', 'Production fruit'),
+        ('integration_cultures_vivrieres', 'Intégration cultures vivrières'),
+        ('integration_elevage', 'Intégration d\'élevage'),
+    )
+    
     # Informations de base
     nom = models.CharField(max_length=100)
-    culture = models.CharField(max_length=100)
     proprietaire = models.CharField(max_length=100)
     
     # Nouveaux champs pour personne référente
@@ -31,28 +76,18 @@ class Parcelle(models.Model):
     
     # Informations agricoles
     superficie = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Superficie en hectares")
-    variete = models.CharField(max_length=100, null=True, blank=True, help_text="Variété de la culture")
-    date_semis = models.DateField(null=True, blank=True, help_text="Date de semis")
-    date_recolte_prevue = models.DateField(null=True, blank=True, help_text="Date de récolte prévue")
     
-    # Informations techniques
-    type_sol = models.CharField(max_length=50, null=True, blank=True, help_text="Type de sol")
-    irrigation = models.BooleanField(default=False, help_text="Parcelle irriguée")
-    type_irrigation = models.CharField(max_length=50, null=True, blank=True, help_text="Type d'irrigation")
+    # Nouveau champ pratique
+    pratique = models.CharField(max_length=50, choices=PRATIQUE_CHOICES, blank=True, help_text="Pratique agricole principale")
     
-    # Informations économiques
-    rendement_prevue = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text="Rendement prévu en tonnes/ha")
-    cout_production = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Coût de production en euros/ha")
-    
-    # Informations environnementales
-    certification_bio = models.BooleanField(default=False, help_text="Certification biologique")
-    certification_hve = models.BooleanField(default=False, help_text="Certification Haute Valeur Environnementale")
-    
-    # Notes et observations
-    notes = models.TextField(null=True, blank=True, help_text="Notes et observations")
+    # Nouveau champ nom projet
+    nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")
     
     # Données géospatiales (GeoJSON converti depuis les fichiers .shp, .kml, etc.)
     geojson = models.JSONField(help_text="Données GeoJSON converties depuis les fichiers uploadés")
+    
+    # Description (remplace notes)
+    description = models.TextField(null=True, blank=True, help_text="Description de la parcelle")
     
     # Relations et métadonnées
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='parcelles')
@@ -109,7 +144,7 @@ class Siege(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nom} - {self.user.username}"
+        return f"{self.nom} - {self.user.email}"
 
 class SiegeImage(models.Model):
     siege = models.ForeignKey(Siege, on_delete=models.CASCADE, related_name='photos_batiment')
@@ -146,7 +181,7 @@ class Pepiniere(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nom} - {self.user.username}"
+        return f"{self.nom} - {self.user.email}"
 
 class PepiniereImage(models.Model):
     pepiniere = models.ForeignKey(Pepiniere, on_delete=models.CASCADE, related_name='photos')

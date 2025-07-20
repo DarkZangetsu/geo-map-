@@ -31,7 +31,7 @@ export default function SiegesGlobauxTable({ sieges, loading }) {
             )}
             <div>
               <div className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</div>
-              <div className="text-sm text-gray-500">{user.username}</div>
+              <div className="text-sm text-gray-500">{user.firstName} {user.lastName} {user.email}</div>
             </div>
           </div>
         ) : '-';

@@ -284,7 +284,7 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                 <Polygon
                   positions={geojson.coordinates[0].map(coord => [coord[1], coord[0]])}
                   pathOptions={{
-                    color: parcelle.certificationBio ? '#22c55e' : '#3b82f6',
+                    color: '#3b82f6',
                     weight: 2,
                     fillOpacity: 0.2
                   }}
@@ -397,13 +397,7 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                   </p>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-2">
-                <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                  <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
-                  Culture
-                </div>
-                <div className="text-base font-medium text-gray-900">{selectedParcelle.culture || 'Non définie'}</div>
-              </div>
+
               <div className="bg-white rounded-xl shadow p-2">
                 <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
                   <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z' /></svg>
@@ -420,48 +414,31 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                   <div className="text-base font-medium text-gray-900">{selectedParcelle.superficie} ha</div>
                 </div>
               )}
-              {selectedParcelle.variete && (
+              {selectedParcelle.pratique && (
                 <div className="bg-white rounded-xl shadow p-2">
                   <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
                     <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
-                    Variété
+                    Pratique
                   </div>
-                  <div className="text-base font-medium text-gray-900">{selectedParcelle.variete}</div>
+                  <div className="text-base font-medium text-gray-900">{selectedParcelle.pratique}</div>
                 </div>
               )}
-              {selectedParcelle.dateSemis && (
+              {selectedParcelle.nomProjet && (
                 <div className="bg-white rounded-xl shadow p-2">
                   <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
-                    Date de semis
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' /></svg>
+                    Nom Projet
                   </div>
-                  <div className="text-base font-medium text-gray-900">{formatDate(selectedParcelle.dateSemis)}</div>
+                  <div className="text-base font-medium text-gray-900">{selectedParcelle.nomProjet}</div>
                 </div>
               )}
-              {selectedParcelle.dateRecoltePrevue && (
-                <div className="bg-white rounded-xl shadow p-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
-                    Récolte prévue
-                  </div>
-                  <div className="text-base font-medium text-gray-900">{formatDate(selectedParcelle.dateRecoltePrevue)}</div>
-                </div>
-              )}
-              <div className="bg-white rounded-xl shadow p-2 flex gap-2">
-                {selectedParcelle.certificationBio && (
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full font-semibold border border-green-200">Bio</span>
-                )}
-                {selectedParcelle.certificationHve && (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-semibold border border-blue-200">HVE</span>
-                )}
-              </div>
-              {selectedParcelle.notes && (
+              {selectedParcelle.description && (
                 <div className="bg-white rounded-xl shadow p-2">
                   <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
                     <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6 0a6 6 0 1112 0A6 6 0 019 12z' /></svg>
-                    Notes
+                    Description
                   </div>
-                  <div className="text-base text-gray-800">{selectedParcelle.notes}</div>
+                  <div className="text-base text-gray-800">{selectedParcelle.description}</div>
                 </div>
               )}
             </div>

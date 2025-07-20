@@ -20,24 +20,15 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     : `${currentAbreviation}_site de référence ${parcellesCount + 1}`;
   const [formData, setFormData] = useState({
     nom: defaultNom,
-    culture: parcelle?.culture || '',
     proprietaire: parcelle?.proprietaire || '',
     nomPersonneReferente: parcelle?.nomPersonneReferente || '',
     poste: parcelle?.poste || '',
     telephone: parcelle?.telephone || '',
     email: parcelle?.email || '',
     superficie: parcelle?.superficie || '',
-    variete: parcelle?.variete || '',
-    dateSemis: parcelle?.dateSemis || '',
-    dateRecoltePrevue: parcelle?.dateRecoltePrevue || '',
-    typeSol: parcelle?.typeSol || '',
-    irrigation: parcelle?.irrigation || false,
-    typeIrrigation: parcelle?.typeIrrigation || '',
-    rendementPrevue: parcelle?.rendementPrevue || '',
-    coutProduction: parcelle?.coutProduction || '',
-    certificationBio: parcelle?.certificationBio || false,
-    certificationHve: parcelle?.certificationHve || false,
-    notes: parcelle?.notes || '',
+    pratique: parcelle?.pratique || '',
+    nomProjet: parcelle?.nomProjet || '',
+    description: parcelle?.description || '',
     images: []
   });
   
@@ -200,20 +191,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Culture *
-                  </label>
-                  <input
-                    type="text"
-                    name="culture"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.culture}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Propriétaire *
                   </label>
                   <input
@@ -225,6 +202,8 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                     onChange={handleInputChange}
                   />
                 </div>
+
+
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -306,166 +285,62 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Variété
-                  </label>
-                  <input
-                    type="text"
-                    name="variete"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.variete}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type de sol
+                    Pratique
                   </label>
                   <select
-                    name="typeSol"
+                    name="pratique"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.typeSol}
+                    value={formData.pratique}
                     onChange={handleInputChange}
                   >
-                    <option value="">Sélectionner</option>
-                    <option value="argileux">Argileux</option>
-                    <option value="sableux">Sableux</option>
-                    <option value="limoneux">Limoneux</option>
-                    <option value="calcaire">Calcaire</option>
+                    <option value="">Sélectionner une pratique</option>
+                    <option value="structure_brise_vent">Structure Brise-vent</option>
+                    <option value="structure_pare_feu">Structure Pare feu</option>
+                    <option value="structures_antierosives">Structures antiérosives</option>
+                    <option value="structure_cultures_couloir">Structure Cultures en Couloir/allée</option>
+                    <option value="pratiques_taillage_coupe">Pratiques de taillage, coupe et application engrais verts</option>
+                    <option value="pratiques_couverture_sol">Pratiques couverture du sol</option>
+                    <option value="pratiques_conservation_eau">Pratiques/structures conservation d'eau</option>
+                    <option value="systeme_multi_etage">Système multi-étage diversifié</option>
+                    <option value="arbres_autochtones">Arbres Autochtones</option>
+                    <option value="production_epices">Production épices</option>
+                    <option value="production_bois_energie">Production Bois énergie</option>
+                    <option value="production_fruit">Production fruit</option>
+                    <option value="integration_cultures_vivrieres">Intégration cultures vivrières</option>
+                    <option value="integration_elevage">Intégration d'élevage</option>
                   </select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date de semis
+                    Nom du projet
                   </label>
                   <input
-                    type="date"
-                    name="dateSemis"
+                    type="text"
+                    name="nomProjet"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.dateSemis}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date de récolte prévue
-                  </label>
-                  <input
-                    type="date"
-                    name="dateRecoltePrevue"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.dateRecoltePrevue}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Irrigation */}
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Irrigation</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="irrigation"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    checked={formData.irrigation}
-                    onChange={handleInputChange}
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Irrigation
-                  </label>
-                </div>
-                
-                {formData.irrigation && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Type d'irrigation
-                    </label>
-                    <select
-                      name="typeIrrigation"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={formData.typeIrrigation}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Sélectionner</option>
-                      <option value="aspersion">Aspersion</option>
-                      <option value="goutte_a_goutte">Goutte à goutte</option>
-                      <option value="gravitaire">Gravitaire</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Informations économiques */}
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Informations économiques</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rendement prévu (t/ha)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="rendementPrevue"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.rendementPrevue}
+                    value={formData.nomProjet}
                     onChange={handleInputChange}
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Coût de production (€/ha)
+                    Description
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="coutProduction"
+                  <textarea
+                    name="description"
+                    rows="4"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.coutProduction}
+                    value={formData.description}
                     onChange={handleInputChange}
+                    placeholder="Description du site de référence..."
                   />
                 </div>
               </div>
             </div>
 
-            {/* Certifications */}
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Certifications</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="certificationBio"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    checked={formData.certificationBio}
-                    onChange={handleInputChange}
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Certification Bio
-                  </label>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="certificationHve"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    checked={formData.certificationHve}
-                    onChange={handleInputChange}
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Certification HVE
-                  </label>
-                </div>
-              </div>
-            </div>
+
 
             {/* Géolocalisation */}
             <div className="border-b pb-4">
@@ -573,20 +448,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
               )}
             </div>
 
-            {/* Notes */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Notes</h3>
-              <div>
-                <textarea
-                  name="notes"
-                  rows="4"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  placeholder="Informations supplémentaires..."
-                />
-              </div>
-            </div>
+
           </form>
         </div>
       </div>

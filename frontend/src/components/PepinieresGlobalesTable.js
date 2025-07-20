@@ -46,7 +46,7 @@ export default function PepinieresGlobalesTable({ pepinieres, users = [] }) {
               <img src={user.logo} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
             )}
             <div>
-              <div className="text-sm font-medium text-gray-900">{user.nomInstitution || user.username}</div>
+              <div className="text-sm font-medium text-gray-900">{user.nomInstitution || (user.firstName + ' ' + user.lastName) || user.email}</div>
               <div className="text-sm text-gray-500">{user.nomProjet || user.abreviation}</div>
             </div>
           </div>
