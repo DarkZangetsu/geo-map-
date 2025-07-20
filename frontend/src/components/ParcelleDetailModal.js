@@ -220,7 +220,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                         <div className="flex items-center gap-3">
                           {parcelleComplete?.user?.logo && (
                             <img
-                              src={`http://localhost:8000${parcelleComplete.user.logo}`}
+                              src={`${process.env.NEXT_PUBLIC_API_URL}${parcelleComplete.user.logo}`}
                               alt="Logo"
                               className="w-12 h-12 rounded-full"
                             />
@@ -265,7 +265,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                           {parcelleComplete.images.map((image, index) => (
                             <div key={image.id} className="relative">
                               <img
-                                src={`http://localhost:8000${image.image}`}
+                                src={`${process.env.NEXT_PUBLIC_API_URL}${image.image}`}
                                 alt={`Photo ${index + 1}`}
                                 className="w-full h-48 object-cover rounded-lg"
                               />

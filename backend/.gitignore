@@ -5,8 +5,7 @@ media
 *.pyo   
 *.pyd
 .Python 
-db.sqlite3-journal
-.env    
+db.sqlite3-journal   
 *.sqlite3
 *.log   
 *.pot

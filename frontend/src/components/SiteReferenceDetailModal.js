@@ -188,8 +188,8 @@ export default function SiteReferenceDetailModal({ parcelle, onClose }) {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Galerie d'images</h3>
               <ImageGallery
                 items={parcelle.images.map((img, idx) => ({
-                  original: `http://localhost:8000/media/${img.image}`,
-                  thumbnail: `http://localhost:8000/media/${img.image}`,
+                  original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+                  thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
                   description: img.titre || `Image ${idx + 1}`
                 }))}
                 showPlayButton={false}

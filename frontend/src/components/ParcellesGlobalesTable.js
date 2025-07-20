@@ -119,7 +119,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                   <div className="flex items-center">
                     {parcelle.user?.logo && (
                       <img
-                        src={`http://localhost:8000/media/${parcelle.user.logo}`}
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/media/${parcelle.user.logo}`}
                         alt="Logo"
                         className="w-6 h-6 rounded-full mr-2"
                       />

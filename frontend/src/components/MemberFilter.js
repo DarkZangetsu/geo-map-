@@ -87,7 +87,7 @@ const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
                 <div className="ml-3 flex items-center">
                   {user.logo && (
                     <img
-                      src={`http://localhost:8000${user.logo}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL}${user.logo}`}
                       alt="Logo"
                       className="w-6 h-6 rounded-full mr-2"
                     />

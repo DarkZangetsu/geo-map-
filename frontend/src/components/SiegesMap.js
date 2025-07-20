@@ -320,8 +320,8 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
                     items={selectedSiege.photosBatiment
                       .filter(photo => !!photo.image)
                       .map(photo => ({
-                        original: `http://localhost:8000/media/${photo.image}`,
-                        thumbnail: `http://localhost:8000/media/${photo.image}`,
+                        original: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+                        thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
                         description: photo.titre ? `${photo.titre}${photo.description ? ' - ' + photo.description : ''}` : photo.description || ''
                       }))}
                     showPlayButton={false}

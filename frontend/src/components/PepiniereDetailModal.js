@@ -161,7 +161,7 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
                 {pepiniere.photos.map((photo, index) => (
                   <div key={photo.id} className="relative">
                     <img
-                      src={`http://localhost:8000/media/${photo.image}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`}
                       alt={photo.titre || `Photo ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
                     />

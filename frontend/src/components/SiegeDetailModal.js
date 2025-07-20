@@ -179,7 +179,7 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                         <div className="flex items-center gap-3">
                           {siegeComplete?.user?.logo && (
                             <img
-                              src={`http://localhost:8000${siegeComplete.user.logo}`}
+                              src={`${process.env.NEXT_PUBLIC_API_URL}${siegeComplete.user.logo}`}
                               alt="Logo"
                               className="w-12 h-12 rounded-full"
                             />

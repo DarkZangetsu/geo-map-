@@ -310,8 +310,8 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
                 <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                   <ImageGallery
                     items={selectedPepiniere.images.map((img, idx) => ({
-                      original: `http://localhost:8000/media/${img.image}`,
-                      thumbnail: `http://localhost:8000/media/${img.image}`,
+                      original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+                      thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
                       description: `Image ${idx + 1}`
                     }))}
                     showPlayButton={false}

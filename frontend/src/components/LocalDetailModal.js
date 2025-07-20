@@ -71,7 +71,7 @@ export default function LocalDetailModal({ siege, onClose }) {
                   {siege.user && siege.user.logo && (
                     <div className="flex items-center gap-3">
                       <ImageIcon className="h-5 w-5 text-gray-400" />
-                      <img src={`http://localhost:8000${siege.user.logo}`} alt="Logo" className="w-10 h-10 rounded-full border" />
+                      <img src={`${process.env.NEXT_PUBLIC_API_URL}${siege.user.logo}`} alt="Logo" className="w-10 h-10 rounded-full border" />
                     </div>
                   )}
                   {siege.poste && (
@@ -139,8 +139,8 @@ export default function LocalDetailModal({ siege, onClose }) {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Galerie d'images</h3>
               <ImageGallery
                 items={siege.photosBatiment.map((img, idx) => ({
-                  original: `http://localhost:8000/media/${img.image}`,
-                  thumbnail: `http://localhost:8000/media/${img.image}`,
+                  original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+                  thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
                   description: img.titre || `Image ${idx + 1}`
                 }))}
                 showPlayButton={false}

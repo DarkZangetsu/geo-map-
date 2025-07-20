@@ -22,6 +22,7 @@
     "apollo-upload-client": "^18.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.0",
     "graphql": "^16.11.0",
     "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",

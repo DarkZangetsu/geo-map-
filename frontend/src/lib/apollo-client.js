@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 
 // Créer le lien d'upload pour les fichiers
 const uploadLink = createUploadLink({
-  uri: 'http://localhost:8000/graphql/',
+  uri: `${process.env.NEXT_PUBLIC_API_URL}/graphql/`,
 });
 
 // Lien d'authentification

@@ -185,8 +185,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
       : [...validImages];
       
     return sorted.map((img, idx) => ({
-      original: `http://localhost:8000/media/${img.image}`,
-      thumbnail: `http://localhost:8000/media/${img.image}`,
+      original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+      thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
       description: `Image ${img.ordre !== undefined ? img.ordre + 1 : idx + 1}`
     }));
   };
@@ -527,13 +527,6 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
             </div>
             <div className="bg-white rounded-xl shadow p-3">
               <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 20h9' /></svg>
-                Description
-              </div>
-              <div className="text-base text-gray-800">{selectedSiege.description || '-'}</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3' /></svg>
                 Coordonnées GPS
               </div>
@@ -566,8 +559,8 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                 <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                   <ImageGallery
                     items={selectedSiege.photosBatiment.map(photo => ({
-                      original: `http://localhost:8000/media/${photo.image}`,
-                      thumbnail: `http://localhost:8000/media/${photo.image}`,
+                      original: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+                      thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
                       description: photo.titre ? `${photo.titre}${photo.description ? ' - ' + photo.description : ''}` : photo.description || ''
                     }))}
                     showPlayButton={false}

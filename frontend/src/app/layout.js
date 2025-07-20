@@ -167,7 +167,7 @@ function LayoutContent({ children }) {
                             {console.log('USER NAVBAR:', user)}
                             {user?.logo&& (
                               <img
-                                src={`http://localhost:8000/media/${user.logo}`}
+                                src={`${process.env.NEXT_PUBLIC_API_URL}/media/${user.logo}`}
                                 alt="Logo"
                                 className="w-8 h-8 rounded-full mr-2"
                               />

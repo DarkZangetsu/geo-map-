@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,12 +82,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.parse(
+        os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+    )
 }
+
+# Exemple de configuration PostgreSQL (décommentez et adaptez si besoin)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB', 'agri_geo'),
+#         'USER': os.getenv('POSTGRES_USER', 'postgres'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+#         'PORT': os.getenv('POSTGRES_PORT', '5432'),
+#     }
+# }
 
 
 # Password validation
@@ -166,10 +182,22 @@ GRAPHQL_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
+import ast
+
+def get_list_env(var, default=None):
+    val = os.getenv(var)
+    if val:
+        # Supporte format JSON ou liste séparée par virgule
+        try:
+            return ast.literal_eval(val)
+        except Exception:
+            return [v.strip() for v in val.split(',') if v.strip()]
+    return default or []
+
+CORS_ALLOWED_ORIGINS = get_list_env('CORS_ALLOWED_ORIGINS', [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-]
+])
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -208,9 +236,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 
 # CSRF settings pour accès admin local
-CSRF_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = get_list_env('CSRF_TRUSTED_ORIGINS', [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-]
+])
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
