@@ -23,8 +23,8 @@ function LayoutContent({ children }) {
   return (
     <html lang="fr" style={{ height: '100%' }}>
       <head>
-        <title>Agri-Geo - Gestion des parcelles agricoles</title>
-        <meta name="description" content="Application web pour la gestion des parcelles agricoles avec cartographie interactive" />
+        <title>Alliance-Agroforesterie</title>
+        <meta name="description" content="Application web pour la visualisation des sites de référene et des locaux et des pépinières des institutions membre de l'Alliance-Agroforesterie avec cartographie interactive" />
       </head>
       <body style={{ height: '100%' }}>
         {isLoading ? (
@@ -152,7 +152,8 @@ function LayoutContent({ children }) {
                       {user ? (
                         <>
                           <div className="flex items-center">
-                            {user?.logo && (
+                            {console.log('USER NAVBAR:', user)}
+                            {user?.logo&& (
                               <img
                                 src={`http://localhost:8000/media/${user.logo}`}
                                 alt="Logo"
@@ -164,7 +165,7 @@ function LayoutContent({ children }) {
                                 {user?.firstName} {user?.lastName}
                               </span>
                               <span className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                                {user?.role}
+                                {user?.nomInstitution}
                               </span>
                             </div>
                           </div>

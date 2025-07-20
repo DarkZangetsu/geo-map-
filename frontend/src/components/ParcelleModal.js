@@ -20,6 +20,7 @@ const ParcelleModal = ({ open, onClose, parcelle = null, onSuccess }) => {
               onClose && onClose();
             }}
             onCancel={onClose}
+            mode={parcelle ? 'edit' : 'add'}
           />
         </div>
       </DialogContent>

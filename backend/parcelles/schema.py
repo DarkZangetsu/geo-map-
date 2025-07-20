@@ -16,12 +16,21 @@ class UserType(DjangoObjectType):
     firstName = graphene.String(source='first_name')
     lastName = graphene.String(source='last_name')
     abreviation = graphene.String()
-    nom_institution = graphene.String()
-    nom_projet = graphene.String()
-    
+    nomInstitution = graphene.String(source='nom_institution')
+    nomProjet = graphene.String(source='nom_projet')
+    logo = graphene.String()
+
     class Meta:
         model = User
         fields = "__all__"
+
+    def resolve_logo(self, info):
+        if self.logo:
+            try:
+                return info.context.build_absolute_uri(self.logo.url)
+            except Exception:
+                return str(self.logo)
+        return ""
 
 class ParcelleImageType(DjangoObjectType):
     class Meta:

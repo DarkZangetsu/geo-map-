@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { CREATE_PARCELLE, UPDATE_PARCELLE, GET_ME } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapDrawModal from './MapDrawModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import ConfirmationDialog from './ConfirmationDialog';
+import * as turf from '@turf/turf';
 
-const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0 }) => {
+const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0, mode = 'add' }) => {
   const { data: meData } = useQuery(GET_ME);
   const userAbreviation = meData?.me?.abreviation || '';
   // Déterminer le nom par défaut si création
@@ -37,9 +39,27 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
   const [geojson, setGeojson] = useState(parcelle?.geojson || null);
   const [showMapModal, setShowMapModal] = useState(false);
   const { showSuccess, showError } = useToast();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const [createParcelle, { loading: createLoading }] = useMutation(CREATE_PARCELLE);
   const [updateParcelle, { loading: updateLoading }] = useMutation(UPDATE_PARCELLE);
+
+  // Liste des projets de l'utilisateur connecté
+  const projets = (meData?.me?.nomProjet || '')
+    .split(',')
+    .map(p => p.trim())
+    .filter(Boolean);
+
+  // Mettre à jour le nom si l'abréviation utilisateur change et qu'on est en mode création
+  useEffect(() => {
+    if (!isEdit && userAbreviation) {
+      setFormData(prev => ({
+        ...prev,
+        nom: `${userAbreviation}_site de référence ${parcellesCount + 1}`
+      }));
+    }
+  }, [userAbreviation, parcellesCount, isEdit]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -111,16 +131,20 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = async () => {
+    setConfirmLoading(true);
     let geojsonToUse = geojson;
     if (showMapModal) {
       geojsonToUse = null;
     }
     if (!geojsonToUse) {
       showError('Veuillez fournir un fichier GeoJSON ou dessiner sur la carte.');
+      setConfirmLoading(false);
       return;
     }
-
     try {
       const imagesToSend = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
       const variables = {
@@ -128,8 +152,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
         geojson: JSON.stringify(geojsonToUse),
         images: imagesToSend.length > 0 ? imagesToSend : null
       };
-
-      if (parcelle) {
+      if (mode === 'edit' && parcelle) {
         // Mise à jour
         const { data } = await updateParcelle({
           variables: {
@@ -137,10 +160,9 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
             ...variables
           }
         });
-
         if (data.updateParcelle.success) {
           showSuccess('Site de référence mis à jour avec succès !');
-          onSuccess(data.updateParcelle.parcelle);
+          onSuccess && onSuccess(data.updateParcelle.parcelle);
         } else {
           showError(data.updateParcelle.message);
         }
@@ -149,10 +171,9 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
         const { data } = await createParcelle({
           variables: variables
         });
-
         if (data.createParcelle.success) {
           showSuccess('Site de référence créé avec succès !');
-          onSuccess(data.createParcelle.parcelle);
+          onSuccess && onSuccess(data.createParcelle.parcelle);
         } else {
           showError(data.createParcelle.message);
         }
@@ -160,12 +181,20 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
       showError('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setConfirmLoading(false);
+      setShowConfirm(false);
     }
   };
 
   return (
     <>
-      {/* Header supprimé, géré par le Dialog parent */}
+      {/* Header fixe - complètement séparé */}
+      <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg">
+        <h2 className="text-2xl font-bold text-gray-900">
+          {mode === 'edit' ? 'Modifier le site de référence' : 'Ajouter un site de référence'}
+        </h2>
+      </div>
       {/* Contenu scrollable - section séparée */}
       <div className="bg-white overflow-y-auto max-h-[60vh]">
         <div className="p-6">
@@ -188,7 +217,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                     readOnly={!isEdit}
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Propriétaire *
@@ -199,22 +227,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={formData.proprietaire}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Superficie (ha)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="superficie"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.superficie}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -315,13 +327,17 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom du projet
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="nomProjet"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={formData.nomProjet}
                     onChange={handleInputChange}
-                  />
+                  >
+                    <option value="">Sélectionner un projet</option>
+                    {projets.map((projet, idx) => (
+                      <option key={idx} value={projet}>{projet}</option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div>
@@ -340,42 +356,67 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
               </div>
             </div>
 
-
-
-            {/* Géolocalisation */}
+            {/* Géolocalisation et superficie */}
             <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Géolocalisation</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fichier GeoJSON *
-                </label>
-                <input
-                  type="file"
-                  accept=".geojson,.json"
-                  onChange={handleGeojsonUpload}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  disabled={!!geojson}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowMapModal(true)}
-                  className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  disabled={!!geojson}
-                >
-                  Dessiner sur la carte
-                </button>
-                {geojson && (
-                  <p className="mt-1 text-sm text-green-600">✓ Site de référence défini</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">Importer un fichier OU dessiner sur la carte.</p>
-                <MapDrawModal
-                  open={showMapModal}
-                  onClose={() => setShowMapModal(false)}
-                  onSave={gjson => {
-                    setGeojson(gjson);
-                    setShowMapModal(false);
-                  }}
-                />
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Géolocalisation et superficie</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Superficie (ha)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="superficie"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={formData.superficie}
+                    onChange={handleInputChange}
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fichier GeoJSON *
+                  </label>
+                  <input
+                    type="file"
+                    accept=".geojson,.json"
+                    onChange={handleGeojsonUpload}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    disabled={!!geojson}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMapModal(true)}
+                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    disabled={!!geojson}
+                  >
+                    Dessiner sur la carte
+                  </button>
+                  {geojson && (
+                    <p className="mt-1 text-sm text-green-600">✓ Site de référence défini</p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">Importer un fichier OU dessiner sur la carte.</p>
+                  <MapDrawModal
+                    open={showMapModal}
+                    onClose={() => setShowMapModal(false)}
+                    onSave={gjson => {
+                      setGeojson(gjson);
+                      // Calcul automatique de la superficie si polygone
+                      try {
+                        if (gjson && (gjson.type === 'Polygon' || gjson.type === 'MultiPolygon')) {
+                          const area = turf.area({ type: 'Feature', geometry: gjson });
+                          // Convertir en hectares (1 ha = 10 000 m²)
+                          const superficieHa = (area / 10000).toFixed(2);
+                          setFormData(prev => ({ ...prev, superficie: superficieHa }));
+                        }
+                      } catch (e) {
+                        // ignore erreur turf
+                      }
+                      setShowMapModal(false);
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -471,14 +512,28 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
             {(createLoading || updateLoading) ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {parcelle ? 'Mise à jour...' : 'Création...'}
+                {mode === 'edit' ? 'Mise à jour...' : 'Création...'}
               </div>
             ) : (
-              parcelle ? 'Mettre à jour' : 'Créer le site de référence'
+              mode === 'edit' ? 'Mettre à jour' : 'Créer le site de référence'
             )}
           </button>
         </div>
       </div>
+      {showConfirm && (
+        <ConfirmationDialog
+          isOpen={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleConfirm}
+          title={mode === 'edit' ? 'Confirmer la modification' : 'Confirmer la création'}
+          message={mode === 'edit' ? 'Voulez-vous vraiment modifier ce site de référence ?' : 'Voulez-vous vraiment créer ce site de référence ?'}
+          confirmText={mode === 'edit' ? 'Mettre à jour' : 'Créer'}
+          confirmButtonClass={confirmLoading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}
+          cancelButtonClass={confirmLoading ? 'cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400'}
+          confirmDisabled={confirmLoading}
+          confirmLoading={confirmLoading}
+        />
+      )}
     </>
   );
 };

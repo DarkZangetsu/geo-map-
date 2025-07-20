@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Eye } from 'lucide-react';
 import { useAuth } from '../../components/Providers';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 export default function ParcellesPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -33,6 +34,8 @@ export default function ParcellesPage() {
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedParcelleDetails, setSelectedParcelleDetails] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [parcelleToDelete, setParcelleToDelete] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
@@ -172,13 +175,16 @@ export default function ParcellesPage() {
     }
   };
 
-  const handleDeleteParcelle = async (id) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce site de référence ?')) {
-      return;
-    }
+  const handleDeleteParcelle = (id) => {
+    setParcelleToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteParcelle = async () => {
+    if (!parcelleToDelete) return;
     try {
       const { data } = await deleteParcelle({
-        variables: { id }
+        variables: { id: parcelleToDelete }
       });
       if (data.deleteParcelle.success) {
         showSuccess('Site de référence supprimé avec succès');
@@ -189,6 +195,9 @@ export default function ParcellesPage() {
     } catch (error) {
       showError('Erreur lors de la suppression');
       console.error('Delete error:', error);
+    } finally {
+      setShowDeleteConfirm(false);
+      setParcelleToDelete(null);
     }
   };
 
@@ -446,6 +455,19 @@ export default function ParcellesPage() {
             {/* Tu peux réutiliser ParcelleDetailModal ici si besoin */}
           </div>
         </div>
+      )}
+
+      {/* Modal de confirmation suppression */}
+      {showDeleteConfirm && (
+        <ConfirmationDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => { setShowDeleteConfirm(false); setParcelleToDelete(null); }}
+          onConfirm={confirmDeleteParcelle}
+          title="Confirmer la suppression"
+          message="Êtes-vous sûr de vouloir supprimer ce site de référence ?"
+          confirmText="Supprimer"
+          confirmButtonClass="bg-red-600 hover:bg-red-700"
+        />
       )}
     </div>
   );
