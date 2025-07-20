@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useToast } from './Toast';
 import { Building, User, Mail, Lock, FolderKanban, ArrowRight, ArrowLeft } from 'lucide-react';
 
-export default function AuthForm({ onLogin, onRegister, loading }) {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthForm({ onLogin, onRegister, loading, mode }) {
+  // Si mode est défini, on force le mode login/register, sinon on laisse le switch interne
+  const [isLogin, setIsLogin] = useState(mode ? mode === 'login' : true);
   const [step, setStep] = useState(0); // Pour la pagination
   const [formData, setFormData] = useState({
     email: '',
@@ -246,6 +247,9 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
     }
   ];
 
+  // Remplace tous les usages de isLogin par la valeur forcée si mode est défini
+  const effectiveIsLogin = mode ? mode === 'login' : isLogin;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 py-12 px-4 sm:px-6 lg:px-8">
       <ToastContainer />
@@ -257,12 +261,12 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
             </svg>
           </div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900 leading-tight">
-            <div>{isLogin ? 'Connexion' : 'Inscription'}</div>
+            <div>{effectiveIsLogin ? 'Connexion' : 'Inscription'}</div>
             <div className="text-lg">à</div>
             <div>Alliance-Agroforesterie</div>
           </h2>
           {/* Barre de progression pour l'inscription */}
-          {!isLogin && (
+          {!effectiveIsLogin && (
             <div className="flex items-center justify-center gap-2 mt-6 mb-2">
               {steps.map((s, idx) => (
                 <div key={s.label} className={`h-2 w-2 md:w-8 rounded-full transition-all duration-300 ${idx <= step ? 'bg-blue-700' : 'bg-blue-200'} ${idx === step ? 'md:w-12' : ''}`}></div>
@@ -271,7 +275,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
           )}
           <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
             <div className={`rounded-md shadow-sm flex flex-col gap-4 max-h-[60vh] overflow-y-auto`}>
-              {isLogin ? (
+              {effectiveIsLogin ? (
                 <>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -309,7 +313,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
               )}
             </div>
             {/* Pagination boutons pour inscription */}
-            {!isLogin && (
+            {!effectiveIsLogin && (
               <div className="flex justify-between items-center mt-2">
                 <button
                   type="button"
@@ -350,7 +354,7 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
               </div>
             )}
             {/* Bouton pour connexion */}
-            {isLogin && (
+            {effectiveIsLogin && (
               <div>
                 <button
                   type="submit"
@@ -372,14 +376,17 @@ export default function AuthForm({ onLogin, onRegister, loading }) {
               </div>
             )}
           </form>
+          {/* Lien bas de formulaire pour changer de mode (toujours affiché) */}
           <div className="text-center mt-4">
-            <button
-              type="button"
-              className="text-blue-700 hover:underline text-sm font-medium"
-              onClick={() => { setIsLogin(!isLogin); resetForm(); setStep(0); }}
-            >
-              {isLogin ? "Pas encore de compte ? S'inscrire" : "Déjà inscrit ? Se connecter"}
-            </button>
+            {effectiveIsLogin ? (
+              <a href="/register" className="text-blue-700 hover:underline text-sm font-medium">
+                Pas encore de compte ? S'inscrire
+              </a>
+            ) : (
+              <a href="/login" className="text-blue-700 hover:underline text-sm font-medium">
+                Déjà inscrit ? Se connecter
+              </a>
+            )}
           </div>
         </div>
       </div>

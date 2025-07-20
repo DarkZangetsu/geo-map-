@@ -14,12 +14,14 @@ export default function ProtectedRoute({ children, requireAuth = true }) {
     const checkAuth = () => {
       const token = authUtils.getToken();
       const savedUser = authUtils.getUser();
-      
+      const path = typeof window !== 'undefined' ? window.location.pathname : '';
       // Si aucun token ou utilisateur, ou si le token est expiré
       if (!token || !savedUser || authUtils.isTokenExpired(token)) {
         console.log('Utilisateur non authentifié, redirection vers login...');
         authUtils.clearAuthData();
-        router.push('/');
+        if (path !== '/login' && path !== '/register') {
+          router.push('/login');
+        }
         return;
       }
     };

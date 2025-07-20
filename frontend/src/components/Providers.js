@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     const checkAuth = () => {
       const token = authUtils.getToken();
       const savedUser = authUtils.getUser();
-      
+      const path = typeof window !== 'undefined' ? window.location.pathname : '';
       if (token && savedUser && !authUtils.isTokenExpired(token)) {
         setUser(savedUser);
         setIsAuthenticated(true);
@@ -28,20 +28,22 @@ export function AuthProvider({ children }) {
         setUser(null);
         setIsAuthenticated(false);
         authUtils.clearAuthData();
-        
-        // Rediriger vers la page de login si on n'est pas déjà sur la page d'accueil
-        if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-          console.log('Token invalide ou expiré, redirection vers login...');
-          router.push('/');
+        // Rediriger vers /login sauf si déjà sur /login ou /register
+        if (typeof window !== 'undefined' && path !== '/login' && path !== '/register') {
+          console.log('Token invalide ou expiré, redirection vers /login...');
+          router.push('/login');
         }
       }
       setIsLoading(false);
     };
-
     checkAuth();
   }, [router]);
 
   const login = (userData, token) => {
+    if (typeof token !== 'string' || !token.trim()) {
+      console.error('Tentative de login avec un token invalide:', token);
+      return;
+    }
     authUtils.setAuthData(token, userData);
     setUser(userData);
     setIsAuthenticated(true);
@@ -54,7 +56,11 @@ export function AuthProvider({ children }) {
     setUser(null);
     setIsAuthenticated(false);
     setIsLoggingOut(false);
-    router.push('/');
+    // Rediriger vers /login sauf si déjà sur /login ou /register
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    if (path !== '/login' && path !== '/register') {
+      router.push('/login');
+    }
   };
 
   return (

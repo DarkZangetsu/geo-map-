@@ -19,6 +19,10 @@ export const isMember = (role) => {
 export const authUtils = {
   // Stocker le token et les données utilisateur
   setAuthData: (token, user) => {
+    if (typeof token !== 'string' || !token.trim()) {
+      console.error('setAuthData appelé avec un token non string:', token);
+      return;
+    }
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
@@ -111,21 +115,18 @@ export const authUtils = {
 
   // Vérifier la validité du token
   validateToken: (token) => {
-    if (!token) {
-      console.log('Aucun token fourni');
+    if (!token || typeof token !== 'string' || token.trim() === '') {
+      console.log('Aucun token fourni ou token non valide');
       return false;
     }
-    
     try {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      
       console.log('Validation du token:');
       console.log('  - Payload:', decoded);
       console.log('  - Expiration:', new Date(decoded.exp * 1000).toLocaleString());
       console.log('  - Temps actuel:', new Date(currentTime * 1000).toLocaleString());
       console.log('  - Valide:', decoded.exp > currentTime);
-      
       return decoded.exp > currentTime;
     } catch (error) {
       console.error('Token invalide:', error);

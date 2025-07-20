@@ -43,6 +43,7 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
+  --midnight-blue: rgb(0,70,144);
 }
 
 @theme inline {
@@ -177,4 +178,14 @@ main {
 
 .modern-input {
   @apply appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-base transition-all duration-200 shadow-sm;
+}
+
+.midnight-blue-btn {
+  background-color: var(--midnight-blue) !important;
+  color: #fff !important;
+  border: 1px solid var(--midnight-blue) !important;
+}
+.midnight-blue-btn:hover {
+  background-color: #003366 !important;
+  color: #fff !important;
 }

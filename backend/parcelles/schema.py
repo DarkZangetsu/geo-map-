@@ -1138,57 +1138,53 @@ class Query(graphene.ObjectType):
     my_pepinieres = graphene.List(PepiniereType)
     pepiniere = graphene.Field(PepiniereType, id=graphene.ID(required=True))
 
-    @login_required
+    # ENLEVER @login_required pour rendre public
     def resolve_all_parcelles(self, info):
-        # Permettre à tous les utilisateurs authentifiés d'accéder à toutes les parcelles
-        # pour les pages globales
         return Parcelle.objects.all()
 
     @login_required
     def resolve_my_parcelles(self, info):
-        return Parcelle.objects.filter(user=info.context.user)
+        user = info.context.user
+        return Parcelle.objects.filter(user=user)
 
     @login_required
     def resolve_parcelle(self, info, id):
-        return Parcelle.objects.get(id=id)
+        return Parcelle.objects.get(pk=id)
 
     @login_required
     def resolve_all_users(self, info):
-        # Permettre à tous les utilisateurs authentifiés d'accéder à la liste des utilisateurs
-        # pour le filtrage dans les pages globales
         return User.objects.all()
 
     @login_required
     def resolve_me(self, info):
-        return info.context.user
+        user = info.context.user
+        return user
 
-    @login_required
+    # ENLEVER @login_required pour rendre public
     def resolve_all_sieges(self, info):
-        # Permettre à tous les utilisateurs authentifiés d'accéder à tous les sièges
-        # pour les pages globales
         return Siege.objects.all()
 
     @login_required
     def resolve_my_sieges(self, info):
-        return Siege.objects.filter(user=info.context.user)
+        user = info.context.user
+        return Siege.objects.filter(user=user)
 
     @login_required
     def resolve_siege(self, info, id):
-        return Siege.objects.get(id=id)
+        return Siege.objects.get(pk=id)
 
-    @login_required
+    # ENLEVER @login_required pour rendre public
     def resolve_all_pepinieres(self, info):
-        # Permettre à tous les utilisateurs authentifiés d'accéder à toutes les pépinières
-        # pour les pages globales
         return Pepiniere.objects.all()
 
     @login_required
     def resolve_my_pepinieres(self, info):
-        return Pepiniere.objects.filter(user=info.context.user)
+        user = info.context.user
+        return Pepiniere.objects.filter(user=user)
 
     @login_required
     def resolve_pepiniere(self, info, id):
-        return Pepiniere.objects.get(id=id)
+        return Pepiniere.objects.get(pk=id)
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
