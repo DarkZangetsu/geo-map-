@@ -31,8 +31,8 @@ export default function HomePage() {
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
       <div className="bg-white flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 py-4 border-b shadow-sm" style={{ flex: '0 0 auto' }}>
-    <div className="flex items-center gap-2">
-          <h1 className="ml-4 text-2xl font-extrabold text-blue-900">Carte globale</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="ml-4 text-2xl font-extrabold text-blue-900">Carte générale</h1>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <label className="flex items-center gap-2 text-blue-900 font-semibold bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
@@ -65,17 +65,17 @@ export default function HomePage() {
             Pépinières
             <span className="ml-1 text-xs bg-orange-200 text-orange-900 rounded px-2 py-0.5 font-bold">{allPepinieres.length}</span>
           </label>
-                  <select
-                    value={mapStyle}
+          <select
+            value={mapStyle}
             onChange={e => setMapStyle(e.target.value)}
             className="px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm"
-                  >
-                    <option value="street">Carte routière</option>
-                    <option value="satellite">Satellite</option>
-                    <option value="hybrid">Hybride</option>
-                  </select>
+          >
+            <option value="street">Carte routière</option>
+            <option value="satellite">Satellite</option>
+            <option value="hybrid">Hybride</option>
+          </select>
         </div>
-            </div>
+      </div>
       <div style={{ flex: 1, minHeight: 0, height: '100%' }}>
         {(parcellesLoading || siegesLoading || pepinieresLoading) ? (
           <div className="flex items-center justify-center h-full text-lg text-blue-700 font-semibold">Chargement de la carte...</div>
@@ -99,6 +99,6 @@ export default function HomePage() {
           </div>
         )}
       </div>
-      </div>
-    );
+    </div>
+  );
 }

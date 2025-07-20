@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     setIsAuthenticated(false);
     setIsLoggingOut(false);
-    // Rediriger vers / (carte globale) sauf si déjà sur /login ou /register
+    // Rediriger vers / (carte générale) sauf si déjà sur /login ou /register
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
     if (path !== '/' && path !== '/login' && path !== '/register') {
       router.push('/');

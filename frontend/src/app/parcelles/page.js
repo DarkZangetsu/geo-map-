@@ -84,20 +84,7 @@ export default function ParcellesPage() {
   const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
 
   const columnsDT = [
-    {
-      id: 'select',
-      header: '',
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={selected.includes(row.original.id)}
-          onChange={e => setSelected(e.target.checked ? [...selected, row.original.id] : selected.filter(id => id !== row.original.id))}
-          className="accent-blue-600 rounded"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+    // Suppression de la colonne de sélection (checkbox)
     ...visibleColumns.map(colKey => {
       const col = columns.find(c => c.key === colKey);
       return col && {

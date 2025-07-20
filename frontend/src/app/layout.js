@@ -85,7 +85,7 @@ function LayoutContent({ children }) {
             {isAuthPage ? (
               <div className="w-full flex items-center px-4 py-4">
                 <a href="/" className="inline-flex items-center text-blue-700 font-bold text-lg hover:underline">
-                  <span className="text-2xl mr-2">&#8592;</span> Retour à la carte globale
+                  <span className="text-2xl mr-2">&#8592;</span> Retour à la carte générale
                 </a>
               </div>
             ) : (
@@ -116,7 +116,7 @@ function LayoutContent({ children }) {
                         {showGlobalDropdown && (
                           <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                             <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                              Carte globale
+                              Carte générale
                             </a>
                             <a href="/parcelles-globales" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                               Liste des Sites de référence
@@ -208,7 +208,7 @@ function LayoutContent({ children }) {
                           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Vue Globale</h3>
                           <div className="space-y-1">
                             <a href="/" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded">
-                              Carte globale
+                              Carte générale
                             </a>
                             <a href="/parcelles-globales" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded">
                               Parcelles globales

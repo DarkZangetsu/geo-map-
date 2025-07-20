@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">Carte globale des sites de référence, des locaux et des pépinières</h2>
+          <h2 className="text-xl font-bold text-blue-900 mb-4">Carte générale des sites de référence, des locaux et des pépinières</h2>
           <div style={{ height: 500 }}>
             <ParcellesMap parcelles={parcelles} sieges={sieges} />
           </div>
