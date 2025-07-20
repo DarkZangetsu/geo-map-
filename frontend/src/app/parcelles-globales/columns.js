@@ -2,6 +2,24 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
+// Ajout du mapping pour les pratiques
+const PRATIQUE_LABELS = {
+  structure_brise_vent: "Structure Brise-vent",
+  structure_pare_feu: "Structure Pare feu",
+  structures_antierosives: "Structures antiérosives",
+  structure_cultures_couloir: "Structure Cultures en Couloir/allée",
+  pratiques_taillage_coupe: "Pratiques de taillage, coupe et application engrais verts",
+  pratiques_couverture_sol: "Pratiques couverture du sol",
+  pratiques_conservation_eau: "Pratiques/structures conservation d'eau",
+  systeme_multi_etage: "Système multi-étage diversifié",
+  arbres_autochtones: "Arbres Autochtones",
+  production_epices: "Production épices",
+  production_bois_energie: "Production Bois énergie",
+  production_fruit: "Production fruit",
+  integration_cultures_vivrieres: "Intégration cultures vivrières",
+  integration_elevage: "Intégration d'élevage",
+};
+
 export const parcellesColumns = (onViewDetails) => [
   {
     accessorKey: "nom",
@@ -18,7 +36,10 @@ export const parcellesColumns = (onViewDetails) => [
   {
     accessorKey: "pratique",
     header: "Pratique",
-    cell: ({ row }) => row.getValue("pratique") || "-",
+    cell: ({ row }) => {
+      const pratique = row.getValue("pratique");
+      return PRATIQUE_LABELS[(pratique || '').toLowerCase()] || pratique || "-";
+    },
   },
   {
     accessorKey: "nomProjet",

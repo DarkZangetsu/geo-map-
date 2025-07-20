@@ -14,6 +14,24 @@ import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Eye } from 'lucide-r
 import { useAuth } from '../../components/Providers';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 
+// Mapping des pratiques pour affichage lisible
+const PRATIQUE_LABELS = {
+  structure_brise_vent: "Structure Brise-vent",
+  structure_pare_feu: "Structure Pare feu",
+  structures_antierosives: "Structures antiérosives",
+  structure_cultures_couloir: "Structure Cultures en Couloir/allée",
+  pratiques_taillage_coupe: "Pratiques de taillage, coupe et application engrais verts",
+  pratiques_couverture_sol: "Pratiques couverture du sol",
+  pratiques_conservation_eau: "Pratiques/structures conservation d'eau",
+  systeme_multi_etage: "Système multi-étage diversifié",
+  arbres_autochtones: "Arbres Autochtones",
+  production_epices: "Production épices",
+  production_bois_energie: "Production Bois énergie",
+  production_fruit: "Production fruit",
+  integration_cultures_vivrieres: "Intégration cultures vivrières",
+  integration_elevage: "Intégration d'élevage",
+};
+
 export default function ParcellesPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -89,6 +107,7 @@ export default function ParcellesPage() {
           const parcelle = info.row.original;
           if (col.key === 'superficie') return parcelle.superficie ? `${parcelle.superficie} ha` : '-';
           if (col.key === 'createdAt') return parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '';
+          if (col.key === 'pratique') return PRATIQUE_LABELS[(parcelle.pratique || '').toLowerCase()] || parcelle.pratique || '-';
           return parcelle[col.key] || '-';
         },
       };
@@ -443,16 +462,118 @@ export default function ParcellesPage() {
       {/* Modal de détails du site de référence */}
       {showDetailsModal && selectedParcelleDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-0 relative flex flex-col">
             <button
               onClick={() => { setShowDetailsModal(false); setSelectedParcelleDetails(null); }}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold z-20"
               title="Fermer"
             >
               ×
             </button>
-            {/* ... détails du site de référence ... */}
-            {/* Tu peux réutiliser ParcelleDetailModal ici si besoin */}
+
+            {/* Header fixe */}
+            <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg sticky top-0 z-10">
+              <h2 className="text-2xl font-bold midnight-blue-text mb-2">
+                Détails du site de référence
+              </h2>
+              <div className="w-20 h-1 bg-blue-600 rounded"></div>
+            </div>
+
+            {/* Contenu principal scrollable */}
+            <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 160px)' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Informations générales */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nom</label>
+                        <p className="text-gray-900 font-medium">{selectedParcelleDetails.nom || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Propriétaire</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.proprietaire || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Superficie</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.superficie ? `${selectedParcelleDetails.superficie} ha` : '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Pratique</label>
+                        <p className="text-gray-900">{PRATIQUE_LABELS[(selectedParcelleDetails.pratique || '').toLowerCase()] || selectedParcelleDetails.pratique || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Nom du projet</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.nomProjet || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Description</label>
+                        <p className="text-gray-900">{selectedParcelleDetails.description || 'Aucune description disponible'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Photos */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Photos</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {Array.isArray(selectedParcelleDetails.photos) && selectedParcelleDetails.photos.length > 0 ? (
+                        selectedParcelleDetails.photos.map((photo, idx) => (
+                          <img
+                            key={idx}
+                            src={photo}
+                            alt={`Photo ${idx + 1}`}
+                            className="w-32 h-32 object-cover rounded shadow border"
+                          />
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Aucune photo disponible</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations supplémentaires */}
+                <div className="md:col-span-2">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Date de création</label>
+                        <p className="text-gray-900">
+                          {selectedParcelleDetails.createdAt ? new Date(selectedParcelleDetails.createdAt).toLocaleDateString('fr-FR') : '-'}
+                        </p>
+                      </div>
+                      {/* Ajoutez ici d'autres champs si besoin, sauf geojson */}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer fixe */}
+            <div className="bg-white border-t border-gray-200 p-6 rounded-b-lg sticky bottom-0 z-10 flex justify-end gap-3">
+              <Button
+                onClick={() => { setShowDetailsModal(false); setSelectedParcelleDetails(null); }}
+                variant="outline"
+                className="px-4 py-2"
+              >
+                Fermer
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setSelectedParcelleDetails(null);
+                  handleEditParcelle(selectedParcelleDetails);
+                }}
+                className="midnight-blue-btn px-4 py-2"
+              >
+                Modifier
+              </Button>
+            </div>
           </div>
         </div>
       )}

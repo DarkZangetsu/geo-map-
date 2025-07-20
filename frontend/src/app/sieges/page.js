@@ -398,108 +398,109 @@ export default function SiegePage() {
         {/* Modal de détails du local */}
         {showDetailsModal && selectedSiege && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-0 relative flex flex-col">
               <Button
                 onClick={() => { setShowDetailsModal(false); setSelectedSiege(null); }}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold"
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold z-20"
                 title="Fermer"
               >
                 ×
               </Button>
-              
-              <div className="mb-6">
+              {/* Header fixe */}
+              <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg sticky top-0 z-10">
                 <h2 className="text-2xl font-bold midnight-blue-text mb-2">
                   Détails du local
                 </h2>
                 <div className="w-20 h-1 bg-blue-600 rounded"></div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Informations générales */}
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Nom du local</label>
-                        <p className="text-gray-900 font-medium">{selectedSiege.nom || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Catégorie</label>
-                        <p className="text-gray-900">{selectedSiege.categorie || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Adresse</label>
-                        <p className="text-gray-900">{selectedSiege.adresse || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Description</label>
-                        <p className="text-gray-900">{selectedSiege.description || 'Aucune description disponible'}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Point de contact */}
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Point de contact</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Nom</label>
-                        <p className="text-gray-900 font-medium">{selectedSiege.nomPointContact || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Poste</label>
-                        <p className="text-gray-900">{selectedSiege.poste || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Téléphone</label>
-                        <p className="text-gray-900">{selectedSiege.telephone || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Email</label>
-                        <p className="text-gray-900">{selectedSiege.email || '-'}</p>
+              {/* Contenu principal scrollable */}
+              <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 160px)' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Informations générales */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Nom du local</label>
+                          <p className="text-gray-900 font-medium">{selectedSiege.nom || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Catégorie</label>
+                          <p className="text-gray-900">{selectedSiege.categorie || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Adresse</label>
+                          <p className="text-gray-900">{selectedSiege.adresse || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Description</label>
+                          <p className="text-gray-900">{selectedSiege.description || 'Aucune description disponible'}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Horaires */}
-                <div className="md:col-span-2">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Horaires d'ouverture</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Matin</label>
-                        <p className="text-gray-900">{selectedSiege.horaireMatin || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Après-midi</label>
-                        <p className="text-gray-900">{selectedSiege.horaireApresMidi || '-'}</p>
+                  {/* Point de contact */}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Point de contact</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Nom</label>
+                          <p className="text-gray-900 font-medium">{selectedSiege.nomPointContact || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Poste</label>
+                          <p className="text-gray-900">{selectedSiege.poste || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Téléphone</label>
+                          <p className="text-gray-900">{selectedSiege.telephone || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Email</label>
+                          <p className="text-gray-900">{selectedSiege.email || '-'}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Informations supplémentaires */}
-                <div className="md:col-span-2">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Date de création</label>
-                        <p className="text-gray-900">
-                          {selectedSiege.createdAt ? new Date(selectedSiege.createdAt).toLocaleDateString('fr-FR') : '-'}
-                        </p>
+                  {/* Horaires */}
+                  <div className="md:col-span-2">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Horaires d'ouverture</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Matin</label>
+                          <p className="text-gray-900">{selectedSiege.horaireMatin || '-'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Après-midi</label>
+                          <p className="text-gray-900">{selectedSiege.horaireApresMidi || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations supplémentaires */}
+                  <div className="md:col-span-2">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Date de création</label>
+                          <p className="text-gray-900">
+                            {selectedSiege.createdAt ? new Date(selectedSiege.createdAt).toLocaleDateString('fr-FR') : '-'}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Boutons d'action */}
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+              {/* Footer fixe */}
+              <div className="bg-white border-t border-gray-200 p-6 rounded-b-lg sticky bottom-0 z-10 flex justify-end gap-3">
                 <Button
                   onClick={() => { setShowDetailsModal(false); setSelectedSiege(null); }}
                   variant="outline"
