@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_PEPINIERE, UPDATE_PEPINIERE } from '../lib/graphql-queries';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_PEPINIERE, UPDATE_PEPINIERE, GET_ME } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapPointModal from './MapPointModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
@@ -17,7 +17,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
     telephoneGestionnaire: '',
     emailGestionnaire: '',
     especesProduites: '',
-    capacite: '',
+    nomProjet: '',
     quantiteProductionGenerale: ''
   });
   const [photos, setPhotos] = useState([]);
@@ -25,6 +25,10 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
   const { showSuccess, showError } = useToast();
   const [createPepiniere, { loading: loadingCreate }] = useMutation(CREATE_PEPINIERE);
   const [updatePepiniere, { loading: loadingUpdate }] = useMutation(UPDATE_PEPINIERE);
+
+  // Récupérer les projets de l'utilisateur connecté
+  const { data: meData } = useQuery(GET_ME);
+  const projets = (meData?.me?.nomProjet || '').split(',').map(p => p.trim()).filter(Boolean);
 
   useEffect(() => {
     if (initialData) {
@@ -39,7 +43,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
         telephoneGestionnaire: initialData.telephoneGestionnaire || '',
         emailGestionnaire: initialData.emailGestionnaire || '',
         especesProduites: initialData.especesProduites || '',
-        capacite: initialData.capacite || '',
+        nomProjet: initialData.nomProjet || '',
         quantiteProductionGenerale: initialData.quantiteProductionGenerale || ''
       });
       // Charger les photos existantes si en mode édition
@@ -127,7 +131,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
             telephoneGestionnaire: formData.telephoneGestionnaire,
             emailGestionnaire: formData.emailGestionnaire,
             especesProduites: formData.especesProduites,
-            capacite: formData.capacite ? parseFloat(formData.capacite) : null,
+            nomProjet: formData.nomProjet,
             quantiteProductionGenerale: formData.quantiteProductionGenerale,
             photos: newPhotos
           }
@@ -151,7 +155,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
             telephoneGestionnaire: formData.telephoneGestionnaire,
             emailGestionnaire: formData.emailGestionnaire,
             especesProduites: formData.especesProduites,
-            capacite: formData.capacite ? parseFloat(formData.capacite) : null,
+            nomProjet: formData.nomProjet,
             quantiteProductionGenerale: formData.quantiteProductionGenerale,
             photos: newPhotos
           }
@@ -194,6 +198,20 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
                   value={formData.nom} 
                   onChange={handleInputChange} 
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nom du projet</label>
+                <select
+                  name="nomProjet"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={formData.nomProjet}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Sélectionner un projet</option>
+                  {projets.map((projet, idx) => (
+                    <option key={idx} value={projet}>{projet}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -304,18 +322,6 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
                     value={formData.especesProduites} 
                     onChange={handleInputChange} 
                     placeholder="Liste des espèces produites" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Capacité de production</label>
-                  <input 
-                    type="number" 
-                    step="0.01" 
-                    name="capacite" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
-                    value={formData.capacite} 
-                    onChange={handleInputChange} 
-                    placeholder="Capacité en unités" 
                   />
                 </div>
               </div>

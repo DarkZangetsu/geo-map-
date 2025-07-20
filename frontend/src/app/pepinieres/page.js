@@ -36,7 +36,6 @@ export default function PepinieresPage() {
     { key: 'adresse', label: 'Adresse' },
     { key: 'nomGestionnaire', label: 'Gestionnaire' },
     { key: 'especesProduites', label: 'Espèces produites' },
-    { key: 'capacite', label: 'Capacité' },
   ];
   
   // Colonnes visibles pour le tableau (filtrage dynamique)
@@ -206,11 +205,6 @@ export default function PepinieresPage() {
           {info.getValue() || '-'}
         </div>
       ),
-    },
-    visibleColumns.includes('capacite') && {
-      accessorKey: 'capacite',
-      header: 'Capacité',
-      cell: info => info.getValue() || '-',
     },
     {
       id: 'actions',

@@ -28,8 +28,9 @@ export function AuthProvider({ children }) {
         setUser(null);
         setIsAuthenticated(false);
         authUtils.clearAuthData();
-        // Rediriger vers /login sauf si déjà sur /login, /register ou /
-        if (typeof window !== 'undefined' && path !== '/login' && path !== '/register' && path !== '/') {
+        // Rediriger vers /login sauf si déjà sur une page publique
+        const publicPaths = ['/', '/login', '/register', '/pepinieres-globales', '/parcelles-globales', '/sieges-globaux'];
+        if (typeof window !== 'undefined' && !publicPaths.includes(path)) {
           console.log('Token invalide ou expiré, redirection vers /login...');
           router.push('/login');
         }

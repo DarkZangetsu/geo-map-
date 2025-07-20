@@ -6,7 +6,6 @@ const ALL_COLUMNS = [
   { key: 'adresse', label: 'Adresse' },
   { key: 'nomGestionnaire', label: 'Gestionnaire' },
   { key: 'especesProduites', label: 'Espèces produites' },
-  { key: 'capacite', label: 'Capacité' },
 ];
 
 const PepinieresTable = ({ pepinieres = [], onEdit, onDelete, visibleColumns = [] }) => {
@@ -52,9 +51,6 @@ const PepinieresTable = ({ pepinieres = [], onEdit, onDelete, visibleColumns = [
                     {pepiniere.especesProduites || '-'}
                   </div>
                   </td>
-              )}
-              {visibleColumns.includes('capacite') && (
-                <td className="px-3 py-2">{pepiniere.capacite ? `${pepiniere.capacite}` : '-'}</td>
               )}
               <td className="px-3 py-2 whitespace-nowrap flex gap-2 items-center">
                     <button

@@ -69,10 +69,11 @@ class PepiniereImageType(DjangoObjectType):
 
 class PepiniereType(DjangoObjectType):
     photos = graphene.List(PepiniereImageType)
+    nom_projet = graphene.String()
     
     class Meta:
         model = Pepiniere
-        fields = "__all__"
+        exclude = ("capacite",)
     
     def resolve_photos(self, info):
         return self.photos.all()
@@ -781,12 +782,12 @@ class CreatePepiniere(graphene.Mutation):
         telephone_gestionnaire = graphene.String()
         email_gestionnaire = graphene.String()
         especes_produites = graphene.String()
-        capacite = graphene.Decimal()
+        nom_projet = graphene.String()
         quantite_production_generale = graphene.String()
         photos = graphene.List(Upload)
 
     @login_required
-    def mutate(self, info, nom, adresse, latitude, longitude, description=None, nom_gestionnaire="", poste_gestionnaire="", telephone_gestionnaire="", email_gestionnaire="", especes_produites="", capacite=None, quantite_production_generale="", photos=None):
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, nom_gestionnaire="", poste_gestionnaire="", telephone_gestionnaire="", email_gestionnaire="", especes_produites="", nom_projet="", quantite_production_generale="", photos=None):
         try:
             user = info.context.user
             pepiniere = Pepiniere.objects.create(
@@ -801,7 +802,7 @@ class CreatePepiniere(graphene.Mutation):
                 telephone_gestionnaire=telephone_gestionnaire,
                 email_gestionnaire=email_gestionnaire,
                 especes_produites=especes_produites,
-                capacite=capacite,
+                nom_projet=nom_projet,
                 quantite_production_generale=quantite_production_generale
             )
             
@@ -836,7 +837,7 @@ class UpdatePepiniere(graphene.Mutation):
         telephone_gestionnaire = graphene.String()
         email_gestionnaire = graphene.String()
         especes_produites = graphene.String()
-        capacite = graphene.Decimal()
+        nom_projet = graphene.String()
         quantite_production_generale = graphene.String()
         photos = graphene.List(Upload)
 
@@ -853,7 +854,8 @@ class UpdatePepiniere(graphene.Mutation):
             
             for field, value in kwargs.items():
                 if value is not None:
-                    setattr(pepiniere, field, value)
+                    if field != "capacite":
+                        setattr(pepiniere, field, value)
             pepiniere.save()
             
             # Mettre à jour les photos si fournies
@@ -916,7 +918,8 @@ class ExportPepinieresCSV(graphene.Mutation):
                 'ID', 'Nom', 'Adresse', 'Latitude', 'Longitude', 'Description',
                 'Catégorie', 'Nom Gestionnaire', 'Poste Gestionnaire', 
                 'Téléphone Gestionnaire', 'Email Gestionnaire',
-                'Espèces Produites', 'Capacité', 'Quantité Production Générale',
+                'Espèces Produites', 'Quantité Production Générale',
+                'Nom projet',
                 'Utilisateur', 'Date Création', 'Date Modification'
             ]
             writer.writerow(headers)
@@ -929,7 +932,8 @@ class ExportPepinieresCSV(graphene.Mutation):
                     pepiniere.categorie, pepiniere.nom_gestionnaire,
                     pepiniere.poste_gestionnaire, pepiniere.telephone_gestionnaire,
                     pepiniere.email_gestionnaire, pepiniere.especes_produites,
-                    pepiniere.capacite, pepiniere.quantite_production_generale,
+                    pepiniere.quantite_production_generale,
+                    pepiniere.nom_projet,
                     pepiniere.user.username, pepiniere.created_at, pepiniere.updated_at
                 ])
             
@@ -978,14 +982,6 @@ class ImportPepinieresCSV(graphene.Mutation):
                         latitude = Decimal('0')
                         longitude = Decimal('0')
                     
-                    # Conversion de la capacité
-                    capacite = None
-                    if row.get('Capacité'):
-                        try:
-                            capacite = Decimal(row.get('Capacité'))
-                        except (ValueError, TypeError):
-                            pass
-                    
                     pepiniere = Pepiniere.objects.create(
                         user=user,
                         nom=row.get('Nom', ''),
@@ -999,8 +995,8 @@ class ImportPepinieresCSV(graphene.Mutation):
                         telephone_gestionnaire=row.get('Téléphone Gestionnaire', ''),
                         email_gestionnaire=row.get('Email Gestionnaire', ''),
                         especes_produites=row.get('Espèces Produites', ''),
-                        capacite=capacite,
-                        quantite_production_generale=row.get('Quantité Production Générale', '')
+                        quantite_production_generale=row.get('Quantité Production Générale', ''),
+                        nom_projet=row.get('Nom projet', ''),
                     )
                     
                     imported_count += 1
@@ -1160,7 +1156,6 @@ class Query(graphene.ObjectType):
     def resolve_parcelle(self, info, id):
         return Parcelle.objects.get(pk=id)
 
-    @login_required
     def resolve_all_users(self, info):
         return User.objects.all()
 

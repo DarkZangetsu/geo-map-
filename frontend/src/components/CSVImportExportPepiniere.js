@@ -110,7 +110,7 @@ const CSVImportExportPepiniere = ({ onImportSuccess }) => {
           </div>
                      <div className="mt-3 text-xs text-gray-600">
              <p>Format attendu: CSV avec les colonnes suivantes :</p>
-             <p>Nom, Adresse, Latitude, Longitude, Description, Nom Gestionnaire, Poste Gestionnaire, Téléphone Gestionnaire, Email Gestionnaire, Espèces Produites, Capacité, Quantité Production Générale</p>
+             <p>Nom, Adresse, Latitude, Longitude, Description, Nom Gestionnaire, Poste Gestionnaire, Téléphone Gestionnaire, Email Gestionnaire, Espèces Produites, Quantité Production Générale, Nom projet</p>
            </div>
         </div>
 

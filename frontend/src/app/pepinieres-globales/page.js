@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_PEPINIERES, GET_ALL_USERS } from "../../lib/graphql-queries";
 import { useToast } from "../../lib/useToast";
-import { useAuthGuard } from "../../lib/useAuthGuard";
 import { pepinieresColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
@@ -13,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import CSVImportExportPepiniere from "../../components/CSVImportExportPepiniere";
 
 export default function PepinieresGlobalesPage() {
-  const { isLoading, isAuthorized } = useAuthGuard(true);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredPepinieres, setFilteredPepinieres] = useState([]);
   const { showError, showToast } = useToast();
@@ -76,28 +74,6 @@ export default function PepinieresGlobalesPage() {
   if (usersError) {
     showError("Erreur lors du chargement des utilisateurs");
     console.error("Users error:", usersError);
-  }
-
-  // Loader d'authentification
-  if (isLoading || !isAuthorized) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            {isLoading ? "Vérification de l'authentification..." : "Redirection vers la page de connexion..."}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (pepinieresLoading || usersLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    );
   }
 
   // Handler pour le filtre membre

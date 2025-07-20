@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_PARCELLES, GET_ALL_USERS } from "../../lib/graphql-queries";
 import { useToast } from "../../lib/useToast";
-import { useAuthGuard } from "../../lib/useAuthGuard";
 import { parcellesColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
@@ -13,7 +12,6 @@ import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
 
 export default function ParcellesGlobalesPage() {
-  const { isLoading, isAuthorized } = useAuthGuard(true);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredParcelles, setFilteredParcelles] = useState([]);
   const { showError } = useToast();
@@ -79,19 +77,6 @@ export default function ParcellesGlobalesPage() {
   }
 
   // Loader d'authentification
-  if (isLoading || !isAuthorized) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
-            {isLoading ? "Vérification de l'authentification..." : "Redirection vers la page de connexion..."}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (parcellesLoading || usersLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

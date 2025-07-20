@@ -268,7 +268,7 @@ export const GET_MY_PEPINIERES = gql`
       telephoneGestionnaire
       emailGestionnaire
       especesProduites
-      capacite
+      nomProjet
       quantiteProductionGenerale
       createdAt
       updatedAt
@@ -301,7 +301,7 @@ export const GET_ALL_PEPINIERES = gql`
       telephoneGestionnaire
       emailGestionnaire
       especesProduites
-      capacite
+      nomProjet
       quantiteProductionGenerale
       createdAt
       updatedAt
@@ -340,7 +340,7 @@ export const GET_PEPINIERE = gql`
       telephoneGestionnaire
       emailGestionnaire
       especesProduites
-      capacite
+      nomProjet
       quantiteProductionGenerale
       createdAt
       updatedAt
@@ -771,7 +771,7 @@ export const CREATE_PEPINIERE = gql`
     $telephoneGestionnaire: String
     $emailGestionnaire: String
     $especesProduites: String
-    $capacite: Decimal
+    $nomProjet: String
     $quantiteProductionGenerale: String
     $photos: [Upload]
   ) {
@@ -786,7 +786,7 @@ export const CREATE_PEPINIERE = gql`
       telephoneGestionnaire: $telephoneGestionnaire
       emailGestionnaire: $emailGestionnaire
       especesProduites: $especesProduites
-      capacite: $capacite
+      nomProjet: $nomProjet
       quantiteProductionGenerale: $quantiteProductionGenerale
       photos: $photos
     ) {
@@ -804,7 +804,7 @@ export const CREATE_PEPINIERE = gql`
         telephoneGestionnaire
         emailGestionnaire
         especesProduites
-        capacite
+        nomProjet
         quantiteProductionGenerale
         createdAt
         updatedAt
@@ -837,7 +837,7 @@ export const UPDATE_PEPINIERE = gql`
     $telephoneGestionnaire: String
     $emailGestionnaire: String
     $especesProduites: String
-    $capacite: Decimal
+    $nomProjet: String
     $quantiteProductionGenerale: String
     $photos: [Upload]
   ) {
@@ -853,7 +853,7 @@ export const UPDATE_PEPINIERE = gql`
       telephoneGestionnaire: $telephoneGestionnaire
       emailGestionnaire: $emailGestionnaire
       especesProduites: $especesProduites
-      capacite: $capacite
+      nomProjet: $nomProjet
       quantiteProductionGenerale: $quantiteProductionGenerale
       photos: $photos
     ) {
@@ -871,7 +871,7 @@ export const UPDATE_PEPINIERE = gql`
         telephoneGestionnaire
         emailGestionnaire
         especesProduites
-        capacite
+        nomProjet
         quantiteProductionGenerale
         createdAt
         updatedAt

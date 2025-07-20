@@ -13,12 +13,52 @@ export const pepinieresColumns = (onViewDetails) => [
   {
     accessorKey: "categorie",
     header: "Catégorie",
-    cell: ({ row }) => row.getValue("categorie"),
+    cell: ({ row }) => row.getValue("categorie") || "-",
   },
   {
     accessorKey: "adresse",
     header: "Adresse",
-    cell: ({ row }) => row.getValue("adresse"),
+    cell: ({ row }) => row.getValue("adresse") || "-",
+  },
+  {
+    accessorKey: "nom_projet",
+    header: "Nom du projet",
+    cell: ({ row }) => row.getValue("nom_projet") || "-",
+  },
+  {
+    accessorKey: "nom_gestionnaire",
+    header: "Nom gestionnaire",
+    cell: ({ row }) => row.getValue("nom_gestionnaire") || "-",
+  },
+  {
+    accessorKey: "poste_gestionnaire",
+    header: "Poste gestionnaire",
+    cell: ({ row }) => row.getValue("poste_gestionnaire") || "-",
+  },
+  {
+    accessorKey: "telephone_gestionnaire",
+    header: "Téléphone gestionnaire",
+    cell: ({ row }) => row.getValue("telephone_gestionnaire") || "-",
+  },
+  {
+    accessorKey: "email_gestionnaire",
+    header: "Email gestionnaire",
+    cell: ({ row }) => row.getValue("email_gestionnaire") || "-",
+  },
+  {
+    accessorKey: "especes_produites",
+    header: "Espèces produites",
+    cell: ({ row }) => row.getValue("especes_produites") || "-",
+  },
+  {
+    accessorKey: "quantite_production_generale",
+    header: "Quantité production générale",
+    cell: ({ row }) => row.getValue("quantite_production_generale") || "-",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Date création",
+    cell: ({ row }) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString('fr-FR') : "-",
   },
   {
     id: "membre",
@@ -32,7 +72,7 @@ export const pepinieresColumns = (onViewDetails) => [
           )}
           <div>
             <div className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</div>
-            <div className="text-sm text-gray-500">{user?.firstName} {user?.lastName} {user?.email}</div>
+            <div className="text-sm text-gray-500">{user?.email}</div>
           </div>
         </div>
       );
@@ -42,21 +82,6 @@ export const pepinieresColumns = (onViewDetails) => [
     accessorKey: "user.abreviation",
     header: "Abréviation",
     cell: ({ row }) => row.original.user?.abreviation || "-",
-  },
-  {
-    accessorKey: "superficie",
-    header: "Superficie (ha)",
-    cell: ({ row }) => row.original.superficie ? `${row.original.superficie} ha` : "-",
-  },
-  {
-    accessorKey: "variete",
-    header: "Variété",
-    cell: ({ row }) => row.original.variete || "-",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date création",
-    cell: ({ row }) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString('fr-FR') : "-",
   },
   {
     id: "actions",

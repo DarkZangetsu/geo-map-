@@ -49,6 +49,13 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
                     </div>
                   </div>
                   
+                  {pepiniere.nomProjet && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">Nom du projet</p>
+                      <p className="text-sm text-gray-600">{pepiniere.nomProjet}</p>
+                    </div>
+                  )}
+                  
                   {pepiniere.description && (
                     <div>
                       <p className="text-sm font-medium text-gray-900 mb-1">Description</p>
@@ -116,16 +123,6 @@ export default function PepiniereDetailModal({ pepiniere, onClose }) {
                 </div>
                 <p className="text-sm text-gray-600">
                   {pepiniere.especesProduites || 'Non définies'}
-                </p>
-              </div>
-              
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Building className="h-5 w-5 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900">Capacité</span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {pepiniere.capacite ? `${pepiniere.capacite} plants` : 'Non définie'}
                 </p>
               </div>
               

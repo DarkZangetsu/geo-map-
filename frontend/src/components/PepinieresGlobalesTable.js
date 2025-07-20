@@ -31,11 +31,6 @@ export default function PepinieresGlobalesTable({ pepinieres, users = [] }) {
       ),
     },
     {
-      accessorKey: 'capacite',
-      header: 'Capacité',
-      cell: info => info.getValue() ? `${info.getValue()}` : '-',
-    },
-    {
       id: 'membre',
       header: 'Membre',
       cell: info => {

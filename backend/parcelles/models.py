@@ -174,7 +174,7 @@ class Pepiniere(models.Model):
     telephone_gestionnaire = models.CharField(max_length=20, blank=True, help_text="Téléphone du gestionnaire")
     email_gestionnaire = models.EmailField(blank=True, help_text="Email du gestionnaire")
     especes_produites = models.TextField(blank=True, help_text="Espèces produites")
-    capacite = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Capacité de production")
+    nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")
     quantite_production_generale = models.TextField(blank=True, help_text="Quantité de production générale")
     
     created_at = models.DateTimeField(auto_now_add=True)

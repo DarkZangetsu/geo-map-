@@ -149,11 +149,14 @@ class PepiniereAdmin(admin.ModelAdmin):
         ('Informations de base', {
             'fields': ('nom', 'user', 'adresse', 'latitude', 'longitude')
         }),
+        ('Projet', {
+            'fields': ('nom_projet',)
+        }),
         ('Gestionnaire', {
             'fields': ('nom_gestionnaire', 'poste_gestionnaire', 'telephone_gestionnaire', 'email_gestionnaire')
         }),
         ('Production', {
-            'fields': ('especes_produites', 'capacite', 'quantite_production_generale')
+            'fields': ('especes_produites', 'quantite_production_generale')
         }),
         ('Description', {
             'fields': ('description',)
