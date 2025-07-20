@@ -2,6 +2,14 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
+// Mapping des catégories pour affichage lisible
+const CATEGORIE_LABELS = {
+  social: "Siège social",
+  regional: "Siège régional",
+  technique: "Siège technique",
+  provisoire: "Siège provisoire",
+};
+
 export const siegesColumns = (onViewDetails) => [
   {
     accessorKey: "nom",
@@ -52,6 +60,14 @@ export const siegesColumns = (onViewDetails) => [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => row.original.description || "-",
+  },
+  {
+    accessorKey: "categorie",
+    header: "Catégorie",
+    cell: ({ row }) => {
+      const cat = row.original.categorie;
+      return CATEGORIE_LABELS[(cat || '').toLowerCase()] || cat || "-";
+    },
   },
   {
     accessorKey: "createdAt",

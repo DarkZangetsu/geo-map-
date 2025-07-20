@@ -364,8 +364,9 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
 
       {/* Panneau latéral pour les détails de la parcelle sélectionnée */}
       {selectedParcelle && (
-        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gray-50 shadow-2xl z-50 overflow-y-auto transition-all duration-300 border border-gray-200 flex flex-col rounded-2xl m-4" style={{maxWidth: 440}}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 overflow-y-auto flex flex-col border border-gray-200 rounded-2xl m-4 max-w-[440px]">
+          {/* Header fixe */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10 rounded-t-2xl">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full shadow">
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 20l-5.447-2.724A2 2 0 013 15.382V6a2 2 0 012-2h14a2 2 0 012 2v9.382a2 2 0 01-1.553 1.894L15 20m-6 0v-2a2 2 0 012-2h2a2 2 0 012 2v2' /></svg>
@@ -380,69 +381,52 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
               ×
             </button>
           </div>
-          <div className="px-2 py-2 flex-1 text-gray-900">
-            <div className="space-y-2">
-              <div className="bg-white rounded-xl shadow p-2 flex items-center gap-4">
-                {selectedParcelle.user?.logo && (
-                  <img
-                    src={`http://localhost:8000/media/${selectedParcelle.user.logo}`}
-                    alt="Logo"
-                    className="w-14 h-14 rounded-full border border-gray-200 shadow"
-                  />
-                )}
-                <div>
-                  <h3 className="font-bold text-xl text-gray-900 leading-tight">{selectedParcelle.nom || 'Sans nom'}</h3>
-                  <p className="text-base text-gray-700 font-normal mt-1">
-                    {selectedParcelle.user?.firstName || ''} {selectedParcelle.user?.lastName || ''}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow p-2">
-                <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                  <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z' /></svg>
-                  Propriétaire
-                </div>
-                <div className="text-base font-medium text-gray-900">{selectedParcelle.proprietaire || 'Non défini'}</div>
-              </div>
-              {selectedParcelle.superficie && (
-                <div className="bg-white rounded-xl shadow p-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 6h16M4 10h16M4 14h16M4 18h16' /></svg>
-                    Superficie
-                  </div>
-                  <div className="text-base font-medium text-gray-900">{selectedParcelle.superficie} ha</div>
-                </div>
-              )}
-              {selectedParcelle.pratique && (
-                <div className="bg-white rounded-xl shadow p-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
-                    Pratique
-                  </div>
-                  <div className="text-base font-medium text-gray-900">{selectedParcelle.pratique}</div>
-                </div>
-              )}
-              {selectedParcelle.nomProjet && (
-                <div className="bg-white rounded-xl shadow p-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' /></svg>
-                    Nom Projet
-                  </div>
-                  <div className="text-base font-medium text-gray-900">{selectedParcelle.nomProjet}</div>
-                </div>
-              )}
-              {selectedParcelle.description && (
-                <div className="bg-white rounded-xl shadow p-2">
-                  <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-indigo-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6 0a6 6 0 1112 0A6 6 0 019 12z' /></svg>
-                    Description
-                  </div>
-                  <div className="text-base text-gray-800">{selectedParcelle.description}</div>
-                </div>
-              )}
+          {/* Contenu scrollable */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {/* Nom et propriétaire */}
+            <div className="bg-white rounded-xl shadow p-3 flex flex-col gap-2">
+              <div className="font-bold text-xl text-gray-900 leading-tight">{selectedParcelle.nom || 'Sans nom'}</div>
+              <div className="text-sm text-gray-700 font-normal">Propriétaire : <span className="font-semibold">{selectedParcelle.proprietaire || 'Non défini'}</span></div>
             </div>
-            {/* Bouton voir images juste après les sections */}
+            {/* Personne référente */}
+            {(selectedParcelle.nomPersonneReferente || selectedParcelle.poste || selectedParcelle.telephone || selectedParcelle.email) && (
+              <div className="bg-white rounded-xl shadow p-3">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1">Personne référente</div>
+                {selectedParcelle.nomPersonneReferente && <div className="text-base font-medium text-gray-900">{selectedParcelle.nomPersonneReferente}</div>}
+                {selectedParcelle.poste && <div className="text-xs text-gray-500">{selectedParcelle.poste}</div>}
+                {selectedParcelle.telephone && <div className="text-xs text-gray-500">{selectedParcelle.telephone}</div>}
+                {selectedParcelle.email && <div className="text-xs text-gray-500">{selectedParcelle.email}</div>}
+              </div>
+            )}
+            {/* Superficie */}
+            {selectedParcelle.superficie && (
+              <div className="bg-white rounded-xl shadow p-3">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1">Superficie</div>
+                <div className="text-base font-medium text-gray-900">{selectedParcelle.superficie} ha</div>
+              </div>
+            )}
+            {/* Pratique */}
+            {selectedParcelle.pratique && (
+              <div className="bg-white rounded-xl shadow p-3">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1">Pratique</div>
+                <div className="text-base font-medium text-gray-900">{selectedParcelle.pratique}</div>
+              </div>
+            )}
+            {/* Projet */}
+            {selectedParcelle.nomProjet && (
+              <div className="bg-white rounded-xl shadow p-3">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1">Projet</div>
+                <div className="text-base font-medium text-gray-900">{selectedParcelle.nomProjet}</div>
+              </div>
+            )}
+            {/* Description */}
+            {selectedParcelle.description && (
+              <div className="bg-white rounded-xl shadow p-3">
+                <div className="uppercase text-xs text-gray-500 font-semibold mb-1">Description</div>
+                <div className="text-base text-gray-800">{selectedParcelle.description}</div>
+              </div>
+            )}
+            {/* Bouton voir images */}
             {Array.isArray(selectedParcelle.images) && selectedParcelle.images.length > 0 && (
               <button
                 onClick={() => {
@@ -459,34 +443,34 @@ const ParcellesMap = ({ parcelles, sieges = [], pepinieres = [], onParcelleClick
                 Voir les images ({selectedParcelle.images.length})
               </button>
             )}
-          </div>
-          {/* Galerie d'images dans le panneau latéral, style amélioré */}
-          {showGallery && selectedParcelle && (
-            <div ref={galleryRef} className="p-4 border-t border-gray-100 bg-white rounded-b-2xl">
-              <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-indigo-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
-                Galerie d'images
-            </div>
-              <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                <ImageGallery
-                  items={prepareGalleryImages(selectedParcelle.images)}
-                  showPlayButton={false}
-                  showFullscreenButton={true}
-                  showNav={true}
-                  showThumbnails={true}
-                  slideInterval={3000}
-                  slideOnThumbnailOver={true}
-                  additionalClass="custom-gallery"
-                />
+            {/* Galerie d'images */}
+            {showGallery && selectedParcelle && (
+              <div ref={galleryRef} className="p-4 border-t border-gray-100 bg-white rounded-b-2xl">
+                <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-indigo-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
+                  Galerie d'images
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
+                  <ImageGallery
+                    items={prepareGalleryImages(selectedParcelle.images)}
+                    showPlayButton={false}
+                    showFullscreenButton={true}
+                    showNav={true}
+                    showThumbnails={true}
+                    slideInterval={3000}
+                    slideOnThumbnailOver={true}
+                    additionalClass="custom-gallery"
+                  />
+                </div>
+                <button
+                  onClick={() => setShowGallery(false)}
+                  className="mt-2 w-full px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 font-semibold"
+                >
+                  Fermer la galerie
+                </button>
               </div>
-              <button
-                onClick={() => setShowGallery(false)}
-                className="mt-2 w-full px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 font-semibold"
-              >
-                Fermer la galerie
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
       {/* Panneau latéral pour les détails du siège sélectionné */}

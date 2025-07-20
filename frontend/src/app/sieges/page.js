@@ -13,6 +13,15 @@ import SiegeModal from '../../components/SiegeModal';
 import { DataTable } from '../../components/ui/table-data-table';
 import { Button } from '../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
+
+// Mapping des catégories pour affichage lisible
+const CATEGORIE_LABELS = {
+  social: "Siège social",
+  regional: "Siège régional",
+  technique: "Siège technique",
+  provisoire: "Siège provisoire",
+};
 
 export default function SiegePage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
@@ -41,6 +50,8 @@ export default function SiegePage() {
   const [showSiegeModal, setShowSiegeModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedSiege, setSelectedSiege] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [siegeToDelete, setSiegeToDelete] = useState(null);
 
   const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
     skip: !isAuthenticated || (user && (user.role === "ADMIN" || user.role === "admin")),
@@ -110,10 +121,15 @@ export default function SiegePage() {
     setShowSiegeModal(true);
   };
 
-  const handleDeleteSiege = async (siege) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce local ?')) return;
+  const handleDeleteSiege = (siege) => {
+    setSiegeToDelete(siege);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSiege = async () => {
+    if (!siegeToDelete) return;
     try {
-      const { data } = await deleteSiege({ variables: { id: siege.id } });
+      const { data } = await deleteSiege({ variables: { id: siegeToDelete.id } });
       if (data.deleteSiege.success) {
         showSuccess('Local supprimé avec succès');
         refetchSieges();
@@ -122,6 +138,9 @@ export default function SiegePage() {
       }
     } catch (e) {
       showError('Erreur lors de la suppression');
+    } finally {
+      setShowDeleteConfirm(false);
+      setSiegeToDelete(null);
     }
   };
 
@@ -140,7 +159,10 @@ export default function SiegePage() {
     visibleColumns.includes('categorie') && {
       accessorKey: 'categorie',
       header: 'Catégorie',
-      cell: info => info.getValue() || '-',
+      cell: info => {
+        const cat = info.getValue();
+        return CATEGORIE_LABELS[(cat || '').toLowerCase()] || cat || '-';
+      },
     },
     visibleColumns.includes('adresse') && {
       accessorKey: 'adresse',
@@ -427,7 +449,7 @@ export default function SiegePage() {
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Catégorie</label>
-                          <p className="text-gray-900">{selectedSiege.categorie || '-'}</p>
+                          <p className="text-gray-900">{CATEGORIE_LABELS[(selectedSiege.categorie || '').toLowerCase()] || selectedSiege.categorie || '-'}</p>
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Adresse</label>
@@ -521,6 +543,18 @@ export default function SiegePage() {
               </div>
             </div>
           </div>
+        )}
+        {/* Modal de confirmation suppression */}
+        {showDeleteConfirm && (
+          <ConfirmationDialog
+            isOpen={showDeleteConfirm}
+            onClose={() => { setShowDeleteConfirm(false); setSiegeToDelete(null); }}
+            onConfirm={confirmDeleteSiege}
+            title="Confirmer la suppression"
+            message="Êtes-vous sûr de vouloir supprimer ce local ?"
+            confirmText="Supprimer"
+            confirmButtonClass="bg-red-600 hover:bg-red-700"
+          />
         )}
       </div>
     </div>

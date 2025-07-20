@@ -4,6 +4,7 @@ import { CREATE_SIEGE, UPDATE_SIEGE } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapPointModal from './MapPointModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import ConfirmationDialog from './ConfirmationDialog';
 
 const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', siegeId = null }) => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,8 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
   const { showSuccess, showError } = useToast();
   const [createSiege, { loading: loadingCreate }] = useMutation(CREATE_SIEGE);
   const [updateSiege, { loading: loadingUpdate }] = useMutation(UPDATE_SIEGE);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -105,14 +108,14 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.nom || !formData.adresse || !formData.latitude || !formData.longitude) {
-      showError('Veuillez remplir tous les champs obligatoires.');
-      return;
-    }
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = async () => {
+    setConfirmLoading(true);
     try {
       // Préparer les nouvelles photos (fichiers)
       const newPhotos = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
-      
       if (mode === 'edit' && siegeId) {
         const { data } = await updateSiege({
           variables: {
@@ -166,6 +169,9 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
       showError('Erreur lors de la soumission du local.');
+    } finally {
+      setConfirmLoading(false);
+      setShowConfirm(false);
     }
   };
 
@@ -446,6 +452,21 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
           </button>
         </div>
       </div>
+
+      {showConfirm && (
+        <ConfirmationDialog
+          isOpen={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleConfirm}
+          title={mode === 'edit' ? 'Confirmer la modification' : 'Confirmer la création'}
+          message={mode === 'edit' ? 'Voulez-vous vraiment modifier ce local ?' : 'Voulez-vous vraiment ajouter ce local ?'}
+          confirmText={mode === 'edit' ? 'Mettre à jour' : 'Ajouter'}
+          confirmButtonClass={confirmLoading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}
+          cancelButtonClass={confirmLoading ? 'cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400'}
+          confirmDisabled={confirmLoading}
+          confirmLoading={confirmLoading}
+        />
+      )}
 
       {showMapModal && (
         <MapPointModal

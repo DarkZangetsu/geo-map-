@@ -20,6 +20,23 @@ function LayoutContent({ children }) {
 
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
+  // Correction : return un écran de chargement AVANT le return principal si isLoading
+  if (isLoading) {
+    return (
+      <html lang="fr" style={{ height: '100%' }}>
+        <head>
+          <title>Alliance-Agroforesterie</title>
+          <meta name="description" content="Application web pour la visualisation des sites de référene et des locaux et des pépinières des institutions membre de l'Alliance-Agroforesterie avec cartographie interactive" />
+        </head>
+        <body style={{ height: '100%' }}>
+          <div className="min-h-screen flex items-center justify-center" style={{ height: '100%' }}>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="fr" style={{ height: '100%' }}>
       <head>
@@ -27,11 +44,6 @@ function LayoutContent({ children }) {
         <meta name="description" content="Application web pour la visualisation des sites de référene et des locaux et des pépinières des institutions membre de l'Alliance-Agroforesterie avec cartographie interactive" />
       </head>
       <body style={{ height: '100%' }}>
-        {isLoading ? (
-          <div className="min-h-screen flex items-center justify-center" style={{ height: '100%' }}>
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-          </div>
-        ) : (
         <ApolloProvider client={client}>
           <div className="min-h-screen bg-gray-50" style={{ height: '100%' }}>
             {/* Overlay de chargement lors du logout */}
@@ -254,7 +266,6 @@ function LayoutContent({ children }) {
             />
           ))}
         </ApolloProvider>
-        )}
       </body>
     </html>
   );
