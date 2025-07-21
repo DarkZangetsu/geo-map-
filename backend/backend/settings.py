@@ -30,10 +30,15 @@ SECRET_KEY = 'django-insecure--61qj^dldn6)8!fka8bt3j6up&p(d5%w)o6jh2q)z)_1-6d0v8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'alliance-agroforesterie.vercel.app', 'geo-map-o6k0.onrender.com' '.onrender.com',
-    '*.vercel.app',
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'alliance-agroforesterie.vercel.app',
+    'geo-map-o6k0.onrender.com',
+    '.onrender.com',
     '.vercel.app',
-    '0.0.0.0',]
+    '0.0.0.0',
+]
 
 
 # Application definition
