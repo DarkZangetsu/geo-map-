@@ -32,7 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'alliance-agroforesterie.vercel.app', 'geo-map-o6k0.onrender.com' '.onrender.com',
     '*.vercel.app',
-    '.vercel.app',]
+    '.vercel.app',
+    '0.0.0.0',]
 
 
 # Application definition
