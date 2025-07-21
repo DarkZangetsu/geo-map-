@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client';
-import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES } from '../lib/graphql-queries';
+import { GET_ALL_PARCELLES, GET_ALL_SIEGES, GET_ALL_PEPINIERES, GET_ALL_USERS } from '../lib/graphql-queries';
 import { useState } from 'react';
 import MapGlobal from '../components/MapGlobal';
 
@@ -10,19 +10,31 @@ export default function HomePage() {
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
   const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
+  const { data: usersData } = useQuery(GET_ALL_USERS);
   const [mapStyle, setMapStyle] = useState('street');
   const [showParcelles, setShowParcelles] = useState(true);
   const [showSieges, setShowSieges] = useState(true);
   const [showPepinieres, setShowPepinieres] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selectedMember, setSelectedMember] = useState('');
 
   const allParcelles = parcellesData?.allParcelles || [];
   const allSieges = siegesData?.allSieges || [];
   const allPepinieres = pepinieresData?.allPepinieres || [];
 
-  // Filtres d'affichage
-  const parcelles = showParcelles ? allParcelles : [];
-  const sieges = showSieges ? allSieges : [];
-  const pepinieres = showPepinieres ? allPepinieres : [];
+  // Filtrage combiné recherche + membre
+  function filterBySearchAndMember(items, search, memberId) {
+    return items.filter(item => {
+      const text = (item.nom || '') + ' ' + (item.proprietaire || '') + ' ' + (item.user?.firstName || '') + ' ' + (item.user?.lastName || '');
+      const matchSearch = search ? text.toLowerCase().includes(search.toLowerCase()) : true;
+      const matchMember = memberId ? (item.user && item.user.id === memberId) : true;
+      return matchSearch && matchMember;
+    });
+  }
+
+  const parcelles = showParcelles ? filterBySearchAndMember(allParcelles, search, selectedMember) : [];
+  const sieges = showSieges ? filterBySearchAndMember(allSieges, search, selectedMember) : [];
+  const pepinieres = showPepinieres ? filterBySearchAndMember(allPepinieres, search, selectedMember) : [];
 
   // Centre Madagascar par défaut
   const MADAGASCAR_CENTER = [-18.7669, 46.8691];
@@ -35,6 +47,27 @@ export default function HomePage() {
           <h1 className="ml-4 text-2xl font-extrabold text-blue-900">Carte générale</h1>
         </div>
         <div className="flex flex-wrap items-center gap-4">
+          {/* Recherche texte */}
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Rechercher par nom, propriétaire..."
+            className="px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm"
+          />
+          {/* Filtre membre */}
+          <select
+            value={selectedMember}
+            onChange={e => setSelectedMember(e.target.value)}
+            className="px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm"
+          >
+            <option value="">Tous les membres</option>
+            {usersData?.allUsers?.map(user => (
+              <option key={user.id} value={user.id}>
+                ({user.nomInstitution})
+              </option>
+            ))}
+          </select>
           <label className="flex items-center gap-2 text-blue-900 font-semibold bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
             <input
               type="checkbox"
