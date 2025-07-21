@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure--61qj^dldn6)8!fka8bt3j6up&p(d5%w)o6jh2q)z)_1-6d0v8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'alliance-agroforesterie.vercel.app', 'geo-map-o6k0.onrender.com']
 
 
 # Application definition
@@ -197,6 +197,8 @@ def get_list_env(var, default=None):
 CORS_ALLOWED_ORIGINS = get_list_env('CORS_ALLOWED_ORIGINS', [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://alliance-agroforesterie.vercel.app/",
+
 ])
 
 CORS_ALLOW_CREDENTIALS = True
@@ -239,6 +241,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 CSRF_TRUSTED_ORIGINS = get_list_env('CSRF_TRUSTED_ORIGINS', [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "https://geo-map-o6k0.onrender.com",
 ])
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
