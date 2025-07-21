@@ -200,8 +200,7 @@ def get_list_env(var, default=None):
 CORS_ALLOWED_ORIGINS = get_list_env('CORS_ALLOWED_ORIGINS', [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://alliance-agroforesterie.vercel.app/",
-
+    "https://alliance-agroforesterie.vercel.app",
 ])
 
 CORS_ALLOW_CREDENTIALS = True
