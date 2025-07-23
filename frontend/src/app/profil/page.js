@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME, UPDATE_USER_ABREVIATION, UPDATE_USER_LOGO, UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../../lib/graphql-queries';
 import { useToast } from '../../lib/useToast';
+import { toast as shadToast } from 'sonner';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { debugAuth } from '../../lib/debug-auth';
 import { useAuth } from '../../components/Providers';
 import { getLogoUrl } from '../../lib/utils';
+import PasswordChangeModal from '../../components/PasswordChangeModal';
 
 export default function ProfilPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -26,7 +28,8 @@ export default function ProfilPage() {
   const user = data?.me;
   const [form, setForm] = useState({
     nomInstitution: '',
-    nomProjet: '',
+    nomProjets: [],
+    newProjet: '',
     email: '',
     abreviation: '',
     logo: null
@@ -37,7 +40,8 @@ export default function ProfilPage() {
     if (user) {
       setForm({
         nomInstitution: user.nomInstitution || '',
-        nomProjet: user.nomProjet || '',
+        nomProjets: user.nomProjet ? user.nomProjet.split(',').map(p => p.trim()).filter(Boolean) : [],
+        newProjet: '',
         email: user.email || '',
         abreviation: user.abreviation || '',
         logo: null
@@ -46,8 +50,7 @@ export default function ProfilPage() {
   }, [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ old: '', new1: '', new2: '' });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -97,13 +100,39 @@ export default function ProfilPage() {
     }));
   };
 
+  // Ajout projet (champ multi, séparé par virgule ou bouton)
+  const handleAddProjet = (e) => {
+    e.preventDefault();
+    const projet = form.newProjet.trim();
+    if (projet && !form.nomProjets.includes(projet)) {
+      setForm(f => ({ ...f, nomProjets: [...f.nomProjets, projet], newProjet: '' }));
+    }
+  };
+  const handleRemoveProjet = (projet) => {
+    setForm(f => ({ ...f, nomProjets: f.nomProjets.filter(p => p !== projet) }));
+  };
+  const handleProjetInput = (e) => {
+    const value = e.target.value;
+    // Si l'utilisateur tape une virgule, on ajoute le projet
+    if (value.endsWith(',')) {
+      const projet = value.slice(0, -1).trim();
+      if (projet && !form.nomProjets.includes(projet)) {
+        setForm(f => ({ ...f, nomProjets: [...f.nomProjets, projet], newProjet: '' }));
+      } else {
+        setForm(f => ({ ...f, newProjet: '' }));
+      }
+    } else {
+      setForm(f => ({ ...f, newProjet: value }));
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     
     // Vérifier s'il y a des changements
     const hasChanges = 
       form.nomInstitution !== user.nomInstitution ||
-      form.nomProjet !== user.nomProjet ||
+      form.nomProjets.join(', ') !== (user.nomProjet || '') ||
       form.email !== user.email ||
       form.abreviation !== user.abreviation;
     
@@ -135,11 +164,9 @@ export default function ProfilPage() {
       }
 
       // Mettre à jour le profil si les autres champs ont changé
-      if (success && (form.nomInstitution !== user.nomInstitution || form.nomProjet !== user.nomProjet || form.email !== user.email)) {
+      if (success && (form.email !== user.email)) {
         const { data: profileData } = await updateUserProfile({
           variables: {
-            nomInstitution: form.nomInstitution,
-            nomProjet: form.nomProjet,
             email: form.email
           }
         });
@@ -151,10 +178,20 @@ export default function ProfilPage() {
 
       if (success) {
         showSuccess('Profil mis à jour avec succès');
+        shadToast({
+          title: 'Succès',
+          description: 'Profil mis à jour avec succès',
+          variant: 'success',
+        });
         setIsEditing(false);
         refetch();
       } else {
         showError(errorMessage || 'Erreur lors de la mise à jour');
+        shadToast({
+          title: 'Erreur',
+          description: errorMessage || 'Erreur lors de la mise à jour',
+          variant: 'destructive',
+        });
       }
     } catch (e) {
       showError('Erreur lors de la mise à jour');
@@ -186,9 +223,19 @@ export default function ProfilPage() {
       const { data } = await updateUserLogo({ variables: { logo: file } });
       if (data.updateUserLogo.success) {
         showSuccess('Logo mis à jour avec succès');
+        shadToast({
+          title: 'Succès',
+          description: 'Logo mis à jour avec succès',
+          variant: 'success',
+        });
         refetch();
       } else {
         showError(data.updateUserLogo.message);
+        shadToast({
+          title: 'Erreur',
+          description: data.updateUserLogo.message,
+          variant: 'destructive',
+        });
       }
     } catch (e) {
       showError('Erreur lors de la mise à jour du logo');
@@ -199,15 +246,14 @@ export default function ProfilPage() {
     }
   };
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordForm(f => ({ ...f, [name]: value }));
-  };
-
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
+  const handlePasswordModalSubmit = async (passwordForm, resetForm) => {
     if (passwordForm.new1 !== passwordForm.new2) {
       showError('Les nouveaux mots de passe ne correspondent pas');
+      shadToast({
+        title: 'Erreur',
+        description: 'Les nouveaux mots de passe ne correspondent pas',
+        variant: 'destructive',
+      });
       return;
     }
     setIsChangingPassword(true);
@@ -217,10 +263,20 @@ export default function ProfilPage() {
       });
       if (data.changePassword.success) {
         showSuccess('Mot de passe modifié avec succès');
-        setShowPasswordForm(false);
-        setPasswordForm({ old: '', new1: '', new2: '' });
+        shadToast({
+          title: 'Succès',
+          description: 'Mot de passe modifié avec succès',
+          variant: 'success',
+        });
+        setShowPasswordModal(false);
+        resetForm && resetForm();
       } else {
         showError(data.changePassword.message);
+        shadToast({
+          title: 'Erreur',
+          description: data.changePassword.message,
+          variant: 'destructive',
+        });
       }
     } catch (e) {
       showError('Erreur lors du changement de mot de passe');
@@ -253,20 +309,62 @@ export default function ProfilPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'institution</label>
-            <input type="text" name="nomInstitution" value={form.nomInstitution} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
+            <input
+              type="text"
+              name="nomInstitution"
+              value={form.nomInstitution}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du projet</label>
-            <input type="text" name="nomProjet" value={form.nomProjet} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Projets rattachés</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                name="newProjet"
+                value={form.newProjet}
+                onChange={handleProjetInput}
+                onKeyDown={e => { if (e.key === 'Enter') { handleAddProjet(e); } }}
+                disabled={!isEditing || isSaving}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`}
+                placeholder="Ajouter un projet et appuyer sur Entrée ou ,"
+              />
+              <button type="button" onClick={handleAddProjet} disabled={!isEditing || isSaving || !form.newProjet.trim()} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">+</button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {form.nomProjets.map((projet, idx) => (
+                <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs flex items-center">
+                  {projet}
+                  {isEditing && (
+                    <button type="button" onClick={() => handleRemoveProjet(projet)} className="ml-1 text-blue-800 hover:text-red-600">&times;</button>
+                  )}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input type="email" name="email" value={form.email} onChange={handleChange} disabled={!isEditing || isSaving} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} />
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            disabled={!isEditing || isSaving}
+            className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Abréviation</label>
-          <input type="text" name="abreviation" value={form.abreviation} onChange={handleChange} maxLength={20} className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`} disabled={!isEditing || isSaving} />
+          <input
+            type="text"
+            name="abreviation"
+            value={form.abreviation}
+            readOnly
+            maxLength={20}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+          />
         </div>
         <div className="flex justify-end gap-3">
           {!isEditing ? (
@@ -291,32 +389,11 @@ export default function ProfilPage() {
         </div>
       </form>
       <div className="flex justify-end mt-8">
-        <button type="button" onClick={() => setShowPasswordForm(v => !v)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-semibold">
-          {showPasswordForm ? 'Annuler' : 'Changer mon mot de passe'}
+        <button type="button" onClick={() => setShowPasswordModal(true)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-semibold shadow">
+          Changer mon mot de passe
         </button>
       </div>
-      {showPasswordForm && (
-        <form onSubmit={handlePasswordSubmit} className="bg-white rounded-lg shadow p-6 mt-4 flex flex-col gap-4 max-w-lg mx-auto">
-          <h2 className="text-lg font-bold text-blue-900 mb-2">Changer mon mot de passe</h2>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ancien mot de passe</label>
-            <input type="password" name="old" value={passwordForm.old} onChange={handlePasswordChange} required minLength={6} className="w-full px-3 py-2 border border-gray-300 rounded-md" disabled={isChangingPassword} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
-            <input type="password" name="new1" value={passwordForm.new1} onChange={handlePasswordChange} required minLength={6} className="w-full px-3 py-2 border border-gray-300 rounded-md" disabled={isChangingPassword} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirmer le nouveau mot de passe</label>
-            <input type="password" name="new2" value={passwordForm.new2} onChange={handlePasswordChange} required minLength={6} className="w-full px-3 py-2 border border-gray-300 rounded-md" disabled={isChangingPassword} />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button type="submit" disabled={isChangingPassword || !passwordForm.old || !passwordForm.new1 || !passwordForm.new2} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-              {isChangingPassword ? 'Enregistrement...' : 'Enregistrer'}
-            </button>
-          </div>
-        </form>
-      )}
+      <PasswordChangeModal open={showPasswordModal} onOpenChange={setShowPasswordModal} onSubmit={handlePasswordModalSubmit} loading={isChangingPassword} />
 
       {/* Dialogue de confirmation */}
       <ConfirmationDialog
