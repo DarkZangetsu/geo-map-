@@ -27,8 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--61qj^dldn6)8!fka8bt3j6up&p(d5%w)o6jh2q)z)_1-6d0v8'
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -206,6 +207,7 @@ CORS_ALLOWED_ORIGINS = get_list_env('CORS_ALLOWED_ORIGINS', [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://alliance-agroforesterie.vercel.app",
+    'localhost:8000',
 ])
 
 CORS_ALLOW_CREDENTIALS = True
