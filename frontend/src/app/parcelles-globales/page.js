@@ -7,6 +7,7 @@ import { useToast } from "../../lib/useToast";
 import { parcellesColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
+import PratiqueFilter from "@/components/PratiqueFilter";
 import ParcelleDetailModal from "@/components/ParcelleDetailModal";
 import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import { Button } from "@/components/ui/button";
 export default function ParcellesGlobalesPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredParcelles, setFilteredParcelles] = useState([]);
+  const [selectedPratiques, setSelectedPratiques] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, parcelle: null });
 
@@ -55,16 +58,43 @@ export default function ParcellesGlobalesPage() {
   // Filtrage des parcelles selon les membres sélectionnés
   useEffect(() => {
     if (parcellesData?.allParcelles) {
-      if (selectedMembers.length === 0) {
-        setFilteredParcelles(parcellesData.allParcelles);
-      } else {
-        const filtered = parcellesData.allParcelles.filter(parcelle =>
-          selectedMembers.includes(parcelle.user.id)
-        );
-        setFilteredParcelles(filtered);
+      let filtered = parcellesData.allParcelles;
+      // Filtre par membre
+      if (selectedMembers.length > 0) {
+        filtered = filtered.filter(parcelle => selectedMembers.includes(parcelle.user.id));
       }
+      // Filtre par pratique
+      if (selectedPratiques.length > 0) {
+        filtered = filtered.filter(parcelle =>
+          selectedPratiques.some(sel =>
+            (parcelle.pratique || "").toLowerCase().replace(/\s+/g, "") === sel.toLowerCase().replace(/\s+/g, "")
+          )
+        );
+      }
+      // Recherche globale sur toutes les colonnes principales
+      if (searchValue.trim() !== "") {
+        const lowerSearch = searchValue.toLowerCase();
+        filtered = filtered.filter(parcelle => {
+          return [
+            parcelle.nom,
+            parcelle.proprietaire,
+            parcelle.pratique,
+            parcelle.nomProjet,
+            parcelle.user?.firstName,
+            parcelle.user?.lastName,
+            parcelle.user?.username,
+            parcelle.user?.email,
+            parcelle.superficie,
+            parcelle.variete,
+            parcelle.typeSol,
+            parcelle.typeIrrigation,
+            parcelle.notes
+          ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
+        });
+      }
+      setFilteredParcelles(filtered);
     }
-  }, [parcellesData, selectedMembers]);
+  }, [parcellesData, selectedMembers, selectedPratiques, searchValue]);
 
   // Gestion des erreurs
   if (parcellesError) {
@@ -98,6 +128,14 @@ export default function ParcellesGlobalesPage() {
   // Handler pour le filtre membre
   const handleMemberFilterChange = (memberIds) => {
     setSelectedMembers(memberIds);
+  };
+  // Handler pour le filtre pratique
+  const handlePratiqueFilterChange = (pratiques) => {
+    setSelectedPratiques(pratiques);
+  };
+  // Handler pour la recherche globale
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value);
   };
 
   // Handler pour l'export CSV
@@ -140,14 +178,29 @@ export default function ParcellesGlobalesPage() {
         {/* Filtres */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-medium midnight-blue-text mb-3">
-                Filtrer par membre
-              </h3>
+            <div className="flex-1 mb-4 lg:mb-0">
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">Filtrer par membre</h3>
               <MemberFilter
                 users={usersData?.allUsers || []}
                 selectedMembers={selectedMembers}
                 onFilterChange={handleMemberFilterChange}
+              />
+            </div>
+            <div className="flex-1 mb-4 lg:mb-0">
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">Filtrer par pratique</h3>
+              <PratiqueFilter
+                selectedPratiques={selectedPratiques}
+                onFilterChange={handlePratiqueFilterChange}
+              />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">Recherche globale</h3>
+              <input
+                type="text"
+                value={searchValue}
+                onChange={handleSearchChange}
+                placeholder="Rechercher dans toutes les colonnes..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -170,8 +223,6 @@ export default function ParcellesGlobalesPage() {
             <DataTable
               columns={parcellesColumns(handleViewDetails)}
               data={filteredParcelles}
-              filterKey="nom"
-              filterPlaceholder="Rechercher par nom..."
               actions={
                 <Button className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" onClick={handleExportCSV} disabled={filteredParcelles.length === 0}>
                   Exporter CSV
