@@ -3,9 +3,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { GET_MY_PARCELLES, CREATE_PARCELLE, DELETE_PARCELLE, GET_MY_SIEGES } from '../../lib/graphql-queries';
-import { useToast } from '../../lib/useToast';
+import { toast } from 'sonner';
 import ParcellesMap from '../../components/ParcellesMap';
-import ParcelleForm from '../../components/ParcelleForm';
+import ParcelleModal from '../../components/ParcelleModal';
 import CSVImportExport from '../../components/CSVImportExport';
 import { DataTable } from '../../components/ui/table-data-table';
 import { Button } from '../../components/ui/button';
@@ -35,7 +35,7 @@ const PRATIQUE_LABELS = {
 export default function ParcellesPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const { showSuccess, showError } = useToast();
+  // toast de sonner utilisé pour les notifications
   const [showForm, setShowForm] = useState(false);
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [showParcelleDetails, setShowParcelleDetails] = useState(false);
@@ -171,12 +171,14 @@ export default function ParcellesPage() {
       if (data.createParcelle.success) {
         setShowForm(false);
         refetchParcelles();
-        showSuccess('Site de référence créé avec succès !');
+        toast.success('Site de référence créé avec succès !');
         return data.createParcelle.parcelle;
       } else {
+        toast.error(data.createParcelle.message || 'Erreur lors de la création du site de référence');
         throw new Error(data.createParcelle.message);
       }
     } catch (error) {
+      toast.error(error.message || 'Erreur lors de la création du site de référence');
       throw new Error(error.message || 'Erreur lors de la création du site de référence');
     }
   };
@@ -193,13 +195,13 @@ export default function ParcellesPage() {
         variables: { id: parcelleToDelete }
       });
       if (data.deleteParcelle.success) {
-        showSuccess('Site de référence supprimé avec succès');
+        toast.success('Site de référence supprimé avec succès');
         refetchParcelles();
       } else {
-        showError(data.deleteParcelle.message);
+        toast.error(data.deleteParcelle.message || 'Erreur lors de la suppression');
       }
     } catch (error) {
-      showError('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
       console.error('Delete error:', error);
     } finally {
       setShowDeleteConfirm(false);
@@ -265,7 +267,7 @@ export default function ParcellesPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => { setEditingParcelle(null); setShowForm(true); }}
               className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
               title="Ajouter un nouveau site de référence"
             >
@@ -410,25 +412,14 @@ export default function ParcellesPage() {
       )}
 
       {/* Modal d'ajout/modification */}
-      {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] p-0 relative">
-            <button
-              onClick={() => { setShowForm(false); setEditingParcelle(null); }}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none z-10"
-              aria-label="Fermer"
-            >
-              &times;
-            </button>
-              <ParcelleForm
-                parcelle={editingParcelle}
-                onSuccess={() => { setShowForm(false); setEditingParcelle(null); refetchParcelles(); }}
-                onCancel={() => { setShowForm(false); setEditingParcelle(null); }}
-                parcellesCount={parcelles?.length || 0}
-              />
-          </div>
-        </div>
-      )}
+      <ParcelleModal
+        open={showForm}
+        onClose={() => { setShowForm(false); setEditingParcelle(null); }}
+        parcelle={editingParcelle}
+        onSuccess={() => { setShowForm(false); setEditingParcelle(null); refetchParcelles(); }}
+        title={editingParcelle ? 'Modifier le site de référence' : 'Ajouter un nouveau site de référence'}
+        description={editingParcelle ? 'Modifiez les informations du site.' : 'Remplissez le formulaire pour ajouter un nouveau site.'}
+      />
 
       {/* Modal Import/Export CSV */}
       {showCSVModal && (

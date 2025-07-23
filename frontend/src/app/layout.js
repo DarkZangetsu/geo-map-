@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import client from '../lib/apollo-client';
 import { useToast } from '../lib/useToast';
 import Toast from '../components/Toast';
+import { Toaster } from "@/components/ui/sonner"
 import './globals.css';
 import { AuthProvider, useAuth } from '../components/Providers';
 import { usePathname } from 'next/navigation';
@@ -254,6 +255,7 @@ function LayoutContent({ children }) {
             {/* Contenu principal */}
             <main className="h-full">
               {children}
+              <Toaster />
             </main>
           </div>
           {/* Toasts */}

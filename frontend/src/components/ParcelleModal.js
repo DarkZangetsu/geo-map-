@@ -1,18 +1,19 @@
 import React from 'react';
 import ParcelleForm from './ParcelleForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const ParcelleModal = ({ open, onClose, parcelle = null, onSuccess }) => {
+  if (!open) return null;
   return (
-    <Dialog open={open} onOpenChange={v => { if (!v) onClose && onClose(); }}>
-      <DialogContent className="max-w-[600px] w-full p-0 sm:p-0 max-h-[90vh] flex flex-col">
-        <DialogHeader className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b">
-          <DialogTitle>{parcelle ? 'Modifier le site de référence' : 'Ajouter un nouveau site de référence'}</DialogTitle>
-          <DialogDescription>
-            {parcelle ? 'Modifiez les informations du site.' : 'Remplissez le formulaire pour ajouter un nouveau site.'}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto px-6 py-4 flex-1">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] p-0 relative animate-fade-in flex flex-col">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none z-10"
+          aria-label="Fermer"
+        >
+          &times;
+        </button>
+        <div className="flex-1 overflow-y-auto">
           <ParcelleForm
             parcelle={parcelle}
             onSuccess={parcelle => {
@@ -23,9 +24,9 @@ const ParcelleModal = ({ open, onClose, parcelle = null, onSuccess }) => {
             mode={parcelle ? 'edit' : 'add'}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
-export default ParcelleModal; 
+export default ParcelleModal;

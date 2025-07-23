@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME, UPDATE_USER_ABREVIATION, UPDATE_USER_LOGO, UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../../lib/graphql-queries';
-import { useToast } from '../../lib/useToast';
-import { toast as shadToast } from 'sonner';
+import { toast } from 'sonner';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { debugAuth } from '../../lib/debug-auth';
@@ -24,7 +23,6 @@ export default function ProfilPage() {
   const [updateUserLogo] = useMutation(UPDATE_USER_LOGO);
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
   const [changePassword] = useMutation(CHANGE_PASSWORD);
-  const { showSuccess, showError } = useToast();
   const user = data?.me;
   const [form, setForm] = useState({
     nomInstitution: '',
@@ -137,7 +135,7 @@ export default function ProfilPage() {
       form.abreviation !== user.abreviation;
     
     if (!hasChanges) {
-      showError('Aucune modification détectée');
+      toast.error('Aucune modification détectée');
       return;
     }
     
@@ -177,24 +175,14 @@ export default function ProfilPage() {
       }
 
       if (success) {
-        showSuccess('Profil mis à jour avec succès');
-        shadToast({
-          title: 'Succès',
-          description: 'Profil mis à jour avec succès',
-          variant: 'success',
-        });
+        toast.success('Profil mis à jour avec succès');
         setIsEditing(false);
         refetch();
       } else {
-        showError(errorMessage || 'Erreur lors de la mise à jour');
-        shadToast({
-          title: 'Erreur',
-          description: errorMessage || 'Erreur lors de la mise à jour',
-          variant: 'destructive',
-        });
+        toast.error(errorMessage || 'Erreur lors de la mise à jour');
       }
     } catch (e) {
-      showError('Erreur lors de la mise à jour');
+      toast.error('Erreur lors de la mise à jour');
     } finally {
       setIsSaving(false);
       setShowConfirmDialog(false);
@@ -216,29 +204,19 @@ export default function ProfilPage() {
     try {
       const file = document.querySelector('input[name="logo"]').files?.[0];
       if (!file) {
-        showError('Aucun fichier sélectionné');
+        toast.error('Aucun fichier sélectionné');
         return;
       }
       
       const { data } = await updateUserLogo({ variables: { logo: file } });
       if (data.updateUserLogo.success) {
-        showSuccess('Logo mis à jour avec succès');
-        shadToast({
-          title: 'Succès',
-          description: 'Logo mis à jour avec succès',
-          variant: 'success',
-        });
+        toast.success('Logo mis à jour avec succès');
         refetch();
       } else {
-        showError(data.updateUserLogo.message);
-        shadToast({
-          title: 'Erreur',
-          description: data.updateUserLogo.message,
-          variant: 'destructive',
-        });
+        toast.error(data.updateUserLogo.message);
       }
     } catch (e) {
-      showError('Erreur lors de la mise à jour du logo');
+      toast.error('Erreur lors de la mise à jour du logo');
     } finally {
       setIsSaving(false);
       setShowConfirmDialog(false);
@@ -248,12 +226,7 @@ export default function ProfilPage() {
 
   const handlePasswordModalSubmit = async (passwordForm, resetForm) => {
     if (passwordForm.new1 !== passwordForm.new2) {
-      showError('Les nouveaux mots de passe ne correspondent pas');
-      shadToast({
-        title: 'Erreur',
-        description: 'Les nouveaux mots de passe ne correspondent pas',
-        variant: 'destructive',
-      });
+      toast.error('Les nouveaux mots de passe ne correspondent pas');
       return;
     }
     setIsChangingPassword(true);
@@ -262,24 +235,14 @@ export default function ProfilPage() {
         variables: { oldPassword: passwordForm.old, newPassword: passwordForm.new1 }
       });
       if (data.changePassword.success) {
-        showSuccess('Mot de passe modifié avec succès');
-        shadToast({
-          title: 'Succès',
-          description: 'Mot de passe modifié avec succès',
-          variant: 'success',
-        });
+        toast.success('Mot de passe modifié avec succès');
         setShowPasswordModal(false);
         resetForm && resetForm();
       } else {
-        showError(data.changePassword.message);
-        shadToast({
-          title: 'Erreur',
-          description: data.changePassword.message,
-          variant: 'destructive',
-        });
+        toast.error(data.changePassword.message);
       }
     } catch (e) {
-      showError('Erreur lors du changement de mot de passe');
+      toast.error('Erreur lors du changement de mot de passe');
     } finally {
       setIsChangingPassword(false);
     }
