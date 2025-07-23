@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import ParcelleDetailModal from './ParcelleDetailModal';
+import { getLogoUrl } from '../lib/utils';
 
 const ParcellesGlobalesTable = ({ parcelles, loading }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -119,7 +120,7 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                   <div className="flex items-center">
                     {parcelle.user?.logo && (
                       <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL}/media/${parcelle.user.logo}`}
+                        src={getLogoUrl(parcelle.user.logo)}
                         alt="Logo"
                         className="w-6 h-6 rounded-full mr-2"
                       />

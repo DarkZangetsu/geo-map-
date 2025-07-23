@@ -45,6 +45,7 @@ async function testApolloClient() {
                         firstName
                         lastName
                         role
+                        logo
                     }
                 }
             `,

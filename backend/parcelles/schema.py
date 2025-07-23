@@ -27,7 +27,14 @@ class UserType(DjangoObjectType):
     def resolve_logo(self, info):
         if self.logo:
             try:
-                return info.context.build_absolute_uri(self.logo.url)
+                request = info.context
+                # Si build_absolute_uri existe (cas normal)
+                if hasattr(request, "build_absolute_uri"):
+                    return request.build_absolute_uri(self.logo.url)
+                # Fallback : BASE_URL ou localhost
+                import os
+                base_url = os.environ.get("BASE_URL") or "http://localhost:8000"
+                return f"{base_url}/media/{self.logo.name}"
             except Exception:
                 return str(self.logo)
         return ""

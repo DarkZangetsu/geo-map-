@@ -163,3 +163,10 @@ export const cleanFormData = (data) => {
   });
   return cleaned;
 }; 
+
+// Utilitaire pour obtenir l'URL absolue du logo utilisateur
+export function getLogoUrl(logo) {
+  if (!logo) return null;
+  if (logo.startsWith('http://') || logo.startsWith('https://')) return logo;
+  return `${process.env.NEXT_PUBLIC_API_URL}/media/${logo}`;
+} 

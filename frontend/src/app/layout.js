@@ -8,6 +8,7 @@ import Toast from '../components/Toast';
 import './globals.css';
 import { AuthProvider, useAuth } from '../components/Providers';
 import { usePathname } from 'next/navigation';
+import { getLogoUrl } from '../lib/utils';
 
 function LayoutContent({ children }) {
   const { user, isLoading, isLoggingOut, logout } = useAuth();
@@ -165,9 +166,9 @@ function LayoutContent({ children }) {
                         <>
                           <div className="flex items-center">
                             {console.log('USER NAVBAR:', user)}
-                            {user?.logo&& (
+                            {user?.logo && (
                               <img
-                                src={`${process.env.NEXT_PUBLIC_API_URL}/media/${user.logo}`}
+                                src={getLogoUrl(user.logo)}
                                 alt="Logo"
                                 className="w-8 h-8 rounded-full mr-2"
                               />

@@ -1,6 +1,7 @@
 import { X, MapPin, User, Image as ImageIcon, Calendar, Building } from 'lucide-react';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
+import { getLogoUrl } from '../lib/utils';
 
 export default function LocalDetailModal({ siege, onClose }) {
   const formatDate = (dateString) => {
@@ -71,7 +72,7 @@ export default function LocalDetailModal({ siege, onClose }) {
                   {siege.user && siege.user.logo && (
                     <div className="flex items-center gap-3">
                       <ImageIcon className="h-5 w-5 text-gray-400" />
-                      <img src={`${process.env.NEXT_PUBLIC_API_URL}${siege.user.logo}`} alt="Logo" className="w-10 h-10 rounded-full border" />
+                      <img src={getLogoUrl(siege.user.logo)} alt="Logo" className="w-10 h-10 rounded-full border" />
                     </div>
                   )}
                   {siege.poste && (

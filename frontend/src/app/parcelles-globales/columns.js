@@ -1,6 +1,7 @@
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { getLogoUrl } from '../../lib/utils';
 
 // Ajout du mapping pour les pratiques
 const PRATIQUE_LABELS = {
@@ -54,7 +55,7 @@ export const parcellesColumns = (onViewDetails) => [
       return (
         <div className="flex items-center">
           {user?.logo && (
-            <img src={`${process.env.NEXT_PUBLIC_API_URL}/media/${user.logo}`} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
+            <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
           )}
           <div>
             <div className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</div>

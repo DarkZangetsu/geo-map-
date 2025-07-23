@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_SIEGE } from '../lib/graphql-queries';
+import { getLogoUrl } from '../lib/utils';
 
 const SiegeDetailModal = ({ siege, onClose }) => {
   const [activeTab, setActiveTab] = useState('info');
@@ -179,7 +180,7 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                         <div className="flex items-center gap-3">
                           {siegeComplete?.user?.logo && (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_API_URL}${siegeComplete.user.logo}`}
+                              src={getLogoUrl(siegeComplete.user.logo)}
                               alt="Logo"
                               className="w-12 h-12 rounded-full"
                             />

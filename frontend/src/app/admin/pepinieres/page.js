@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import MemberFilter from '../../../components/MemberFilter';
 import { DataTable } from '../../../components/ui/table-data-table';
 import React, { useState, useMemo } from 'react';
+import { getLogoUrl } from '../../../lib/utils';
 
 export default function AdminPepinieresPage() {
   const { data, loading, error } = useQuery(GET_ALL_PEPINIERES);
@@ -55,7 +56,7 @@ export default function AdminPepinieresPage() {
         return user ? (
           <div className="flex items-center">
             {user.logo && (
-              <img src={user.logo} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
+              <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
             )}
             <div>
               <div className="text-sm font-medium text-gray-900">{user.nomInstitution || user.username}</div>

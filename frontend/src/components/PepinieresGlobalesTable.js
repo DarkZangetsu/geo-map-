@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DataTable } from './ui/table-data-table';
 import MemberFilter from './MemberFilter';
+import { getLogoUrl } from '../lib/utils';
 
 export default function PepinieresGlobalesTable({ pepinieres, users = [] }) {
   const [selectedUser, setSelectedUser] = React.useState('');
@@ -38,7 +39,7 @@ export default function PepinieresGlobalesTable({ pepinieres, users = [] }) {
         return user ? (
           <div className="flex items-center">
             {user.logo && (
-              <img src={user.logo} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
+              <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
             )}
             <div>
               <div className="text-sm font-medium text-gray-900">{user.nomInstitution || (user.firstName + ' ' + user.lastName) || user.email}</div>

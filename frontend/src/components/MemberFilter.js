@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getLogoUrl } from '../lib/utils';
 
 const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,7 +88,7 @@ const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
                 <div className="ml-3 flex items-center">
                   {user.logo && (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL}${user.logo}`}
+                      src={getLogoUrl(user.logo)}
                       alt="Logo"
                       className="w-6 h-6 rounded-full mr-2"
                     />

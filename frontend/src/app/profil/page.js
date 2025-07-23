@@ -7,6 +7,7 @@ import { useAuthGuard } from '../../lib/useAuthGuard';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { debugAuth } from '../../lib/debug-auth';
 import { useAuth } from '../../components/Providers';
+import { getLogoUrl } from '../../lib/utils';
 
 export default function ProfilPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
@@ -242,7 +243,7 @@ export default function ProfilPage() {
       <form onSubmit={handleSave} className="bg-white rounded-lg shadow p-6 flex flex-col gap-6">
         <div className="flex items-center gap-6">
           {user.logo && (
-            <img src={`http://localhost:8000/media/${user.logo}`} alt="Logo" className="w-20 h-20 rounded-full object-cover border" />
+            <img src={getLogoUrl(user.logo)} alt="Logo" className="w-20 h-20 rounded-full object-cover border" />
           )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Changer le logo</label>

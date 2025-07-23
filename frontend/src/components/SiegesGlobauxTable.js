@@ -3,6 +3,7 @@ import * as React from 'react';
 import { DataTable } from './ui/table-data-table';
 import { Button } from './ui/button';
 import SiegeDetailModal from './SiegeDetailModal';
+import { getLogoUrl } from '../lib/utils';
 
 export default function SiegesGlobauxTable({ sieges, loading }) {
   const [selectedSiege, setSelectedSiege] = React.useState(null);
@@ -27,7 +28,7 @@ export default function SiegesGlobauxTable({ sieges, loading }) {
         return user ? (
           <div className="flex items-center">
             {user.logo && (
-              <img src={`${process.env.NEXT_PUBLIC_API_URL}${user.logo}`} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
+              <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
             )}
             <div>
               <div className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</div>

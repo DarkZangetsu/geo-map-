@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PARCELLE } from '../lib/graphql-queries';
+import { getLogoUrl } from '../lib/utils';
 
 const ParcelleDetailModal = ({ parcelle, onClose }) => {
   const [activeTab, setActiveTab] = useState('info');
@@ -220,7 +221,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                         <div className="flex items-center gap-3">
                           {parcelleComplete?.user?.logo && (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_API_URL}${parcelleComplete.user.logo}`}
+                              src={getLogoUrl(parcelleComplete.user.logo)}
                               alt="Logo"
                               className="w-12 h-12 rounded-full"
                             />
