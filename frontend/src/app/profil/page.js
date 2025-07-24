@@ -46,6 +46,7 @@ export default function ProfilPage() {
       });
     }
   }, [user]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -56,10 +57,10 @@ export default function ProfilPage() {
   // Afficher un loader pendant la vérification d'authentification
   if (isLoading || !isAuthorized) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm border border-white/20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-slate-600 font-medium">
             {isLoading ? 'Vérification de l\'authentification...' : 'Redirection vers la page de connexion...'}
           </p>
         </div>
@@ -68,26 +69,47 @@ export default function ProfilPage() {
   }
 
   if (!isAuthenticated) {
-    return <div className="text-center py-12 text-gray-500">Veuillez vous connecter pour accéder à votre profil.</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-slate-500 text-lg">Veuillez vous connecter pour accéder à votre profil.</div>
+        </div>
+      </div>
+    );
   }
   
   if (loading) {
-    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
   
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">Erreur lors du chargement du profil: {error.message}</div>
-        <button onClick={debugAuth} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Debug Auth
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-red-500 mb-4 font-medium">Erreur lors du chargement du profil: {error.message}</div>
+          <button 
+            onClick={debugAuth} 
+            className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium shadow-lg"
+          >
+            Debug Auth
+          </button>
+        </div>
       </div>
     );
   }
   
   if (!user) {
-    return <div className="text-center py-12 text-gray-500">Aucune donnée utilisateur.</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-slate-500 text-lg">Aucune donnée utilisateur.</div>
+        </div>
+      </div>
+    );
   }
 
   const handleChange = (e) => {
@@ -98,7 +120,6 @@ export default function ProfilPage() {
     }));
   };
 
-  // Ajout projet (champ multi, séparé par virgule ou bouton)
   const handleAddProjet = (e) => {
     e.preventDefault();
     const projet = form.newProjet.trim();
@@ -106,12 +127,13 @@ export default function ProfilPage() {
       setForm(f => ({ ...f, nomProjets: [...f.nomProjets, projet], newProjet: '' }));
     }
   };
+
   const handleRemoveProjet = (projet) => {
     setForm(f => ({ ...f, nomProjets: f.nomProjets.filter(p => p !== projet) }));
   };
+
   const handleProjetInput = (e) => {
     const value = e.target.value;
-    // Si l'utilisateur tape une virgule, on ajoute le projet
     if (value.endsWith(',')) {
       const projet = value.slice(0, -1).trim();
       if (projet && !form.nomProjets.includes(projet)) {
@@ -127,7 +149,6 @@ export default function ProfilPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     
-    // Vérifier s'il y a des changements
     const hasChanges = 
       form.nomInstitution !== user.nomInstitution ||
       form.nomProjets.join(', ') !== (user.nomProjet || '') ||
@@ -139,7 +160,6 @@ export default function ProfilPage() {
       return;
     }
     
-    // Afficher le dialogue de confirmation
     setPendingAction('save');
     setShowConfirmDialog(true);
   };
@@ -150,7 +170,6 @@ export default function ProfilPage() {
       let success = true;
       let errorMessage = '';
 
-      // Mettre à jour l'abréviation si elle a changé
       if (form.abreviation !== user.abreviation) {
         const { data: abreviationData } = await updateUserAbreviation({
           variables: { userId: user.id, abreviation: form.abreviation }
@@ -161,10 +180,15 @@ export default function ProfilPage() {
         }
       }
 
-      // Mettre à jour le profil si les autres champs ont changé
-      if (success && (form.email !== user.email)) {
+      if (success && (
+        form.nomInstitution !== user.nomInstitution ||
+        form.nomProjets.join(', ') !== (user.nomProjet || '') ||
+        form.email !== user.email
+      )) {
         const { data: profileData } = await updateUserProfile({
           variables: {
+            nomInstitution: form.nomInstitution,
+            nomProjet: form.nomProjets.join(', '),
             email: form.email
           }
         });
@@ -182,6 +206,7 @@ export default function ProfilPage() {
         toast.error(errorMessage || 'Erreur lors de la mise à jour');
       }
     } catch (e) {
+      console.error('Erreur lors de la mise à jour:', e);
       toast.error('Erreur lors de la mise à jour');
     } finally {
       setIsSaving(false);
@@ -194,7 +219,6 @@ export default function ProfilPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Afficher le dialogue de confirmation
     setPendingAction('logo');
     setShowConfirmDialog(true);
   };
@@ -248,117 +272,252 @@ export default function ProfilPage() {
     }
   };
 
+  const resetForm = () => {
+    setForm({
+      nomInstitution: user.nomInstitution || '',
+      nomProjets: user.nomProjet ? user.nomProjet.split(',').map(p => p.trim()).filter(Boolean) : [],
+      newProjet: '',
+      email: user.email || '',
+      abreviation: user.abreviation || '',
+      logo: null
+    });
+  };
+
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">Mon profil</h1>
-        <button 
-          onClick={debugAuth} 
-          className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
-        >
-          Debug Auth
-        </button>
-      </div>
-      <form onSubmit={handleSave} className="bg-white rounded-lg shadow p-6 flex flex-col gap-6">
-        <div className="flex items-center gap-6">
-          {user.logo && (
-            <img src={getLogoUrl(user.logo)} alt="Logo" className="w-20 h-20 rounded-full object-cover border" />
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* En-tête */}
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Changer le logo</label>
-            <input type="file" name="logo" accept="image/*" onChange={handleLogoChange} disabled={isSaving} className="block w-full text-sm text-gray-500" />
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">Mon profil</h1>
+            <p className="text-slate-600">Gérez vos informations personnelles et préférences</p>
           </div>
+          <button 
+            onClick={debugAuth} 
+            className="px-4 py-2 bg-slate-500 text-white text-sm rounded-xl hover:bg-slate-600 transition-colors shadow-lg"
+          >
+            Debug Auth
+          </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l'institution</label>
-            <input
-              type="text"
-              name="nomInstitution"
-              value={form.nomInstitution}
-              readOnly
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Projets rattachés</label>
-            <div className="flex gap-2 mb-2">
+
+        {/* Carte principale */}
+        <div className="bg-white rounded-3xl shadow-xl border border-white/20 backdrop-blur-sm overflow-hidden">
+          <form onSubmit={handleSave} className="p-8">
+            {/* Section Logo */}
+            <div className="flex items-center gap-6 mb-8 pb-8 border-b border-slate-100">
+              <div className="relative group">
+                {user.logo ? (
+                  <img 
+                    src={getLogoUrl(user.logo)} 
+                    alt="Logo" 
+                    className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-lg group-hover:shadow-xl transition-shadow" 
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 border-4 border-white shadow-lg flex items-center justify-center">
+                    <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute -bottom-2 -right-2 bg-blue-500 rounded-full p-2 shadow-lg group-hover:bg-blue-600 transition-colors">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Photo de profil</label>
+                <input 
+                  type="file" 
+                  name="logo" 
+                  accept="image/*" 
+                  onChange={handleLogoChange} 
+                  disabled={isSaving} 
+                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:transition-colors" 
+                />
+                <p className="text-xs text-slate-500 mt-2">PNG, JPG ou GIF (max. 2MB)</p>
+              </div>
+            </div>
+
+            {/* Informations principales */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Nom de l'institution</label>
+                <input
+                  type="text"
+                  name="nomInstitution"
+                  value={form.nomInstitution}
+                  readOnly
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 cursor-not-allowed text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-colors"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  disabled={!isEditing || isSaving}
+                  className={`w-full px-4 py-3 border rounded-xl transition-colors focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 ${
+                    !isEditing 
+                      ? 'border-slate-200 bg-slate-50 text-slate-600' 
+                      : 'border-slate-300 bg-white text-slate-800'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Projets */}
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">Projets rattachés</label>
+              <div className="flex gap-3 mb-4">
+                <input
+                  type="text"
+                  name="newProjet"
+                  value={form.newProjet}
+                  onChange={handleProjetInput}
+                  onKeyDown={e => { if (e.key === 'Enter') { handleAddProjet(e); } }}
+                  disabled={!isEditing || isSaving}
+                  className={`flex-1 px-4 py-3 border rounded-xl transition-colors focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 ${
+                    !isEditing 
+                      ? 'border-slate-200 bg-slate-50 text-slate-600' 
+                      : 'border-slate-300 bg-white text-slate-800'
+                  }`}
+                  placeholder="Ajouter un projet et appuyer sur Entrée ou ,"
+                />
+                <button 
+                  type="button" 
+                  onClick={handleAddProjet} 
+                  disabled={!isEditing || isSaving || !form.newProjet.trim()} 
+                  className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-lg hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                {form.nomProjets.map((projet, idx) => (
+                  <span key={idx} className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-4 py-2 rounded-xl text-sm flex items-center font-medium shadow-sm">
+                    {projet}
+                    {isEditing && (
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveProjet(projet)} 
+                        className="ml-2 text-blue-800 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-white/50"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Abréviation */}
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Abréviation</label>
               <input
                 type="text"
-                name="newProjet"
-                value={form.newProjet}
-                onChange={handleProjetInput}
-                onKeyDown={e => { if (e.key === 'Enter') { handleAddProjet(e); } }}
-                disabled={!isEditing || isSaving}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`}
-                placeholder="Ajouter un projet et appuyer sur Entrée ou ,"
+                name="abreviation"
+                value={form.abreviation}
+                readOnly
+                maxLength={20}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 cursor-not-allowed text-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-colors"
               />
-              <button type="button" onClick={handleAddProjet} disabled={!isEditing || isSaving || !form.newProjet.trim()} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">+</button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {form.nomProjets.map((projet, idx) => (
-                <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs flex items-center">
-                  {projet}
-                  {isEditing && (
-                    <button type="button" onClick={() => handleRemoveProjet(projet)} className="ml-1 text-blue-800 hover:text-red-600">&times;</button>
-                  )}
-                </span>
-              ))}
+
+            {/* Boutons d'action */}
+            <div className="flex justify-end gap-4 pt-6 border-t border-slate-100">
+              {!isEditing ? (
+                <button 
+                  type="button" 
+                  onClick={() => setIsEditing(true)} 
+                  className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Modifier
+                </button>
+              ) : (
+                <>
+                  <button 
+                    type="button" 
+                    onClick={() => { 
+                      setIsEditing(false); 
+                      resetForm();
+                    }} 
+                    className="px-8 py-3 bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Annuler
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isSaving} 
+                    className="px-8 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+                  >
+                    {isSaving ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enregistrement...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Enregistrer
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
+          </form>
+        </div>
+
+        {/* Section mot de passe */}
+        <div className="mt-8 bg-white rounded-3xl shadow-xl border border-white/20 backdrop-blur-sm p-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Sécurité</h3>
+              <p className="text-slate-600">Modifiez votre mot de passe pour sécuriser votre compte</p>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => setShowPasswordModal(true)} 
+              className="px-6 py-3 bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Changer mon mot de passe
+            </button>
           </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            disabled={!isEditing || isSaving}
-            className={`w-full px-3 py-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : 'bg-white'}`}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Abréviation</label>
-          <input
-            type="text"
-            name="abreviation"
-            value={form.abreviation}
-            readOnly
-            maxLength={20}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
-          />
-        </div>
-        <div className="flex justify-end gap-3">
-          {!isEditing ? (
-            <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">Modifier</button>
-          ) : (
-            <>
-              <button type="button" onClick={() => { 
-                setIsEditing(false); 
-                setForm({
-                  nomInstitution: user.nomInstitution || '',
-                  nomProjet: user.nomProjet || '',
-                  email: user.email || '',
-                  abreviation: user.abreviation || '',
-                  logo: null
-                }); 
-              }} className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-semibold">Annuler</button>
-              <button type="submit" disabled={isSaving} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                {isSaving ? 'Enregistrement...' : 'Enregistrer'}
-              </button>
-            </>
-          )}
-        </div>
-      </form>
-      <div className="flex justify-end mt-8">
-        <button type="button" onClick={() => setShowPasswordModal(true)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-semibold shadow">
-          Changer mon mot de passe
-        </button>
       </div>
-      <PasswordChangeModal open={showPasswordModal} onOpenChange={setShowPasswordModal} onSubmit={handlePasswordModalSubmit} loading={isChangingPassword} />
 
-      {/* Dialogue de confirmation */}
+      {/* Modals */}
+      <PasswordChangeModal 
+        open={showPasswordModal} 
+        onOpenChange={setShowPasswordModal} 
+        onSubmit={handlePasswordModalSubmit} 
+        loading={isChangingPassword} 
+      />
+
       <ConfirmationDialog
         isOpen={showConfirmDialog}
         onClose={() => {
@@ -382,4 +541,4 @@ export default function ProfilPage() {
       />
     </div>
   );
-} 
+}

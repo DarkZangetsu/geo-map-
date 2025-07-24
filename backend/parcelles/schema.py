@@ -1095,27 +1095,31 @@ class UpdateUserProfile(graphene.Mutation):
     message = graphene.String()
 
     class Arguments:
-        first_name = graphene.String()
-        last_name = graphene.String()
+        nom_institution = graphene.String()
+        nom_projet = graphene.String()
         email = graphene.String()
 
     @login_required
-    def mutate(self, info, first_name=None, last_name=None, email=None):
+    def mutate(self, info, nom_institution=None, nom_projet=None, email=None):
         user = info.context.user
+
         try:
-            if first_name is not None:
-                user.first_name = first_name
-            if last_name is not None:
-                user.last_name = last_name
+            if nom_institution is not None:
+                user.nom_institution = nom_institution
+
+            if nom_projet is not None:
+                user.nom_projet = nom_projet
+
             if email is not None:
-                # Vérifier unicité email
+                # Vérifie que l'email est unique pour les autres utilisateurs
                 if User.objects.filter(email=email).exclude(id=user.id).exists():
                     return UpdateUserProfile(success=False, message="Cet email est déjà utilisé")
                 user.email = email
+
             user.save()
             return UpdateUserProfile(user=user, success=True, message="Profil mis à jour")
         except Exception as e:
-            return UpdateUserProfile(success=False, message=str(e))
+            return UpdateUserProfile(success=False, message=f"Erreur : {str(e)}")
 
 class ChangePassword(graphene.Mutation):
     success = graphene.Boolean()
