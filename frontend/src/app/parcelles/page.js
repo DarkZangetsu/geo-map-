@@ -266,56 +266,59 @@ export default function ParcellesPage() {
               {parcelles.length} site{parcelles.length !== 1 ? 's' : ''} de référence au total
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
-              onClick={() => { setEditingParcelle(null); setShowForm(true); }}
-              className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
-              title="Ajouter un nouveau site de référence"
-            >
-              <Plus size={16} /> Ajouter un site
-            </button>
-            <button
-              onClick={() => setShowCSVModal(true)}
-              className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
-              title="Import/Export CSV"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Import/Export CSV
-            </button>
-            {(showMap || mapFullscreen) && (
-              <div className="flex items-center gap-2">
-                <select
-                  value={mapStyle}
-                  onChange={(e) => setMapStyle(e.target.value)}
-                  className="px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm text-sm"
+          {/* Masquer les boutons Ajouter/Export quand la carte est affichée */}
+          {!(showMap || mapFullscreen) && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                onClick={() => { setEditingParcelle(null); setShowForm(true); }}
+                className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
+                title="Ajouter un nouveau site de référence"
+              >
+                <Plus size={16} /> Ajouter un site
+              </button>
+              <button
+                onClick={() => setShowCSVModal(true)}
+                className="px-4 py-2 midnight-blue-btn rounded-md shadow font-bold transition flex items-center justify-center gap-2 text-sm"
+                title="Import/Export CSV"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Import/Export CSV
+              </button>
+            </div>
+          )}
+          {(showMap || mapFullscreen) && (
+            <div className="flex items-center gap-2">
+              <select
+                value={mapStyle}
+                onChange={(e) => setMapStyle(e.target.value)}
+                className="px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm text-sm"
+              >
+                <option value="street">Carte routière</option>
+                <option value="satellite">Satellite</option>
+                <option value="hybrid">Hybride</option>
+              </select>
+              {!mapFullscreen && (
+                <button
+                  onClick={() => setMapFullscreen(true)}
+                  className="px-3 py-2 midnight-blue-btn rounded-md font-semibold shadow-sm transition text-sm"
+                  title="Afficher la carte en plein écran"
                 >
-                  <option value="street">Carte routière</option>
-                  <option value="satellite">Satellite</option>
-                  <option value="hybrid">Hybride</option>
-                </select>
-                {!mapFullscreen && (
-                  <button
-                    onClick={() => setMapFullscreen(true)}
-                    className="px-3 py-2 midnight-blue-btn rounded-md font-semibold shadow-sm transition text-sm"
-                    title="Afficher la carte en plein écran"
-                  >
-                    Plein écran
-                  </button>
-                )}
-                {mapFullscreen && (
-                  <button
-                    onClick={() => setMapFullscreen(false)}
-                    className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-semibold shadow-sm transition text-sm"
-                    title="Quitter le plein écran"
-                  >
-                    Quitter
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+                  Plein écran
+                </button>
+              )}
+              {mapFullscreen && (
+                <button
+                  onClick={() => setMapFullscreen(false)}
+                  className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-semibold shadow-sm transition text-sm"
+                  title="Quitter le plein écran"
+                >
+                  Quitter
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
       {/* Affichage conditionnel : Carte ou Tableau */}
