@@ -38,7 +38,6 @@ export default function ParcellesPage() {
   // toast de sonner utilisé pour les notifications
   const [showForm, setShowForm] = useState(false);
   const [selectedParcelle, setSelectedParcelle] = useState(null);
-  const [showParcelleDetails, setShowParcelleDetails] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [mapStyle, setMapStyle] = useState('street');
@@ -139,11 +138,33 @@ export default function ParcellesPage() {
   const filteredParcelles = useMemo(() => {
     let data = parcellesData?.myParcelles || [];
     if (search) {
-      data = data.data.filter(p =>
-        (p.nom || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.proprietaire || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.pratique || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.nomProjet || '').toLowerCase().includes(search.toLowerCase())
+      const lowerSearch = search.toLowerCase();
+      data = data.filter(row =>
+        visibleColumns.some(col => {
+          let value = row[col];
+          // Affichage lisible pour la colonne pratique
+          if (col === 'pratique') {
+            value = PRATIQUE_LABELS[(value || '').toLowerCase()] || value || '-';
+          }
+          // Affichage concaténé pour user (membre)
+          if (col === 'user' && row.user) {
+            value = [row.user.firstName, row.user.lastName, row.user.email, row.user.abreviation].filter(Boolean).join(' ');
+          }
+          // Affichage abréviation
+          if (col === 'user.abreviation' && row.user) {
+            value = row.user.abreviation || '-';
+          }
+          // Superficie formatée
+          if (col === 'superficie') {
+            value = row.superficie ? `${row.superficie} ha` : '-';
+          }
+          // Si tableau, joindre les valeurs
+          if (Array.isArray(value)) value = value.join(' ');
+          // Si objet, essayer de joindre les valeurs
+          if (typeof value === 'object' && value !== null) value = Object.values(value).join(' ');
+          if (value === undefined || value === null) return false;
+          return String(value).toLowerCase().includes(lowerSearch);
+        })
       );
     }
     data = [...data].sort((a, b) => {
@@ -156,7 +177,7 @@ export default function ParcellesPage() {
       return 0;
     });
     return data;
-  }, [parcellesData?.myParcelles, search, sortBy, sortDir]);
+  }, [parcellesData?.myParcelles, search, sortBy, sortDir, visibleColumns]);
 
   const paginatedParcelles = useMemo(() => {
     const start = (page - 1) * rowsPerPage;

@@ -116,10 +116,13 @@ export default function PepinieresPage() {
   const filteredPepinieres = useMemo(() => {
     let data = pepinieres;
     if (search) {
-      data = data.filter(p =>
-        (p.nom || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.adresse || '').toLowerCase().includes(search.toLowerCase()) ||
-        (p.nomGestionnaire || '').toLowerCase().includes(search.toLowerCase())
+      const lowerSearch = search.toLowerCase();
+      data = data.filter(row =>
+        visibleColumns.some(col => {
+          const value = row[col];
+          if (value === undefined || value === null) return false;
+          return String(value).toLowerCase().includes(lowerSearch);
+        })
       );
     }
     data = [...data].sort((a, b) => {
@@ -132,7 +135,7 @@ export default function PepinieresPage() {
       return 0;
     });
     return data;
-  }, [pepinieres, search, sortBy, sortDir]);
+  }, [pepinieres, search, sortBy, sortDir, visibleColumns]);
 
   const paginatedPepinieres = useMemo(() => {
     const start = (page - 1) * rowsPerPage;

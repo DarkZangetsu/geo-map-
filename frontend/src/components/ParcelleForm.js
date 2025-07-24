@@ -389,7 +389,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                     type="button"
                     onClick={() => setShowMapModal(true)}
                     className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    disabled={!!geojson}
                   >
                     Dessiner sur la carte
                   </button>

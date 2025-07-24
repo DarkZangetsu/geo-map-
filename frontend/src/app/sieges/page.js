@@ -96,13 +96,17 @@ export default function SiegePage() {
   const filteredSieges = useMemo(() => {
     let data = sieges;
     if (search) {
-      data = data.filter(s =>
-        (s.nom || "").toLowerCase().includes(search.toLowerCase()) ||
-        (s.adresse || "").toLowerCase().includes(search.toLowerCase())
+      const lowerSearch = search.toLowerCase();
+      data = data.filter(row =>
+        visibleColumns.some(col => {
+          const value = row[col];
+          if (value === undefined || value === null) return false;
+          return String(value).toLowerCase().includes(lowerSearch);
+        })
       );
     }
     return data;
-  }, [sieges, search]);
+  }, [sieges, search, visibleColumns]);
 
   const paginatedSieges = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
