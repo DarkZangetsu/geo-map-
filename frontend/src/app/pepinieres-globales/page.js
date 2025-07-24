@@ -6,6 +6,7 @@ import { GET_ALL_PEPINIERES, GET_ALL_USERS } from "../../lib/graphql-queries";
 import { useToast } from "../../lib/useToast";
 import { pepinieresColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
+import PepiniereDetailModal from "@/components/PepiniereDetailModal";
 import MemberFilter from "@/components/MemberFilter";
 import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export default function PepinieresGlobalesPage() {
   const [filteredPepinieres, setFilteredPepinieres] = useState([]);
   const { showError, showToast } = useToast();
   const [showCSVModal, setShowCSVModal] = useState(false);
+  const [selectedPepiniere, setSelectedPepiniere] = useState(null);
 
   // Ajout d'une variable CSS pour la couleur midnight blue
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function PepinieresGlobalesPage() {
       categorie: pepin.categorie,
       adresse: pepin.adresse,
       membre: `${pepin.user?.firstName} ${pepin.user?.lastName}`,
-      username: pepin.user?.username,
+      username: pepin.user?.nomInstitution,
       abreviation: pepin.user?.abreviation || '',
       superficie_ha: pepin.superficie || '',
       variete: pepin.variete || '',
@@ -140,7 +142,7 @@ export default function PepinieresGlobalesPage() {
           </div>
           <div className="p-6">
             <DataTable
-              columns={pepinieresColumns(() => {})}
+              columns={pepinieresColumns((pepiniere) => setSelectedPepiniere(pepiniere))}
               data={filteredPepinieres}
               filterKey="nom"
               filterPlaceholder="Rechercher par nom..."
@@ -154,6 +156,15 @@ export default function PepinieresGlobalesPage() {
             />
           </div>
         </div>
+
+        {/* Modal de détails de la pépinière */}
+        {selectedPepiniere && (
+          <PepiniereDetailModal
+            pepiniere={selectedPepiniere}
+            onClose={() => setSelectedPepiniere(null)}
+          />
+        )}
+
         {/* Modal d'import CSV */}
         {showCSVModal && (
           <CSVImportExportPepiniere

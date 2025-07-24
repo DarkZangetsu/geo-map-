@@ -275,7 +275,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Description</h4>
                         </div>
-                        <p className="text-slate-700 leading-relaxed bg-white/60 p-4 rounded-xl border border-amber-100/50">
+                        <p className="text-slate-700 leading-relaxed bg-white/60 p-4 rounded-xl border border-amber-100/50 whitespace-pre-wrap break-words">
                           {parcelleComplete.description}
                         </p>
                       </div>

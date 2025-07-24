@@ -92,11 +92,6 @@ export const siegesColumns = (onViewDetails) => [
     cell: ({ row }) => row.original.longitude || "-",
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => row.original.description || "-",
-  },
-  {
     accessorKey: "categorie",
     header: "Catégorie",
     cell: ({ row }) => {

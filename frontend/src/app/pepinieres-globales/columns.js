@@ -12,49 +12,37 @@ export const pepinieresColumns = (onViewDetails) => [
     cell: ({ row }) => row.getValue("nom"),
   },
   {
-    accessorKey: "categorie",
-    header: "Catégorie",
-    cell: ({ row }) => row.getValue("categorie") || "-",
-  },
-  {
     accessorKey: "adresse",
     header: "Adresse",
     cell: ({ row }) => row.getValue("adresse") || "-",
   },
   {
-    accessorKey: "nom_projet",
+    accessorKey: "nomProjet",
     header: "Nom du projet",
-    cell: ({ row }) => row.getValue("nom_projet") || "-",
+    cell: ({ row }) => row.getValue("nomProjet") || "-",
   },
   {
-    accessorKey: "nom_gestionnaire",
-    header: "Nom gestionnaire",
-    cell: ({ row }) => row.getValue("nom_gestionnaire") || "-",
-  },
-  {
-    accessorKey: "poste_gestionnaire",
-    header: "Poste gestionnaire",
-    cell: ({ row }) => row.getValue("poste_gestionnaire") || "-",
-  },
-  {
-    accessorKey: "telephone_gestionnaire",
-    header: "Téléphone gestionnaire",
-    cell: ({ row }) => row.getValue("telephone_gestionnaire") || "-",
-  },
-  {
-    accessorKey: "email_gestionnaire",
-    header: "Email gestionnaire",
-    cell: ({ row }) => row.getValue("email_gestionnaire") || "-",
-  },
-  {
-    accessorKey: "especes_produites",
-    header: "Espèces produites",
-    cell: ({ row }) => row.getValue("especes_produites") || "-",
-  },
-  {
-    accessorKey: "quantite_production_generale",
-    header: "Quantité production générale",
-    cell: ({ row }) => row.getValue("quantite_production_generale") || "-",
+    id: "gestionnaire",
+    header: "Gestionnaire",
+    cell: ({ row }) => {
+      const pepiniere = row.original;
+      return (
+        <div className="space-y-1">
+          {pepiniere.nomGestionnaire && (
+            <div className="text-sm font-medium text-gray-900">{pepiniere.nomGestionnaire}</div>
+          )}
+          {pepiniere.posteGestionnaire && (
+            <div className="text-xs text-gray-500">{pepiniere.posteGestionnaire}</div>
+          )}
+          {pepiniere.telephoneGestionnaire && (
+            <div className="text-xs text-gray-500">📞 {pepiniere.telephoneGestionnaire}</div>
+          )}
+          {pepiniere.emailGestionnaire && (
+            <div className="text-xs text-gray-500">✉️ {pepiniere.emailGestionnaire}</div>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "createdAt",
@@ -72,8 +60,7 @@ export const pepinieresColumns = (onViewDetails) => [
             <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
           )}
           <div>
-            <div className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</div>
-            <div className="text-sm text-gray-500">{user?.email}</div>
+            <div className="text-sm font-medium text-gray-900">{user?.nomInstitution}</div>
           </div>
         </div>
       );
