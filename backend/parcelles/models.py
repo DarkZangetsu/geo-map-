@@ -126,7 +126,7 @@ class Siege(models.Model):
     nom = models.CharField(max_length=100)
     
     # Nouveaux champs
-    categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES, default='bureau', help_text="Catégorie du siège")
+    categorie = models.CharField(max_length=20, choices=CATEGORIE_CHOICES, default='social', help_text="Catégorie du siège")
     nom_point_contact = models.CharField(max_length=100, blank=True, help_text="Nom du point de contact")
     poste = models.CharField(max_length=100, blank=True, help_text="Poste du point de contact")
     telephone = models.CharField(max_length=20, blank=True, help_text="Téléphone du point de contact")

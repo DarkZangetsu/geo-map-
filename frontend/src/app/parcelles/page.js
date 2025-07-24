@@ -46,7 +46,6 @@ export default function ParcellesPage() {
   const [sortDir, setSortDir] = useState('asc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selected, setSelected] = useState([]);
   const [showMap, setShowMap] = useState(false);
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -184,25 +183,6 @@ export default function ParcellesPage() {
     return filteredParcelles.slice(start, start + rowsPerPage);
   }, [filteredParcelles, page, rowsPerPage]);
 
-  const handleCreateParcelle = async (parcelleData) => {
-    try {
-      const { data } = await createParcelle({
-        variables: parcelleData
-      });
-      if (data.createParcelle.success) {
-        setShowForm(false);
-        refetchParcelles();
-        toast.success('Site de référence créé avec succès !');
-        return data.createParcelle.parcelle;
-      } else {
-        toast.error(data.createParcelle.message || 'Erreur lors de la création du site de référence');
-        throw new Error(data.createParcelle.message);
-      }
-    } catch (error) {
-      toast.error(error.message || 'Erreur lors de la création du site de référence');
-      throw new Error(error.message || 'Erreur lors de la création du site de référence');
-    }
-  };
 
   const handleDeleteParcelle = (id) => {
     setParcelleToDelete(id);
@@ -423,7 +403,7 @@ export default function ParcellesPage() {
               filterPlaceholder="Rechercher par nom..."
               actions={dataTableActions}
             />
-            {/* Pagination sous le DataTable */}
+            {/* Pagination sous le DataTable (footer unique) */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
               <div className="text-sm text-blue-900 font-semibold">
                 Page {page} sur {totalPages}

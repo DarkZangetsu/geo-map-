@@ -128,43 +128,6 @@ export function DataTable({ columns, data, filterKey = null, filterPlaceholder =
           </TableBody>
         </Table>
       </div>
-      {/* Pagination */}
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="flex items-center gap-2">
-          <span>Afficher</span>
-          <select
-            className="border rounded px-2 py-1"
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-          >
-            {[10, 50, 100].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>
-          <span>lignes</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Précédent
-          </Button>
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} sur {table.getPageCount()}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Suivant
-          </Button>
-        </div>
-      </div>
     </div>
   );
 } 

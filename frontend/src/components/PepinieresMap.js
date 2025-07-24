@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import dynamic from 'next/dynamic';
-import ImageGallery from 'react-image-gallery';
-import 'react-image-gallery/styles/css/image-gallery.css';
-import L from 'leaflet';
-import React from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import dynamic from "next/dynamic";
+import ImageGallery from "react-image-gallery";
+import "react-image-gallery/styles/css/image-gallery.css";
+import L from "leaflet";
+import React from "react";
 
 // Icône personnalisée pour les pépinières
 const pepiniereIcon = new L.DivIcon({
-  className: '',
+  className: "",
   iconSize: [36, 42],
   iconAnchor: [18, 42],
   popupAnchor: [0, -36],
@@ -25,44 +25,63 @@ const pepiniereIcon = new L.DivIcon({
         </filter>
       </defs>
     </svg>
-  `
+  `,
 });
 
 // Import dynamique de Leaflet pour éviter les erreurs SSR
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
-const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street', style, center }) => {
+const PepinieresMap = ({
+  pepinieres = [],
+  onPepiniereClick,
+  mapStyle = "street",
+  style,
+  center,
+}) => {
   const [selectedPepiniere, setSelectedPepiniere] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
-  const galleryRef = useRef(null);
 
   // Coordonnées de Madagascar (centre approximatif)
   const MADAGASCAR_CENTER = [-18.7669, 46.8691];
   const MADAGASCAR_BOUNDS = [
-    [-25.6070, 43.2540], // Sud-Ouest
-    [-11.9450, 50.4830]  // Nord-Est
+    [-25.607, 43.254], // Sud-Ouest
+    [-11.945, 50.483], // Nord-Est
   ];
 
   const mapStyles = {
-    street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    hybrid: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+    street: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    satellite:
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    hybrid:
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   };
 
   const attribution = {
-    street: '© OpenStreetMap contributors',
-    satellite: 'Tiles © Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    hybrid: '© Esri'
+    street: "© OpenStreetMap contributors",
+    satellite:
+      "Tiles © Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+    hybrid: "© Esri",
   };
 
   // Forcer le re-render de la carte quand les pépinières changent
   useEffect(() => {
-    setMapKey(prev => prev + 1);
+    setMapKey((prev) => prev + 1);
   }, [pepinieres]);
 
   // Invalidation de la taille de la carte après le rendu
@@ -70,11 +89,11 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
     const timer = setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.invalidateSize();
-        
+
         // Ajuster les bounds si on a des pépinières
         if (pepinieres && pepinieres.length > 0) {
           const bounds = [];
-          pepinieres.forEach(pepiniere => {
+          pepinieres.forEach((pepiniere) => {
             if (pepiniere.latitude && pepiniere.longitude) {
               const lat = parseFloat(pepiniere.latitude);
               const lng = parseFloat(pepiniere.longitude);
@@ -83,7 +102,7 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
               }
             }
           });
-          
+
           if (bounds.length > 0) {
             mapRef.current.fitBounds(bounds, { padding: [20, 20] });
           }
@@ -118,8 +137,8 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Non définie';
-    return new Date(dateString).toLocaleDateString('fr-FR');
+    if (!dateString) return "Non définie";
+    return new Date(dateString).toLocaleDateString("fr-FR");
   };
 
   // Gestion du clic sur la carte pour fermer les panneaux de détail
@@ -127,7 +146,7 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
     setSelectedPepiniere(null);
   };
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -137,15 +156,19 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
       </div>
     );
   }
-      
+
   return (
     <div
       className="w-full h-full relative flex"
       style={{
-        height: (typeof style !== 'undefined' && style.height) ? style.height : '100%',
-        width: (typeof style !== 'undefined' && style.width) ? style.width : '100%',
-        minHeight: (typeof style !== 'undefined' && style.height) ? undefined : '400px',
-        minWidth: (typeof style !== 'undefined' && style.width) ? undefined : undefined,
+        height:
+          typeof style !== "undefined" && style.height ? style.height : "100%",
+        width:
+          typeof style !== "undefined" && style.width ? style.width : "100%",
+        minHeight:
+          typeof style !== "undefined" && style.height ? undefined : "400px",
+        minWidth:
+          typeof style !== "undefined" && style.width ? undefined : undefined,
         margin: 0,
         padding: 0,
       }}
@@ -156,10 +179,12 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
         center={center || MADAGASCAR_CENTER}
         zoom={6}
         style={{
-          height: '100%',
-          width: '100%',
-          minHeight: (typeof style !== 'undefined' && style.height) ? undefined : '400px',
-          minWidth: (typeof style !== 'undefined' && style.width) ? undefined : undefined,
+          height: "100%",
+          width: "100%",
+          minHeight:
+            typeof style !== "undefined" && style.height ? undefined : "400px",
+          minWidth:
+            typeof style !== "undefined" && style.width ? undefined : undefined,
         }}
         className="z-0"
         maxBounds={MADAGASCAR_BOUNDS}
@@ -178,159 +203,325 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
           attribution={attribution[mapStyle]}
         />
         {/* Satellite + labels */}
-        {mapStyle === 'satellite' && (
+        {mapStyle === "satellite" && (
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
             attribution="Labels © Esri"
           />
         )}
         {/* Hybride = satellite + OSM routes/villes */}
-        {mapStyle === 'hybrid' && (
+        {mapStyle === "hybrid" && (
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="© OpenStreetMap contributors"
             opacity={0.7}
           />
         )}
-        
+
         {/* Affichage des pépinières */}
-        {Array.isArray(pepinieres) && pepinieres.length > 0 && pepinieres.map((pepiniere) => {
-          // Vérification et conversion sécurisée des coordonnées
-          const lat = pepiniere.latitude ? parseFloat(pepiniere.latitude) : null;
-          const lng = pepiniere.longitude ? parseFloat(pepiniere.longitude) : null;
-          
-          // Ne pas afficher le marqueur si les coordonnées sont invalides
-          if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
-            return null;
-          }
-          
-          return (
-            <Marker
-              key={pepiniere.id}
-              position={[lat, lng]}
-              icon={pepiniereIcon}
-              eventHandlers={{
-                click: () => handlePepiniereClick(pepiniere)
-              }}
-            >
-            </Marker>
-          );
-        })}
+        {Array.isArray(pepinieres) &&
+          pepinieres.length > 0 &&
+          pepinieres.map((pepiniere) => {
+            // Vérification et conversion sécurisée des coordonnées
+            const lat = pepiniere.latitude
+              ? parseFloat(pepiniere.latitude)
+              : null;
+            const lng = pepiniere.longitude
+              ? parseFloat(pepiniere.longitude)
+              : null;
+
+            // Ne pas afficher le marqueur si les coordonnées sont invalides
+            if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) {
+              return null;
+            }
+
+            return (
+              <Marker
+                key={pepiniere.id}
+                position={[lat, lng]}
+                icon={pepiniereIcon}
+                eventHandlers={{
+                  click: () => handlePepiniereClick(pepiniere),
+                }}
+              ></Marker>
+            );
+          })}
       </MapContainer>
 
       {/* Panneau latéral pour les détails de la pépinière sélectionnée */}
       {selectedPepiniere && (
-        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col border border-gray-200 rounded-2xl m-4 max-w-[440px]">
-          {/* Header fixe */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-8 h-8 bg-orange-100 text-orange-600 rounded-full shadow">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' /></svg>
-              </span>
-              <h3 className="text-2xl font-bold text-orange-900 tracking-tight ml-2">Détails de la pépinière</h3>
+        <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gradient-to-br from-slate-50 to-white backdrop-blur-lg shadow-xl z-50 flex flex-col border-0 rounded-3xl m-3 max-w-[440px]">
+          {/* Header fixe avec gradient doux */}
+          <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-orange-50/80 to-amber-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-orange-100/50">
+            <div className="flex items-center gap-3">
+              <img
+                src={`${process.env.NEXT_PUBLIC_API_URL}/media/${selectedPepiniere.user.logo}`}
+                alt="Logo"
+                className="w-10 h-10 rounded-full object-cover border border-orange-200 bg-white"
+              />
+             <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
+                Détails de la pépinière
+              </h3>
             </div>
             <button
               onClick={() => setSelectedPepiniere(null)}
-              className="text-gray-400 hover:text-orange-600 text-3xl font-bold transition-colors duration-150 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="text-slate-400 hover:text-orange-500 text-2xl transition-all duration-200 rounded-2xl p-2 hover:bg-orange-50/50 focus:outline-none focus:ring-2 focus:ring-orange-200"
               title="Fermer"
             >
               ×
             </button>
           </div>
+
           {/* Contenu scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            <div className="bg-gray-50 rounded-xl shadow p-3 flex items-center gap-4">
-              <div>
-                <h3 className="font-bold text-xl text-orange-900 leading-tight">{selectedPepiniere.nom || 'Sans nom'}</h3>
-                <div className="text-xs text-gray-500 font-semibold mt-1">Type : <span className="font-bold text-orange-700">{selectedPepiniere.type || 'Non défini'}</span></div>
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            {/* Nom et type */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <h3 className="font-semibold text-xl text-slate-800 mb-2">
+                {selectedPepiniere.nom || "Sans nom"}
+              </h3>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                <span className="text-sm text-slate-600">Projet rattaché : </span>
+                <span className="font-medium text-orange-700 text-sm">
+                  {selectedPepiniere.nomProjet || "Non défini"}
+                </span>
               </div>
             </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 20h5v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2h5' /></svg>
-                Adresse
+
+            {/* Adresse */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-slate-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Adresse
+                </div>
               </div>
-              <div className="text-base font-medium text-gray-900">{selectedPepiniere.adresse || 'Non définie'}</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z' /></svg>
-                Contact
+              <div className="text-base font-medium text-slate-800">
+                {selectedPepiniere.adresse || "Non définie"}
               </div>
-              <div className="text-base font-medium text-gray-900">{selectedPepiniere.nomContact || '-'}</div>
-              <div className="text-xs text-gray-500">{selectedPepiniere.telephone || '-'}</div>
-              <div className="text-xs text-gray-500">{selectedPepiniere.email || '-'}</div>
             </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
-                Horaires
+
+            {/* Contact */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Contact Gestionnaire
+                </div>
               </div>
-              <div className="text-xs text-gray-700"><span className="font-semibold">Matin :</span> {selectedPepiniere.horaireMatin || '-'}</div>
-              <div className="text-xs text-gray-700"><span className="font-semibold">Après-midi :</span> {selectedPepiniere.horaireApresMidi || '-'}</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 20h9' /></svg>
-                Description
+              <div className="space-y-1">
+                <div className="text-base font-medium text-slate-800">
+                 - {selectedPepiniere.nomGestionnaire|| "-"}
+                </div>
+                 <div className="text-base font-medium text-slate-800">
+                 - {selectedPepiniere.posteGestionnaire|| "-"}
+                </div>
+                <div className="text-sm text-slate-600">
+                 - {selectedPepiniere.telephoneGestionnaire || "-"}
+                </div>
+                <div className="text-sm text-slate-600">
+                 - {selectedPepiniere.emailGestionnaire || "-"}
+                </div>
               </div>
-              <div className="text-base text-gray-800">{selectedPepiniere.description || '-'}</div>
             </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3' /></svg>
-                Coordonnées GPS
+
+            {/* Description */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-teal-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Description
+                </div>
               </div>
-              <div className="text-xs text-gray-700">Lat : {selectedPepiniere.latitude}, Lng : {selectedPepiniere.longitude}</div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-3">
-              <div className="uppercase text-xs text-gray-500 font-semibold mb-1 flex items-center gap-2">
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-orange-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>
-                Date de création
+              <div className="text-sm text-slate-700 leading-relaxed">
+                {selectedPepiniere.description || "-"}
               </div>
-              <div className="text-xs text-gray-700">{selectedPepiniere.createdAt ? formatDate(selectedPepiniere.createdAt) : '-'}</div>
             </div>
+
+            {/* Coordonnées GPS */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-violet-100 rounded-xl flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-purple-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Coordonnées GPS
+                </div>
+              </div>
+              <div className="text-sm text-slate-700">
+                Lat : {selectedPepiniere.latitude}, Lng :{" "}
+                {selectedPepiniere.longitude}
+              </div>
+            </div>
+
+            {/* Date de création */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-rose-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Date d'ajout
+                </div>
+              </div>
+              <div className="text-sm text-slate-700">
+                {selectedPepiniere.createdAt
+                  ? formatDate(selectedPepiniere.createdAt)
+                  : "-"}
+              </div>
+            </div>
+
             {/* Bouton voir images */}
-            {Array.isArray(selectedPepiniere.images) && selectedPepiniere.images.length > 0 && !showGallery && (
-              <button
-                onClick={() => setShowGallery(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white text-base rounded-xl font-semibold hover:bg-orange-700 transition shadow-lg mt-4"
-              >
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
-                Voir les images ({selectedPepiniere.images.length})
-              </button>
-            )}
-            {/* Galerie d'images */}
-            {showGallery && Array.isArray(selectedPepiniere.images) && selectedPepiniere.images.length > 0 && (
-              <div className="p-4 border-t border-gray-100 bg-white rounded-b-2xl">
-                <div className="mb-2 text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 text-orange-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8' /></svg>
-                  Galerie d'images
-                </div>
-                <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                  <ImageGallery
-                    items={selectedPepiniere.images.map((img, idx) => ({
-                      original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
-                      thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
-                      description: `Image ${idx + 1}`
-                    }))}
-                    showPlayButton={false}
-                    showFullscreenButton={true}
-                    showNav={true}
-                    showThumbnails={true}
-                    slideInterval={3000}
-                    slideOnThumbnailOver={true}
-                    additionalClass="custom-gallery"
-                  />
-                </div>
+            {Array.isArray(selectedPepiniere.images) &&
+              selectedPepiniere.images.length > 0 &&
+              !showGallery && (
                 <button
-                  onClick={() => setShowGallery(false)}
-                  className="mt-2 w-full px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 font-semibold"
+                  onClick={() => setShowGallery(true)}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  Fermer la galerie
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Voir les images ({selectedPepiniere.images.length})
                 </button>
-              </div>
-            )}
+              )}
+
+            {/* Galerie d'images */}
+            {showGallery &&
+              Array.isArray(selectedPepiniere.images) &&
+              selectedPepiniere.images.length > 0 && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+                  <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-orange-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    Galerie d'images
+                  </div>
+                  <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-200/50">
+                    <ImageGallery
+                      items={selectedPepiniere.images.map((img, idx) => ({
+                        original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+                        thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
+                        description: `Image ${idx + 1}`,
+                      }))}
+                      showPlayButton={false}
+                      showFullscreenButton={true}
+                      showNav={true}
+                      showThumbnails={true}
+                      slideInterval={3000}
+                      slideOnThumbnailOver={true}
+                      additionalClass="custom-gallery"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowGallery(false)}
+                    className="mt-4 w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
+                  >
+                    Fermer la galerie
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -338,4 +529,4 @@ const PepinieresMap = ({ pepinieres = [], onPepiniereClick, mapStyle = 'street',
   );
 };
 
-export default PepinieresMap; 
+export default PepinieresMap;

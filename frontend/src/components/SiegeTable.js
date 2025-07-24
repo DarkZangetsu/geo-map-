@@ -55,7 +55,7 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                     siege.categorie === 'régional' ? 'bg-green-100 text-green-800' :
                     'bg-gray-100 text-gray-800'
                   }`}>
-                    {siege.categorie || 'bureau'}
+                    {siege.categorie || 'social'}
                   </span>
                 </td>
               )}
