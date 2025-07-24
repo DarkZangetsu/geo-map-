@@ -15,6 +15,8 @@ import { DataTable } from '../../components/ui/table-data-table';
 import { Button } from '../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
+import PepiniereDetailModal from "@/components/PepiniereDetailModal";
+
 export default function PepinieresPage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -27,7 +29,7 @@ export default function PepinieresPage() {
   const [sortDir, setSortDir] = useState('asc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selected, setSelected] = useState([]);
+
   const [mapStyle, setMapStyle] = useState('street');
   
   // Colonnes du tableau (configurable)
@@ -457,117 +459,13 @@ export default function PepinieresPage() {
 
           {/* Modal de détails de la pépinière */}
           {showDetailsModal && selectedPepiniere && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-              <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-0 relative flex flex-col">
-                <Button
-                  onClick={() => { setShowDetailsModal(false); setSelectedPepiniere(null); }}
-                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl font-bold z-20"
-                  title="Fermer"
-                >
-                  ×
-                </Button>
-                {/* Header fixe */}
-                <div className="bg-white border-b border-gray-200 p-6 rounded-t-lg sticky top-0 z-10">
-                  <h2 className="text-2xl font-bold midnight-blue-text mb-2">
-                    Détails de la pépinière
-                  </h2>
-                  <div className="w-20 h-1 bg-blue-600 rounded"></div>
-                </div>
-                {/* Contenu principal scrollable */}
-                <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 160px)' }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Informations générales */}
-                    <div className="space-y-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations générales</h3>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Nom de la pépinière</label>
-                            <p className="text-gray-900 font-medium">{selectedPepiniere.nom || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Adresse</label>
-                            <p className="text-gray-900">{selectedPepiniere.adresse || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Espèces produites</label>
-                            <p className="text-gray-900">{selectedPepiniere.especesProduites || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Capacité</label>
-                            <p className="text-gray-900">{selectedPepiniere.capacite || '-'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Informations du gestionnaire */}
-                    <div className="space-y-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Gestionnaire</h3>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Nom</label>
-                            <p className="text-gray-900 font-medium">{selectedPepiniere.nomGestionnaire || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Poste</label>
-                            <p className="text-gray-900">{selectedPepiniere.posteGestionnaire || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Téléphone</label>
-                            <p className="text-gray-900">{selectedPepiniere.telephoneGestionnaire || '-'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Email</label>
-                            <p className="text-gray-900">{selectedPepiniere.emailGestionnaire || '-'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Informations supplémentaires */}
-                    <div className="md:col-span-2">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Informations supplémentaires</h3>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Description</label>
-                            <p className="text-gray-900">{selectedPepiniere.description || 'Aucune description disponible'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Date de création</label>
-                            <p className="text-gray-900">
-                              {selectedPepiniere.createdAt ? new Date(selectedPepiniere.createdAt).toLocaleDateString('fr-FR') : '-'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Footer fixe */}
-                <div className="bg-white border-t border-gray-200 p-6 rounded-b-lg sticky bottom-0 z-10 flex justify-end gap-3">
-                  <Button
-                    onClick={() => { setShowDetailsModal(false); setSelectedPepiniere(null); }}
-                    variant="outline"
-                    className="px-4 py-2"
-                  >
-                    Fermer
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setShowDetailsModal(false);
-                      setSelectedPepiniere(null);
-                      handleEditPepiniere(selectedPepiniere);
-                    }}
-                    className="midnight-blue-btn px-4 py-2"
-                  >
-                    Modifier
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <PepiniereDetailModal 
+              pepiniere={selectedPepiniere}
+              onClose={() => {
+                setShowDetailsModal(false);
+                setSelectedPepiniere(null);
+              }}
+            />
           )}
         </div>
       )}
