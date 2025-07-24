@@ -9,6 +9,7 @@ const MapDrawModal = ({ open, onClose, onSave, initialGeojson }) => {
   const [geojson, setGeojson] = useState(initialGeojson || null);
   const featureGroupRef = useRef();
   const [basemap, setBasemap] = useState('standard');
+  const [fullscreen, setFullscreen] = useState(false);
 
   if (!open) return null;
 
@@ -36,16 +37,15 @@ const MapDrawModal = ({ open, onClose, onSave, initialGeojson }) => {
       onClose();
     }
   };
-
-  // Modal TOUJOURS en plein écran
   const modalContainer = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-  const modalContent = 'relative w-screen h-screen max-w-none max-h-none rounded-none bg-white flex flex-col';
+  const modalContentSmall = 'relative w-full max-w-2xl max-h-[80vh] rounded-lg bg-white flex flex-col shadow-2xl';
+  const modalContentFullscreen = 'relative w-screen h-screen max-w-none max-h-none rounded-none bg-white flex flex-col';
   const headerClass = 'sticky top-0 z-10 bg-white px-6 py-4 border-b flex items-center justify-between';
   const footerClass = 'sticky bottom-0 z-10 bg-white px-6 py-4 border-t flex justify-end space-x-2';
 
   const modalJSX = (
     <div className={modalContainer}>
-      <div className={modalContent}>
+      <div className={fullscreen ? modalContentFullscreen : modalContentSmall}>
         {/* Header sticky */}
         <div className={headerClass}>
           <h2 className="text-lg font-bold">Dessiner la parcelle</h2>
@@ -58,15 +58,23 @@ const MapDrawModal = ({ open, onClose, onSave, initialGeojson }) => {
               <option value="standard">Standard</option>
               <option value="satellite">Satellite + labels</option>
             </select>
+            <button
+              type="button"
+              onClick={() => setFullscreen(f => !f)}
+              className="ml-2 px-3 py-1 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 text-sm"
+              title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            >
+              {fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            </button>
           </div>
         </div>
         {/* Carte occupe tout l'espace entre header et footer */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1">
+          <div className="flex-1" style={fullscreen ? {height: '100vh', width: '100vw'} : {display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
             <MapContainer
               center={[-19.0, 47.0]}
               zoom={6}
-              style={{ height: '100%', width: '100%' }}
+              style={fullscreen ? { height: '100vh', width: '100vw' } : { height: '500px', width: '100%' }}
             >
               {basemap === 'standard' && (
                 <TileLayer

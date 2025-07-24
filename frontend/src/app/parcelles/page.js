@@ -340,56 +340,65 @@ export default function ParcellesPage() {
       </div>
       {/* Affichage conditionnel : Carte ou Tableau */}
       {showMap || mapFullscreen ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={mapFullscreen ? "fixed inset-0 z-50 bg-white bg-opacity-95 flex flex-col" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}
+          style={mapFullscreen ? {height: '100vh', width: '100vw', margin: 0, padding: 0} : {}}
+        >
           {/* Bouton pour revenir au tableau au-dessus de la carte */}
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={() => setShowMap(false)}
-              className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+          {!mapFullscreen && (
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setShowMap(false)}
+                className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+              >
+                <Map size={16} />
+                <span className="hidden sm:inline">Voir le tableau</span>
+                <span className="sm:hidden">Tableau</span>
+              </button>
+            </div>
+          )}
+          <div
+            className={mapFullscreen ? "flex-1 flex flex-col relative" : "bg-white rounded-lg shadow-lg overflow-hidden"}
+            style={mapFullscreen ? {height: '100%', width: '100%', maxWidth: '100vw', maxHeight: '100vh', margin: 0, padding: 0} : {}}
+          >
+            {/* Quitter plein écran visible en overlay en haut à droite en mode plein écran */}
+            {mapFullscreen && (
+              <button
+                onClick={() => setMapFullscreen(false)}
+                className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
+                title="Quitter le plein écran"
+              >
+                Quitter plein écran
+              </button>
+            )}
+            <div className={mapFullscreen ? "p-4 border-b" : "p-4 border-b"}>
+              <h2 className="text-lg font-semibold text-gray-900">Carte des sites de référence</h2>
+              <p className="text-sm text-gray-600">
+                {parcelles.length} site{parcelles.length !== 1 ? 's' : ''} de référence affiché{parcelles.length !== 1 ? 's' : ''} sur la carte
+              </p>
+            </div>
+            <div
+              className={mapFullscreen ? "flex-1 flex" : ""}
+              style={mapFullscreen ? {height: '100%', width: '100%', minHeight: 0, minWidth: 0, margin: 0, padding: 0} : { height: '600px', width: '100%' }}
             >
-              <Map size={16} />
-              <span className="hidden sm:inline">Voir le tableau</span>
-              <span className="sm:hidden">Tableau</span>
-            </button>
-          </div>
-          <div className={mapFullscreen ? "fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center" : "bg-white rounded-lg shadow-lg overflow-hidden"} style={mapFullscreen ? {height: '100vh', width: '100vw'} : {}}>
-            <div className={mapFullscreen ? "w-full h-full flex flex-col bg-white rounded-none shadow-none relative" : "bg-white rounded-lg shadow-lg overflow-hidden"} style={mapFullscreen ? {maxWidth: '100vw', maxHeight: '100vh'} : {}}>
-              {/* Quitter plein écran visible en overlay en haut à droite en mode plein écran */}
-              {mapFullscreen && (
-                <button
-                  onClick={() => setMapFullscreen(false)}
-                  className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
-                  title="Quitter le plein écran"
-                >
-                  Quitter plein écran
-                </button>
-              )}
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Carte des sites de référence</h2>
-                <p className="text-sm text-gray-600">
-                  {parcelles.length} site{parcelles.length !== 1 ? 's' : ''} de référence affiché{parcelles.length !== 1 ? 's' : ''} sur la carte
-                </p>
-              </div>
-              <div style={mapFullscreen ? {flex: 1, minHeight: 0, minWidth: 0} : { height: '600px', width: '100%' }}>
-                {loading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-                      <p className="mt-2 text-gray-600">Chargement de la carte...</p>
-                    </div>
+              {loading ? (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Chargement de la carte...</p>
                   </div>
-                ) : (
-                  <ParcellesMap
-                    parcelles={parcelles}
-                    sieges={[]}
-                    pepinieres={[]}
-                    onParcelleClick={setSelectedParcelle}
-                    mapStyle={mapStyle}
-                    style={{ height: '100%', minHeight: 400 }}
-                    mode="parcelle"
-                  />
-                )}
-              </div>
+                </div>
+              ) : (
+                <ParcellesMap
+                  parcelles={parcelles}
+                  sieges={[]}
+                  pepinieres={[]}
+                  onParcelleClick={setSelectedParcelle}
+                  mapStyle={mapStyle}
+                  style={mapFullscreen ? { height: '100%', width: '100%' } : { height: '100%', minHeight: 400 }}
+                  mode="parcelle"
+                />
+              )}
             </div>
           </div>
         </div>
