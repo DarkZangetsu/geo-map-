@@ -1159,7 +1159,7 @@ class Query(graphene.ObjectType):
         user = info.context.user
         return Parcelle.objects.filter(user=user)
 
-    @login_required
+   
     def resolve_parcelle(self, info, id):
         return Parcelle.objects.get(pk=id)
 
@@ -1180,7 +1180,6 @@ class Query(graphene.ObjectType):
         user = info.context.user
         return Siege.objects.filter(user=user)
 
-    @login_required
     def resolve_siege(self, info, id):
         return Siege.objects.get(pk=id)
 
@@ -1193,7 +1192,7 @@ class Query(graphene.ObjectType):
         user = info.context.user
         return Pepiniere.objects.filter(user=user)
 
-    @login_required
+   
     def resolve_pepiniere(self, info, id):
         return Pepiniere.objects.get(pk=id)
 

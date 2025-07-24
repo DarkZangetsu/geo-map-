@@ -58,8 +58,7 @@ export const parcellesColumns = (onViewDetails) => [
             <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
           )}
           <div>
-            <div className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</div>
-            <div className="text-sm text-gray-500">{user?.firstName} {user?.lastName} {user?.email}</div>
+            <div className="text-sm font-medium text-gray-900">{user?.nomInstitution}</div>
           </div>
         </div>
       );
