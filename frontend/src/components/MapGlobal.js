@@ -7,6 +7,8 @@ import React from 'react';
 import PepiniereDetailModal from './PepiniereDetailModal';
 import SiteReferenceDetailModal from './SiteReferenceDetailModal';
 import LocalDetailModal from './LocalDetailModal';
+import SiegeDetailModal from './SiegeDetailModal';
+import ParcelleDetailModal from './ParcelleDetailModal';
 
 const full3DIcon = new L.DivIcon({
   className: '',
@@ -210,13 +212,13 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
         />
       )}
       {selectedParcelle && (
-        <SiteReferenceDetailModal
+        <ParcelleDetailModal
           parcelle={selectedParcelle}
           onClose={() => setSelectedParcelle(null)}
         />
       )}
       {selectedSiege && (
-        <LocalDetailModal
+        <SiegeDetailModal
           siege={selectedSiege}
           onClose={() => setSelectedSiege(null)}
         />
