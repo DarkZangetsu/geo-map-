@@ -313,7 +313,7 @@ class CreateSiege(graphene.Mutation):
         photos_batiment = graphene.List(Upload)
 
     @login_required
-    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='bureau', nom_point_contact="", poste="", telephone="", email="", horaire_matin="", horaire_apres_midi="", photos_batiment=None):
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='social', nom_point_contact="", poste="", telephone="", email="", horaire_matin="", horaire_apres_midi="", photos_batiment=None):
         try:
             user = info.context.user
             siege = Siege.objects.create(
@@ -743,7 +743,7 @@ class ImportSiegesCSV(graphene.Mutation):
                         latitude=latitude,
                         longitude=longitude,
                         description=row.get('Description', ''),
-                        categorie=row.get('Catégorie', 'bureau'),
+                        categorie=row.get('Catégorie', 'social'),
                         nom_point_contact=row.get('Nom Point Contact', ''),
                         poste=row.get('Poste', ''),
                         telephone=row.get('Téléphone', ''),
@@ -996,7 +996,7 @@ class ImportPepinieresCSV(graphene.Mutation):
                         latitude=latitude,
                         longitude=longitude,
                         description=row.get('Description', ''),
-                        categorie=row.get('Catégorie', 'bureau'),
+                        categorie=row.get('Catégorie', 'social'),
                         nom_gestionnaire=row.get('Nom Gestionnaire', ''),
                         poste_gestionnaire=row.get('Poste Gestionnaire', ''),
                         telephone_gestionnaire=row.get('Téléphone Gestionnaire', ''),

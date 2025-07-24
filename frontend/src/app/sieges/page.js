@@ -28,8 +28,10 @@ export default function SiegePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [showSiegeForm, setShowSiegeForm] = useState(false);
-  const [mapSiege, setMapSiege] = useState(null);
+  // Réintégration de la fonctionnalité plein écran
   const [showMap, setShowMap] = useState(false);
+  const [mapFullscreen, setMapFullscreen] = useState(false);
+  const [mapStyle, setMapStyle] = useState('street');
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -90,7 +92,7 @@ export default function SiegePage() {
     // Ici vous pouvez ajouter une logique pour afficher les détails du siège
   };
 
-  const mapStyle = "mapbox://styles/mapbox/streets-v11";
+  // mapStyle est maintenant géré par useState plus haut pour uniformité
 
   // Recherche et pagination
   const filteredSieges = useMemo(() => {
@@ -328,43 +330,96 @@ export default function SiegePage() {
             </Button>
           </div>
         </div>
-        {/* Bouton Voir la carte juste avant le tableau, comme dans page.js */}
-        <div className="flex justify-end mb-2">
-          <Button
-            onClick={() => setShowMap(true)}
-            variant="outline"
-            className="midnight-blue-text midnight-blue-border border rounded-md hover:bg-blue-50 flex items-center justify-center gap-2 font-bold transition text-sm shadow-sm"
-            title="Voir la carte"
-          >
-            <Map size={16} />
-            <span className="hidden sm:inline">Voir la carte</span>
-            <span className="sm:hidden">Carte</span>
-          </Button>
-        </div>
-        {/* Tableau shadcn/ui */}
-        <div className="bg-white rounded-b-lg shadow-lg overflow-hidden">
-          <DataTable
-            columns={columns}
-            data={paginatedSieges}
-            filterKey="nom"
-            filterPlaceholder="Rechercher par nom..."
-            actions={dataTableActions}
-          />
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
-            <div className="text-sm text-blue-900 font-semibold">
-              Page {page} sur {totalPages}
+        {/* Affichage conditionnel : Carte ou Tableau */}
+        {showMap ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Bouton pour revenir au tableau au-dessus de la carte */}
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setShowMap(false)}
+                className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+              >
+                <Map size={16} />
+                <span className="hidden sm:inline">Voir le tableau</span>
+                <span className="sm:hidden">Tableau</span>
+              </button>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="flex items-center gap-1">
-                <ChevronLeft size={14} /> <span className="hidden sm:inline">Précédent</span>
-              </Button>
-              <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="flex items-center gap-1">
-                <span className="hidden sm:inline">Suivant</span> <ChevronRight size={14} />
-              </Button>
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Carte des locaux</h2>
+                  <p className="text-sm text-gray-600">
+                    {sieges.length} local{sieges.length !== 1 ? "s" : ""} affiché{sieges.length !== 1 ? "s" : ""} sur la carte
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={mapStyle}
+                    onChange={e => setMapStyle(e.target.value)}
+                    className="px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm text-sm"
+                  >
+                    <option value="street">Carte routière</option>
+                    <option value="satellite">Satellite</option>
+                    <option value="hybrid">Hybride</option>
+                  </select>
+                  <button
+                    onClick={() => setMapFullscreen(true)}
+                    className="px-3 py-2 midnight-blue-btn rounded-md font-semibold shadow-sm transition text-sm"
+                    title="Afficher la carte en plein écran"
+                  >
+                    Plein écran
+                  </button>
+                </div>
+              </div>
+              <div style={{ height: '600px', width: '100%' }}>
+                <SiegesMap
+                  sieges={sieges}
+                  onSiegeClick={handleSiegeClick}
+                  mapStyle={mapStyle}
+                  style={{ height: '100%', minHeight: 400 }}
+                  center={[-18.7669, 46.8691]} // Centre Madagascar
+                />
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Bouton Voir la carte au-dessus du tableau, aligné à droite */}
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setShowMap(true)}
+                className="px-3 py-2 rounded-md border midnight-blue-border bg-white midnight-blue-text hover:bg-blue-50 flex items-center gap-2 shadow-sm transition font-semibold text-sm"
+              >
+                <Map size={16} />
+                <span className="hidden sm:inline">Voir la carte</span>
+                <span className="sm:hidden">Carte</span>
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <DataTable
+                columns={columns}
+                data={paginatedSieges}
+                filterKey="nom"
+                filterPlaceholder="Rechercher par nom..."
+                actions={dataTableActions}
+              />
+              {/* Pagination sous le DataTable (footer unique) */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-b-2xl border-t border-blue-100">
+                <div className="text-sm text-blue-900 font-semibold">
+                  Page {page} sur {totalPages}
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="flex items-center gap-1">
+                    <ChevronLeft size={14} /> <span className="hidden sm:inline">Précédent</span>
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="flex items-center gap-1">
+                    <span className="hidden sm:inline">Suivant</span> <ChevronRight size={14} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <SiegeModal
           open={showSiegeModal}
           onClose={() => { setShowSiegeModal(false); setEditingSiege(null); }}
@@ -373,12 +428,12 @@ export default function SiegePage() {
           siegeId={editingSiege ? editingSiege.id : null}
           onSuccess={handleSiegeSuccess}
         />
-        {/* Carte */}
-        {showMap && (
+        {/* Carte en plein écran (overlay) */}
+        {mapFullscreen && (
           <div className="fixed inset-0 z-50 bg-white bg-opacity-95 flex items-center justify-center">
             <div className="w-full h-full flex flex-col bg-white rounded-none shadow-none relative">
               <Button
-                onClick={() => setShowMap(false)}
+                onClick={() => setMapFullscreen(false)}
                 className="absolute top-4 right-4 z-50 px-4 py-2 bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-900 font-bold transition"
                 title="Fermer la carte"
               >
@@ -396,6 +451,7 @@ export default function SiegePage() {
                   onSiegeClick={handleSiegeClick}
                   mapStyle={mapStyle}
                   style={{ height: '100%', minHeight: 400 }}
+                  center={[-18.7669, 46.8691]} // Centre Madagascar
                 />
               </div>
             </div>
@@ -559,4 +615,4 @@ export default function SiegePage() {
       </div>
     </div>
   );
-} 
+}

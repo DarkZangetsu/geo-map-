@@ -123,6 +123,7 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
         className="z-0"
         maxBounds={MADAGASCAR_BOUNDS}
         maxBoundsViscosity={1.0}
+        maxZoom={19}
         whenReady={() => { setTimeout(() => { if (mapRef.current && mapRef.current.invalidateSize) { mapRef.current.invalidateSize(); } }, 200); }}
         onClick={handleMapClick}
       >
