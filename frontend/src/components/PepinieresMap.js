@@ -56,7 +56,6 @@ const PepinieresMap = ({
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
-  const galleryRef = useRef(null);
 
   // Coordonnées de Madagascar (centre approximatif)
   const MADAGASCAR_CENTER = [-18.7669, 46.8691];

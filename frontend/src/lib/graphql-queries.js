@@ -163,6 +163,7 @@ export const GET_MY_SIEGES = gql`
       user {
         id
         email
+        logo
       }
       photosBatiment {
         id
@@ -275,6 +276,12 @@ export const GET_MY_PEPINIERES = gql`
       user {
         id
         email
+        firstName
+        lastName
+        logo
+        abreviation
+        nomInstitution
+        nomProjet
       }
       photos {
         id

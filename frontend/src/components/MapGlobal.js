@@ -81,11 +81,8 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
   const [selectedParcelle, setSelectedParcelle] = useState(null);
   const [selectedSiege, setSelectedSiege] = useState(null);
   const [selectedPepiniere, setSelectedPepiniere] = useState(null);
-  const [showGallery, setShowGallery] = useState(false);
-  const [showSiegeGallery, setShowSiegeGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
-  const galleryRef = useRef(null);
 
   useEffect(() => { setMapKey(prev => prev + 1); }, [parcelles, sieges, pepinieres]);
 
