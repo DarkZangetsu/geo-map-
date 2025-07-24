@@ -56,6 +56,7 @@ const PepinieresMap = ({
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
+  const galleryRef = useRef(null);
 
   // Coordonnées de Madagascar (centre approximatif)
   const MADAGASCAR_CENTER = [-18.7669, 46.8691];
@@ -140,6 +141,14 @@ const PepinieresMap = ({
     if (!dateString) return "Non définie";
     return new Date(dateString).toLocaleDateString("fr-FR");
   };
+
+  const prepareGalleryImages = (photos) => {
+  return photos.map((photo) => ({
+    original: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+    thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+    description: photo.titre || photo.description || `Image ${photo.id}`,
+  }));
+};
 
   // Gestion du clic sur la carte pour fermer les panneaux de détail
   const handleMapClick = (e) => {
@@ -449,79 +458,75 @@ const PepinieresMap = ({
             </div>
 
             {/* Bouton voir images */}
-            {Array.isArray(selectedPepiniere.images) &&
-              selectedPepiniere.images.length > 0 &&
-              !showGallery && (
-                <button
-                  onClick={() => setShowGallery(true)}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {Array.isArray(selectedPepiniere.photos) &&
+                selectedPepiniere.photos.length > 0 &&
+                !showGallery && (
+                  <button
+                    onClick={() => setShowGallery(true)}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Voir les images ({selectedPepiniere.images.length})
-                </button>
-              )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Voir les images ({selectedPepiniere.photos.length})
+                  </button>
+                )}
 
             {/* Galerie d'images */}
             {showGallery &&
-              Array.isArray(selectedPepiniere.images) &&
-              selectedPepiniere.images.length > 0 && (
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
-                  <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-orange-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    Galerie d'images
-                  </div>
-                  <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-200/50">
-                    <ImageGallery
-                      items={selectedPepiniere.images.map((img, idx) => ({
-                        original: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
-                        thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${img.image}`,
-                        description: `Image ${idx + 1}`,
-                      }))}
-                      showPlayButton={false}
-                      showFullscreenButton={true}
-                      showNav={true}
-                      showThumbnails={true}
-                      slideInterval={3000}
-                      slideOnThumbnailOver={true}
-                      additionalClass="custom-gallery"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setShowGallery(false)}
-                    className="mt-4 w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
-                  >
-                    Fermer la galerie
-                  </button>
-                </div>
-              )}
+  Array.isArray(selectedPepiniere.photos) &&
+  selectedPepiniere.photos.length > 0 && (
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+      <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
+        <div className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 text-orange-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
+        Galerie d'images
+      </div>
+      <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-200/50">
+        <ImageGallery
+          items={prepareGalleryImages(selectedPepiniere.photos)}
+          showPlayButton={false}
+          showFullscreenButton={true}
+          showNav={true}
+          showThumbnails={true}
+          slideInterval={3000}
+          slideOnThumbnailOver={true}
+          additionalClass="custom-gallery"
+        />
+      </div>
+      <button
+        onClick={() => setShowGallery(false)}
+        className="mt-4 w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
+      >
+        Fermer la galerie
+      </button>
+    </div>
+  )}
           </div>
         </div>
       )}

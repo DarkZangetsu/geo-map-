@@ -166,7 +166,6 @@ function LayoutContent({ children }) {
                       {user ? (
                         <>
                           <div className="flex items-center">
-                            {console.log('USER NAVBAR:', user)}
                             {user?.logo && (
                               <img
                                 src={getLogoUrl(user.logo)}
@@ -175,9 +174,6 @@ function LayoutContent({ children }) {
                               />
                             )}
                             <div className="hidden sm:block">
-                              <span className="text-sm text-gray-700 font-medium">
-                                {user?.firstName} {user?.lastName}
-                              </span>
                               <span className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
                                 {user?.nomInstitution}
                               </span>

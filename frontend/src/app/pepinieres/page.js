@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { GET_MY_PEPINIERES, DELETE_PEPINIERE } from '../../lib/graphql-queries';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
-import { Map, Search, Plus, Edit, Trash, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Map, Plus, Edit, Trash, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useToast } from '../../lib/useToast';
 import PepiniereModal from '../../components/PepiniereModal';
 import PepinieresMap from '../../components/PepinieresMap';

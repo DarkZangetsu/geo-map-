@@ -83,8 +83,7 @@ const ParcellesMap = ({
   center,
   mode = "parcelle",
 }) => {
-  const [selectedParcelle, setSelectedParcelle] = useState(null);
-  const [selectedSiege, setSelectedSiege] = useState(null);
+  const [selectedParcelle, setSelectedParcelle] = useState(null);;
   const [showGallery, setShowGallery] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const mapRef = useRef(null);
@@ -224,7 +223,6 @@ const ParcellesMap = ({
   // Gestion du clic sur la carte pour fermer les panneaux de détail
   const handleMapClick = (e) => {
     setSelectedParcelle(null);
-    setSelectedSiege(null);
     // (ajouter ici setSelectedPepiniere si besoin)
   };
 

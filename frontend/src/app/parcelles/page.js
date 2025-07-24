@@ -77,7 +77,6 @@ export default function ParcellesPage() {
     { key: 'superficie', label: 'Superficie' },
     { key: 'pratique', label: 'Pratique' },
     { key: 'nomProjet', label: 'Nom Projet' },
-    { key: 'description', label: 'Description' },
   ];
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
 
