@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import dynamic from 'next/dynamic';
-import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import L from 'leaflet';
 import React from 'react';
 import PepiniereDetailModal from './PepiniereDetailModal';
-import SiteReferenceDetailModal from './SiteReferenceDetailModal';
-import LocalDetailModal from './LocalDetailModal';
 import SiegeDetailModal from './SiegeDetailModal';
 import ParcelleDetailModal from './ParcelleDetailModal';
 
