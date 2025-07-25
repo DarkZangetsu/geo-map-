@@ -4,6 +4,37 @@ import { useState } from 'react';
 import { useToast } from './Toast';
 import { Building, User, Mail, Lock, FolderKanban, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
+const PasswordField = ({ id, name, value, onChange, placeholder, label, showPassword, onTogglePassword }) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> {label} *</span>
+    </label>
+    <div className="relative">
+      <input
+        id={id}
+        name={name}
+        type={showPassword ? "text" : "password"}
+        required
+        value={value}
+        onChange={onChange}
+        className="modern-input pr-10"
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+        onClick={onTogglePassword}
+      >
+        {showPassword ? (
+          <EyeOff className="h-5 w-5" />
+        ) : (
+          <Eye className="h-5 w-5" />
+        )}
+      </button>
+    </div>
+  </div>
+);
+
 export default function AuthForm({ onLogin, onRegister, loading, mode }) {
   // Si mode est défini, on force le mode login/register, sinon on laisse le switch interne
   const [isLogin, setIsLogin] = useState(mode ? mode === 'login' : true);
@@ -125,38 +156,6 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
     }
     return true;
   };
-
-  // Composant pour les champs de mot de passe avec visibilité
-  const PasswordField = ({ id, name, value, onChange, placeholder, label, showPassword, onTogglePassword }) => (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-        <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> {label} *</span>
-      </label>
-      <div className="relative">
-        <input
-          id={id}
-          name={name}
-          type={showPassword ? "text" : "password"}
-          required
-          value={value}
-          onChange={onChange}
-          className="modern-input pr-10"
-          placeholder={placeholder}
-        />
-        <button
-          type="button"
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-          onClick={onTogglePassword}
-        >
-          {showPassword ? (
-            <EyeOff className="h-5 w-5" />
-          ) : (
-            <Eye className="h-5 w-5" />
-          )}
-        </button>
-      </div>
-    </div>
-  );
 
   // Gestion des étapes pour l'inscription
   const steps = [
