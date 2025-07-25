@@ -8,7 +8,6 @@ import { parcellesColumns } from "./columns";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
 import PratiqueFilter from "@/components/PratiqueFilter";
-import ParcelleDetailModal from "@/components/ParcelleDetailModal";
 import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +18,10 @@ export default function ParcellesGlobalesPage() {
   const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, parcelle: null });
+  
+  // États pour la pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Ajout d'une variable CSS pour la couleur midnight blue
   useEffect(() => {
@@ -45,6 +48,33 @@ export default function ParcellesGlobalesPage() {
       .midnight-blue-btn:hover {
         background-color: #003366 !important;
         color: #fff !important;
+      }
+      .pagination-btn {
+        padding: 8px 12px;
+        margin: 0 2px;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #374151;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .pagination-btn:hover {
+        background-color: #f3f4f6;
+        border-color: var(--midnight-blue);
+      }
+      .pagination-btn.active {
+        background-color: var(--midnight-blue);
+        color: white;
+        border-color: var(--midnight-blue);
+      }
+      .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .pagination-btn:disabled:hover {
+        background: white;
+        border-color: #d1d5db;
       }
     `;
     document.head.appendChild(style);
@@ -82,16 +112,22 @@ export default function ParcellesGlobalesPage() {
             parcelle.nomProjet,
             parcelle.user?.nomInstitution,
             parcelle.superficie,
-            parcelle.variete,
-            parcelle.typeSol,
-            parcelle.typeIrrigation,
-            parcelle.notes
+            parcelle.description
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
       setFilteredParcelles(filtered);
+      // Réinitialiser à la première page quand les filtres changent
+      setCurrentPage(1);
     }
   }, [parcellesData, selectedMembers, selectedPratiques, searchValue]);
+
+  // Calcul des données paginées
+  const totalItems = filteredParcelles.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = filteredParcelles.slice(startIndex, endIndex);
 
   // Gestion des erreurs
   if (parcellesError) {
@@ -126,38 +162,75 @@ export default function ParcellesGlobalesPage() {
   const handleMemberFilterChange = (memberIds) => {
     setSelectedMembers(memberIds);
   };
+
   // Handler pour le filtre pratique
   const handlePratiqueFilterChange = (pratiques) => {
     setSelectedPratiques(pratiques);
   };
+
   // Handler pour la recherche globale
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
+  };
+
+  // Handler pour changer le nombre d'éléments par page
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(parseInt(e.target.value));
+    setCurrentPage(1); // Retour à la première page
+  };
+
+  // Handler pour changer de page
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   // Handler pour l'export CSV
   const handleExportCSV = () => {
     const data = filteredParcelles.map(parcelle => ({
       nom: parcelle.nom,
-      culture: parcelle.culture,
       proprietaire: parcelle.proprietaire,
-      membre: `${parcelle.user?.firstName} ${parcelle.user?.lastName}`,
-      username: parcelle.user?.username,
+      membre: `${parcelle.user?.nomInstitution}`,
       superficie_ha: parcelle.superficie || '',
-      variete: parcelle.variete || '',
-      date_semis: parcelle.dateSemis ? new Date(parcelle.dateSemis).toLocaleDateString('fr-FR') : '',
-      date_recolte: parcelle.dateRecoltePrevue ? new Date(parcelle.dateRecoltePrevue).toLocaleDateString('fr-FR') : '',
-      type_sol: parcelle.typeSol || '',
-      irrigation: parcelle.irrigation ? 'Oui' : 'Non',
-      type_irrigation: parcelle.typeIrrigation || '',
-      rendement_prevue: parcelle.rendementPrevue || '',
-      cout_production: parcelle.coutProduction || '',
-      certification_bio: parcelle.certificationBio ? 'Oui' : 'Non',
-      certification_hve: parcelle.certificationHve ? 'Oui' : 'Non',
-      notes: parcelle.notes || '',
+      notes: parcelle.description || '',
       date_creation: new Date(parcelle.createdAt).toLocaleDateString('fr-FR')
     }));
     exportToCSV(data, "parcelles_globales.csv");
+  };
+
+  // Génération des numéros de pages à afficher
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
   };
 
   return (
@@ -172,6 +245,7 @@ export default function ParcellesGlobalesPage() {
             Consultez tous les sites de référence tous les membres de la plateforme.
           </p>
         </div>
+
         {/* Filtres */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -202,40 +276,104 @@ export default function ParcellesGlobalesPage() {
             </div>
           </div>
         </div>
+
         {/* DataTable */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium midnight-blue-text">
-                Sites de référence ({filteredParcelles.length})
-              </h3>
-              {selectedMembers.length > 0 && (
-                <span className="text-sm text-gray-500">
-                  Filtré par {selectedMembers.length} membre(s)
-                </span>
-              )}
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <h3 className="text-lg font-medium midnight-blue-text">
+                  Sites de référence ({totalItems})
+                </h3>
+                {selectedMembers.length > 0 && (
+                  <span className="text-sm text-gray-500">
+                    Filtré par {selectedMembers.length} membre(s)
+                  </span>
+                )}
+              </div>
+              
+              {/* Sélecteur d'éléments par page */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
+                    Afficher:
+                  </label>
+                  <select
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span className="text-sm text-gray-600">lignes</span>
+                </div>
+                
+                <Button 
+                  className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" 
+                  onClick={handleExportCSV} 
+                  disabled={filteredParcelles.length === 0}
+                >
+                  Exporter CSV
+                </Button>
+              </div>
             </div>
           </div>
+          
           <div className="p-6">
             <DataTable
               columns={parcellesColumns(handleViewDetails)}
-              data={filteredParcelles}
-              actions={
-                <Button className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" onClick={handleExportCSV} disabled={filteredParcelles.length === 0}>
-                  Exporter CSV
-                </Button>
-              }
+              data={paginatedData}
             />
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="text-sm text-gray-600">
+                  Affichage de {startIndex + 1} à {Math.min(endIndex, totalItems)} sur {totalItems} résultats
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {/* Bouton Précédent */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-btn"
+                  >
+                    ← Précédent
+                  </button>
+
+                  {/* Numéros de pages */}
+                  {getPageNumbers().map((pageNumber, index) => (
+                    <button
+                      key={index}
+                      onClick={() => typeof pageNumber === 'number' ? handlePageChange(pageNumber) : null}
+                      disabled={pageNumber === '...'}
+                      className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''}`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ))}
+
+                  {/* Bouton Suivant */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-btn"
+                  >
+                    Suivant →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      {/* Modal de détail */}
-      {detailModal.open && (
-        <ParcelleDetailModal
-          parcelle={detailModal.parcelle}
-          onClose={handleCloseDetailModal}
-        />
-      )}
     </div>
   );
-} 
+}

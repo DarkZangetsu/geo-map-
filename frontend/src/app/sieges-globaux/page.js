@@ -18,6 +18,10 @@ export default function SiegesGlobauxPage() {
   const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, siege: null });
+  
+  // États pour la pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Ajout d'une variable CSS pour la couleur midnight blue
   useEffect(() => {
@@ -44,6 +48,33 @@ export default function SiegesGlobauxPage() {
       .midnight-blue-btn:hover {
         background-color: #003366 !important;
         color: #fff !important;
+      }
+      .pagination-btn {
+        padding: 8px 12px;
+        margin: 0 2px;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #374151;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .pagination-btn:hover {
+        background-color: #f3f4f6;
+        border-color: var(--midnight-blue);
+      }
+      .pagination-btn.active {
+        background-color: var(--midnight-blue);
+        color: white;
+        border-color: var(--midnight-blue);
+      }
+      .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .pagination-btn:disabled:hover {
+        background: white;
+        border-color: #d1d5db;
       }
     `;
     document.head.appendChild(style);
@@ -92,8 +123,17 @@ export default function SiegesGlobauxPage() {
       }
       
       setFilteredSieges(filtered);
+      // Réinitialiser à la première page quand les filtres changent
+      setCurrentPage(1);
     }
   }, [siegesData, selectedMembers, selectedCategories, searchValue]);
+
+  // Calcul des données paginées
+  const totalItems = filteredSieges.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = filteredSieges.slice(startIndex, endIndex);
 
   // Gestion des erreurs
   if (siegesError) {
@@ -139,14 +179,24 @@ export default function SiegesGlobauxPage() {
     setSearchValue(e.target.value);
   };
 
+  // Handler pour changer le nombre d'éléments par page
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(parseInt(e.target.value));
+    setCurrentPage(1); // Retour à la première page
+  };
+
+  // Handler pour changer de page
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   // Handler pour l'export CSV
   const handleExportCSV = () => {
     const data = filteredSieges.map(siege => ({
       nom: siege.nom,
       adresse: siege.adresse,
       categorie: siege.categorie || '',
-      membre: `${siege.user?.firstName} ${siege.user?.lastName}`,
-      username: siege.user?.username,
+      membre: `${siege.user?.nomInstitution}`,
       institution: siege.user?.nomInstitution || '',
       latitude: siege.latitude,
       longitude: siege.longitude,
@@ -154,6 +204,42 @@ export default function SiegesGlobauxPage() {
       date_creation: new Date(siege.createdAt).toLocaleDateString('fr-FR')
     }));
     exportToCSV(data, "locaux_globaux.csv");
+  };
+
+  // Génération des numéros de pages à afficher
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
   };
 
   return (
@@ -203,24 +289,40 @@ export default function SiegesGlobauxPage() {
         {/* DataTable */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium midnight-blue-text">
-                Locaux ({filteredSieges.length})
-              </h3>
-              {(selectedMembers.length > 0 || selectedCategories.length > 0) && (
-                <span className="text-sm text-gray-500">
-                  {selectedMembers.length > 0 && `Filtré par ${selectedMembers.length} membre(s)`}
-                  {selectedMembers.length > 0 && selectedCategories.length > 0 && " - "}
-                  {selectedCategories.length > 0 && `${selectedCategories.length} catégorie(s)`}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="p-6">
-            <DataTable
-              columns={siegesColumns(handleViewDetails)}
-              data={filteredSieges}
-              actions={
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <h3 className="text-lg font-medium midnight-blue-text">
+                  Locaux ({totalItems})
+                </h3>
+                {(selectedMembers.length > 0 || selectedCategories.length > 0) && (
+                  <span className="text-sm text-gray-500">
+                    {selectedMembers.length > 0 && `Filtré par ${selectedMembers.length} membre(s)`}
+                    {selectedMembers.length > 0 && selectedCategories.length > 0 && " - "}
+                    {selectedCategories.length > 0 && `${selectedCategories.length} catégorie(s)`}
+                  </span>
+                )}
+              </div>
+              
+              {/* Sélecteur d'éléments par page */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
+                    Afficher:
+                  </label>
+                  <select
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span className="text-sm text-gray-600">lignes</span>
+                </div>
+                
                 <Button 
                   className="midnight-blue-btn px-4 py-2 rounded-md font-bold text-sm" 
                   onClick={handleExportCSV} 
@@ -228,9 +330,59 @@ export default function SiegesGlobauxPage() {
                 >
                   Exporter CSV
                 </Button>
-              }
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <DataTable
+              columns={siegesColumns(handleViewDetails)}
+              data={paginatedData}
             />
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="text-sm text-gray-600">
+                  Affichage de {startIndex + 1} à {Math.min(endIndex, totalItems)} sur {totalItems} résultats
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {/* Bouton Précédent */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-btn"
+                  >
+                    ← Précédent
+                  </button>
+
+                  {/* Numéros de pages */}
+                  {getPageNumbers().map((pageNumber, index) => (
+                    <button
+                      key={index}
+                      onClick={() => typeof pageNumber === 'number' ? handlePageChange(pageNumber) : null}
+                      disabled={pageNumber === '...'}
+                      className={`pagination-btn ${currentPage === pageNumber ? 'active' : ''}`}
+                    >
+                      {pageNumber}
+                    </button>
+                  ))}
+
+                  {/* Bouton Suivant */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-btn"
+                  >
+                    Suivant →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

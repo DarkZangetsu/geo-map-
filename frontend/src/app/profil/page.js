@@ -5,7 +5,7 @@ import { GET_ME, UPDATE_USER_ABREVIATION, UPDATE_USER_LOGO, UPDATE_USER_PROFILE,
 import { toast } from 'sonner';
 import { useAuthGuard } from '../../lib/useAuthGuard';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
-import { debugAuth } from '../../lib/debug-auth';
+// ...
 import { useAuth } from '../../components/Providers';
 import { getLogoUrl } from '../../lib/utils';
 import PasswordChangeModal from '../../components/PasswordChangeModal';
@@ -91,12 +91,6 @@ export default function ProfilPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center bg-white rounded-2xl shadow-xl p-8">
           <div className="text-red-500 mb-4 font-medium">Erreur lors du chargement du profil: {error.message}</div>
-          <button 
-            onClick={debugAuth} 
-            className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium shadow-lg"
-          >
-            Debug Auth
-          </button>
         </div>
       </div>
     );
@@ -292,12 +286,7 @@ export default function ProfilPage() {
             <h1 className="text-3xl font-bold text-slate-800 mb-2">Mon profil</h1>
             <p className="text-slate-600">Gérez vos informations personnelles et préférences</p>
           </div>
-          <button 
-            onClick={debugAuth} 
-            className="px-4 py-2 bg-slate-500 text-white text-sm rounded-xl hover:bg-slate-600 transition-colors shadow-lg"
-          >
-            Debug Auth
-          </button>
+          {/* Debug Auth button removed */}
         </div>
 
         {/* Carte principale */}
