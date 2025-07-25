@@ -47,9 +47,10 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
       });
       // Charger les photos existantes si en mode édition
       if (initialData.photosBatiment) {
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/media/` || '';
         setPhotos(initialData.photosBatiment.map(photo => ({
           id: photo.id,
-          url: photo.image,
+          url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
           titre: photo.titre || '',
           description: photo.description || '',
           isExisting: true

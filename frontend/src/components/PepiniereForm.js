@@ -49,9 +49,10 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
       });
       // Charger les photos existantes si en mode édition
       if (initialData.photos) {
+        const apiUrl =  `${process.env.NEXT_PUBLIC_API_URL}/media/` || '';
         setPhotos(initialData.photos.map(photo => ({
           id: photo.id,
-          url: photo.image,
+          url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
           titre: photo.titre || '',
           description: photo.description || '',
           isExisting: true
@@ -349,7 +350,18 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
               </div>
             </div>
 
-            {/* Photos */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <textarea 
+                name="description" 
+                rows="3" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                value={formData.description} 
+                onChange={handleInputChange} 
+              />
+            </div>
+
+            {/* Photos (tout en bas) */}
             <div className="border-t pt-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Photos de la pépinière (max 2)</h3>
               <div className="space-y-4">
@@ -419,17 +431,6 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
                   </div>
                 )}
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-              <textarea 
-                name="description" 
-                rows="3" 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
-                value={formData.description} 
-                onChange={handleInputChange} 
-              />
             </div>
           </form>
         </div>

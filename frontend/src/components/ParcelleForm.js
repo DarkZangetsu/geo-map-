@@ -35,6 +35,19 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
   });
   
   const [photos, setPhotos] = useState([]);
+  // Charger les images existantes lors de l'édition
+  useEffect(() => {
+    if (isEdit && parcelle && parcelle.images && Array.isArray(parcelle.images)) {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/media/` || '';
+      setPhotos(parcelle.images.map(photo => ({
+        id: photo.id,
+        url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
+        titre: photo.titre || '',
+        description: photo.description || '',
+        isExisting: true
+      })));
+    }
+  }, [isEdit, parcelle]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [geojson, setGeojson] = useState(parcelle?.geojson || null);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -147,10 +160,19 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     }
     try {
       const imagesToSend = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
+      // Gestion suppression d'images existantes
+      let imagesToDelete = [];
+      if (mode === 'edit' && parcelle && Array.isArray(parcelle.images)) {
+        const currentIds = photos.filter(photo => photo.isExisting).map(photo => photo.id);
+        imagesToDelete = parcelle.images
+          .filter(img => !currentIds.includes(img.id))
+          .map(img => img.id);
+      }
       const variables = {
         ...formData,
         geojson: JSON.stringify(geojsonToUse),
-        images: imagesToSend.length > 0 ? imagesToSend : null
+        images: imagesToSend.length > 0 ? imagesToSend : null,
+        imagesToDelete: imagesToDelete.length > 0 ? imagesToDelete : null
       };
       if (mode === 'edit' && parcelle) {
         // Mise à jour

@@ -50,7 +50,8 @@ function PointSelector({ position, setPosition }) {
 
 const MapPointModal = ({ open, onClose, onSave, initialPosition }) => {
   const [position, setPosition] = useState(initialPosition || null);
-  const [fullscreen, setFullscreen] = useState(false);
+  // Toujours en plein écran
+  const fullscreen = true;
   const [basemap, setBasemap] = useState('standard');
 
   if (!open) return null;
@@ -67,19 +68,19 @@ const MapPointModal = ({ open, onClose, onSave, initialPosition }) => {
       <div
         style={{
           ...contentStyle,
-          width: fullscreen ? '100vw' : '600px',
-          minWidth: fullscreen ? '100vw' : '350px',
-          height: fullscreen ? '100vh' : '500px',
-          minHeight: fullscreen ? '100vh' : '400px',
-          maxWidth: fullscreen ? '100vw' : '90vw',
-          maxHeight: fullscreen ? '100vh' : '90vh',
-          padding: fullscreen ? 0 : 24,
+          width: '100vw',
+          minWidth: '100vw',
+          height: '100vh',
+          minHeight: '100vh',
+          maxWidth: '100vw',
+          maxHeight: '100vh',
+          padding: 0,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        <div className="flex items-center justify-between mb-2" style={{padding: fullscreen ? '16px 24px 0 24px' : 0}}>
+        <div className="flex items-center justify-between mb-2" style={{padding: '16px 24px 0 24px'}}>
           <h2 className="text-lg font-bold">Sélectionner la position du siège</h2>
           <div className="flex items-center space-x-2">
             <select
@@ -90,13 +91,7 @@ const MapPointModal = ({ open, onClose, onSave, initialPosition }) => {
               <option value="standard">Standard</option>
               <option value="satellite">Satellite + labels</option>
             </select>
-            <button
-              onClick={() => setFullscreen(f => !f)}
-              className="ml-2 px-3 py-1 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100"
-              title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-            >
-              {fullscreen ? '⤢' : '⤢'}
-            </button>
+            {/* Bouton plein écran supprimé car toujours en plein écran */}
           </div>
         </div>
         <div style={{ flex: 1, minHeight: 0 }}>
@@ -131,10 +126,10 @@ const MapPointModal = ({ open, onClose, onSave, initialPosition }) => {
           className="flex justify-end mt-4 space-x-2"
           style={{
             background: 'white',
-            padding: fullscreen ? '0 24px 24px 24px' : '24px 24px 0 24px',
+            padding: '0 24px 24px 24px',
             borderBottomLeftRadius: 8,
             borderBottomRightRadius: 8,
-            boxShadow: fullscreen ? '0 -2px 8px rgba(0,0,0,0.04)' : undefined
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.04)'
           }}
         >
           <button
