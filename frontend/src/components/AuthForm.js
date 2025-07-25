@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useToast } from './Toast';
-import { Building, User, Mail, Lock, FolderKanban, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Building, User, Mail, Lock, FolderKanban, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthForm({ onLogin, onRegister, loading, mode }) {
   // Si mode est défini, on force le mode login/register, sinon on laisse le switch interne
@@ -19,6 +19,8 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
   });
   const [newProjet, setNewProjet] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showToast, ToastContainer } = useToast();
 
   const handleInputChange = (e) => {
@@ -124,6 +126,38 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
     return true;
   };
 
+  // Composant pour les champs de mot de passe avec visibilité
+  const PasswordField = ({ id, name, value, onChange, placeholder, label, showPassword, onTogglePassword }) => (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> {label} *</span>
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          name={name}
+          type={showPassword ? "text" : "password"}
+          required
+          value={value}
+          onChange={onChange}
+          className="modern-input pr-10"
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+          onClick={onTogglePassword}
+        >
+          {showPassword ? (
+            <EyeOff className="h-5 w-5" />
+          ) : (
+            <Eye className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
   // Gestion des étapes pour l'inscription
   const steps = [
     {
@@ -212,34 +246,26 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
               placeholder="Email"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> Mot de passe *</span>
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              className="modern-input"
-              placeholder="Mot de passe"
-            />
-          </div>
+          <PasswordField
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            placeholder="Mot de passe"
+            label="Mot de passe"
+            showPassword={showPassword}
+            onTogglePassword={() => setShowPassword(!showPassword)}
+          />
           <div className="md:col-span-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> Confirmer le mot de passe *</span>
-            </label>
-            <input
+            <PasswordField
               id="confirmPassword"
               name="confirmPassword"
-              type="password"
-              required
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              className="modern-input"
               placeholder="Confirmer le mot de passe"
+              label="Confirmer le mot de passe"
+              showPassword={showConfirmPassword}
+              onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
             />
           </div>
         </div>
@@ -292,21 +318,16 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
                       placeholder="Email"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                      <span className="flex items-center gap-2"><Lock className="w-4 h-4" /> Mot de passe *</span>
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="modern-input"
-                      placeholder="Mot de passe"
-                    />
-                  </div>
+                  <PasswordField
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Mot de passe"
+                    label="Mot de passe"
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
                 </>
               ) : (
                 steps[step].content
@@ -397,4 +418,4 @@ export default function AuthForm({ onLogin, onRegister, loading, mode }) {
       `}</style>
     </div>
   );
-} 
+}
