@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_MY_PARCELLES, CREATE_PARCELLE, DELETE_PARCELLE, GET_MY_SIEGES } from '../../lib/graphql-queries';
+import { GET_MY_PARCELLES, DELETE_PARCELLE} from '../../lib/graphql-queries';
 import { toast } from 'sonner';
 import ParcellesMap from '../../components/ParcellesMap';
 import ParcelleModal from '../../components/ParcelleModal';
@@ -64,11 +64,7 @@ export default function ParcellesPage() {
     skip: !isAuthenticated,
   });
 
-  const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
-    skip: !isAuthenticated
-  });
 
-  const [createParcelle] = useMutation(CREATE_PARCELLE);
   const [deleteParcelle] = useMutation(DELETE_PARCELLE);
 
   const columns = [
@@ -76,13 +72,12 @@ export default function ParcellesPage() {
     { key: 'proprietaire', label: 'Propriétaire' },
     { key: 'superficie', label: 'Superficie' },
     { key: 'pratique', label: 'Pratique' },
-    { key: 'nomProjet', label: 'Nom Projet' },
+    { key: 'nomProjet', label: 'Projet rattaché' },
   ];
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
 
 
   const columnsDT = [
-    // Suppression de la colonne de sélection (checkbox)
     ...visibleColumns.map(colKey => {
       const col = columns.find(c => c.key === colKey);
       return col && {

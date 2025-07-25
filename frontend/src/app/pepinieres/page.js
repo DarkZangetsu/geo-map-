@@ -9,6 +9,7 @@ import { useAuthGuard } from '../../lib/useAuthGuard';
 import CSVImportExportPepiniere from '../../components/CSVImportExportPepiniere';
 import { Map, Plus, Edit, Trash, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useToast } from '../../lib/useToast';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 import PepiniereModal from '../../components/PepiniereModal';
 import PepinieresMap from '../../components/PepinieresMap';
 import { DataTable } from '../../components/ui/table-data-table';
@@ -37,12 +38,11 @@ export default function PepinieresPage() {
     { key: 'nom', label: 'Pépinière' },
     { key: 'adresse', label: 'Adresse' },
     { key: 'nomGestionnaire', label: 'Gestionnaire' },
-    { key: 'especesProduites', label: 'Espèces produites' },
+    { key: 'nomProjet', label: 'Projet rattaché' },
   ];
   
   // Colonnes visibles pour le tableau (filtrage dynamique)
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
-  const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
   const { showSuccess, showError } = useToast();
   const [editingPepiniere, setEditingPepiniere] = useState(null);
   const [deletePepiniere] = useMutation(DELETE_PEPINIERE);
@@ -50,6 +50,10 @@ export default function PepinieresPage() {
   const [showPepiniereModal, setShowPepiniereModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPepiniere, setSelectedPepiniere] = useState(null);
+  // Pour la confirmation de suppression
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pepiniereToDelete, setPepiniereToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { data: pepinieresData, loading: pepinieresLoading, refetch: refetchPepinieres } = useQuery(GET_MY_PEPINIERES, {
     skip: !isAuthenticated || (user && (user.role === "ADMIN" || user.role === "admin")),
@@ -94,10 +98,17 @@ export default function PepinieresPage() {
     setShowPepiniereModal(true);
   };
 
-  const handleDeletePepiniere = async (pepiniere) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette pépinière ?')) return;
+
+  const handleDeletePepiniere = (pepiniere) => {
+    setPepiniereToDelete(pepiniere);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePepiniere = async () => {
+    if (!pepiniereToDelete) return;
+    setDeleteLoading(true);
     try {
-      const { data } = await deletePepiniere({ variables: { id: pepiniere.id } });
+      const { data } = await deletePepiniere({ variables: { id: pepiniereToDelete.id } });
       if (data.deletePepiniere.success) {
         showSuccess('Pépinière supprimée avec succès');
         refetchPepinieres();
@@ -106,6 +117,10 @@ export default function PepinieresPage() {
       }
     } catch (e) {
       showError('Erreur lors de la suppression');
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
+      setPepiniereToDelete(null);
     }
   };
 
@@ -202,14 +217,10 @@ export default function PepinieresPage() {
         );
       },
     },
-    visibleColumns.includes('especesProduites') && {
-      accessorKey: 'especesProduites',
-      header: 'Espèces produites',
-      cell: info => (
-        <div className="max-w-xs truncate" title={info.getValue() || '-'}>
-          {info.getValue() || '-'}
-        </div>
-      ),
+    visibleColumns.includes('nomProjet') && {
+      accessorKey: 'nomProjet',
+      header: 'Projet rattaché',
+      cell: info => info.getValue(),
     },
     {
       id: 'actions',
@@ -241,6 +252,21 @@ export default function PepinieresPage() {
           >
             <Trash size={15} />
           </Button>
+      {/* ConfirmationDialog pour la suppression */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        title="Confirmer la suppression"
+        description={pepiniereToDelete ? `Êtes-vous sûr de vouloir supprimer la pépinière « ${pepiniereToDelete.nom} » ? Cette action est irréversible.` : ''}
+        confirmLabel={deleteLoading ? 'Suppression...' : 'Supprimer'}
+        cancelLabel="Annuler"
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setPepiniereToDelete(null);
+        }}
+        onConfirm={confirmDeletePepiniere}
+        loading={deleteLoading}
+        variant="destructive"
+      />
         </div>
       ),
       enableSorting: false,

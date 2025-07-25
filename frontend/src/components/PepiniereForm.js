@@ -4,6 +4,7 @@ import { CREATE_PEPINIERE, UPDATE_PEPINIERE, GET_ME } from '../lib/graphql-queri
 import { useToast } from '../lib/useToast';
 import MapPointModal from './MapPointModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import ConfirmationDialog from './ConfirmationDialog';
 
 const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', pepiniereId = null }) => {
   const [formData, setFormData] = useState({
@@ -107,16 +108,23 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
     }
   };
 
-  const handleSubmit = async (e) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nom || !formData.adresse || !formData.latitude || !formData.longitude) {
       showError('Veuillez remplir tous les champs obligatoires.');
       return;
     }
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = async () => {
+    setConfirmLoading(true);
     try {
       // Préparer les nouvelles photos (fichiers)
       const newPhotos = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
-      
       if (mode === 'edit' && pepiniereId) {
         const { data } = await updatePepiniere({
           variables: {
@@ -137,10 +145,10 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
           }
         });
         if (data.updatePepiniere.success) {
-          showSuccess('Pépinière modifiée avec succès !');
-          onSuccess && onSuccess(data.updatePepiniere.pepiniere);
+          showSuccess('Pépinière mise à jour avec succès.');
+          if (onSuccess) onSuccess();
         } else {
-          showError(data.updatePepiniere.message);
+          showError(data.updatePepiniere.message || 'Erreur lors de la mise à jour.');
         }
       } else {
         const { data } = await createPepiniere({
@@ -161,15 +169,18 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
           }
         });
         if (data.createPepiniere.success) {
-          showSuccess('Pépinière ajoutée avec succès !');
-          onSuccess && onSuccess(data.createPepiniere.pepiniere);
+          showSuccess('Pépinière créée avec succès.');
+          if (onSuccess) onSuccess();
         } else {
-          showError(data.createPepiniere.message);
+          showError(data.createPepiniere.message || 'Erreur lors de la création.');
         }
       }
+      setShowConfirm(false);
     } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
       showError('Erreur lors de la soumission de la pépinière.');
+      console.error('Erreur lors de la soumission:', error);
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -460,6 +471,21 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
             setShowMapModal(false);
           }}
           initialPosition={formData.latitude && formData.longitude ? [parseFloat(formData.latitude), parseFloat(formData.longitude)] : null}
+        />
+      )}
+
+      {showConfirm && (
+        <ConfirmationDialog
+          isOpen={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleConfirm}
+          title={mode === 'edit' ? 'Confirmer la modification' : 'Confirmer la création'}
+          message={mode === 'edit' ? 'Voulez-vous vraiment modifier cette pépinière ?' : 'Voulez-vous vraiment créer cette pépinière ?'}
+          confirmText={mode === 'edit' ? 'Mettre à jour' : 'Créer'}
+          confirmButtonClass={confirmLoading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}
+          cancelButtonClass={confirmLoading ? 'cursor-not-allowed' : 'bg-gray-300 hover:bg-gray-400'}
+          confirmDisabled={confirmLoading}
+          confirmLoading={confirmLoading}
         />
       )}
     </>

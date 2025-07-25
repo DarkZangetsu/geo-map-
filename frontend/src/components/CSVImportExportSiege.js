@@ -99,8 +99,8 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h3 className="text-xl font-semibold mb-6 text-gray-800">Import/Export CSV des locaux</h3>
+    <div>
+      <h3 className="text-xl font-semibold mb-6 text-gray-800 text-center">Import/Export CSV des locaux</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Export Section */}
         <div className="space-y-4">

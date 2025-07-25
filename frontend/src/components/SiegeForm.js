@@ -106,7 +106,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirm(true);
   };

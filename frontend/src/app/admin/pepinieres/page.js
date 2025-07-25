@@ -85,7 +85,7 @@ export default function AdminPepinieresPage() {
 
   if (error || usersError) {
     return (
-      <div className="text-center text-red-600 py-8">Erreur lors du chargement des pépinières ou des membres.</div>
+      <div className="text-center text-red-600 py-8">Erreur lors du chargement des pépinières ou des institutions.</div>
     );
   }
 
@@ -94,7 +94,7 @@ export default function AdminPepinieresPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-blue-900">Gestion des Pépinières</h1>
-          <p className="text-gray-600 text-sm mt-1">Consultez et gérez toutes les pépinières de tous les membres.</p>
+          <p className="text-gray-600 text-sm mt-1">Consultez et gérez toutes les pépinières de tous les institutions.</p>
         </div>
         <Button onClick={() => setShowAdd(true)} className="gap-2">
           <Plus size={16} /> Ajouter une pépinière

@@ -226,7 +226,7 @@ export default function PepinieresGlobalesPage() {
             Liste des pépinières
           </h1>
           <p className="text-gray-600">
-            Consultez toutes les pépinières de tous les membres de la plateforme.
+            Consultez toutes les pépinières de tous les institutions de la plateforme.
           </p>
         </div>
 
@@ -234,7 +234,7 @@ export default function PepinieresGlobalesPage() {
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1 mb-4 lg:mb-0">
-              <h3 className="text-lg font-medium midnight-blue-text mb-3">Filtrer par membre</h3>
+              <h3 className="text-lg font-medium midnight-blue-text mb-3">Filtrer par institution</h3>
               <MemberFilter
                 users={usersData?.allUsers || []}
                 selectedMembers={selectedMembers}
@@ -264,7 +264,7 @@ export default function PepinieresGlobalesPage() {
                 </h3>
                 {selectedMembers.length > 0 && (
                   <span className="text-sm text-gray-500">
-                    Filtré par {selectedMembers.length} membre(s)
+                    Filtré par {selectedMembers.length} Information(s)
                   </span>
                 )}
               </div>

@@ -86,9 +86,8 @@ const CSVImportExportPepiniere = ({ onImportSuccess }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold mb-4">Import/Export CSV - Pépinières</h3>
-      
+    <div>
+      <h3 className="text-lg font-semibold mb-4 text-center">Import/Export CSV - Pépinières</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Import */}
         <div className="border rounded-lg p-4">

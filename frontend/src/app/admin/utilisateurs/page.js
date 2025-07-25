@@ -75,7 +75,7 @@ export default function AdminUtilisateursPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-blue-900">Gestion des utilisateurs</h1>
-          <p className="text-gray-600 text-sm mt-1">Gérez les comptes utilisateurs, activez ou désactivez les membres et modifiez leurs abréviations.</p>
+          <p className="text-gray-600 text-sm mt-1">Gérez les comptes utilisateurs, activez ou désactivez les institutions et modifiez leurs abréviations.</p>
         </div>
         <Button onClick={() => setShowAdd(true)} className="gap-2">
           <Plus size={16} /> Ajouter un utilisateur

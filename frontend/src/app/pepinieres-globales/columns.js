@@ -18,7 +18,7 @@ export const pepinieresColumns = (onViewDetails) => [
   },
   {
     accessorKey: "nomProjet",
-    header: "Nom du projet",
+    header: "Projet rattaché",
     cell: ({ row }) => row.getValue("nomProjet") || "-",
   },
   {
@@ -45,13 +45,8 @@ export const pepinieresColumns = (onViewDetails) => [
     },
   },
   {
-    accessorKey: "createdAt",
-    header: "Date création",
-    cell: ({ row }) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString('fr-FR') : "-",
-  },
-  {
     id: "membre",
-    header: "Membre",
+    header: "Nom Institution",
     cell: ({ row }) => {
       const user = row.original.user;
       return (

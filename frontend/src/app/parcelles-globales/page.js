@@ -242,7 +242,7 @@ export default function ParcellesGlobalesPage() {
             Liste des sites de référence
           </h1>
           <p className="text-gray-600">
-            Consultez tous les sites de référence tous les membres de la plateforme.
+            Consultez tous les sites de référence tous les institution de la plateforme.
           </p>
         </div>
 

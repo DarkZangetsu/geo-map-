@@ -54,6 +54,7 @@ export default function SiegePage() {
   const [selectedSiege, setSelectedSiege] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [siegeToDelete, setSiegeToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { data: siegesData, loading: siegesLoading, refetch: refetchSieges } = useQuery(GET_MY_SIEGES, {
     skip: !isAuthenticated || (user && (user.role === "ADMIN" || user.role === "admin")),
@@ -131,6 +132,7 @@ export default function SiegePage() {
 
   const confirmDeleteSiege = async () => {
     if (!siegeToDelete) return;
+    setDeleteLoading(true);
     try {
       const { data } = await deleteSiege({ variables: { id: siegeToDelete.id } });
       if (data.deleteSiege.success) {
@@ -142,6 +144,7 @@ export default function SiegePage() {
     } catch (e) {
       showError('Erreur lors de la suppression');
     } finally {
+      setDeleteLoading(false);
       setShowDeleteConfirm(false);
       setSiegeToDelete(null);
     }
@@ -484,17 +487,17 @@ export default function SiegePage() {
         )}
       
         {/* Modal de confirmation suppression */}
-        {showDeleteConfirm && (
-          <ConfirmationDialog
-            isOpen={showDeleteConfirm}
-            onClose={() => { setShowDeleteConfirm(false); setSiegeToDelete(null); }}
-            onConfirm={confirmDeleteSiege}
-            title="Confirmer la suppression"
-            message="Êtes-vous sûr de vouloir supprimer ce local ?"
-            confirmText="Supprimer"
-            confirmButtonClass="bg-red-600 hover:bg-red-700"
-          />
-        )}
+        <ConfirmationDialog
+          open={showDeleteConfirm}
+          title="Confirmer la suppression"
+          description={siegeToDelete ? `Êtes-vous sûr de vouloir supprimer le local « ${siegeToDelete.nom} » ? Cette action est irréversible.` : ''}
+          confirmLabel={deleteLoading ? 'Suppression...' : 'Supprimer'}
+          cancelLabel="Annuler"
+          onCancel={() => { setShowDeleteConfirm(false); setSiegeToDelete(null); }}
+          onConfirm={confirmDeleteSiege}
+          loading={deleteLoading}
+          variant="destructive"
+        />
       </div>
     </div>
   );

@@ -38,10 +38,10 @@ const MemberFilter = ({ users = [], selectedMembers = [], onFilterChange }) => {
       >
         <span>
           {selectedCount === 0 
-            ? 'Tous les membres' 
+            ? 'Tous les institutions' 
             : selectedCount === totalCount 
-              ? 'Tous les membres' 
-              : `${selectedCount} membre(s) sélectionné(s)`
+              ? 'Tous les institutions' 
+              : `${selectedCount} institution(s) sélectionnée(s)`
           }
         </span>
         <svg

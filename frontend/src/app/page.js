@@ -61,7 +61,7 @@ export default function HomePage() {
             onChange={e => setSelectedMember(e.target.value)}
             className="px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-blue-900 font-semibold shadow-sm"
           >
-            <option value="">Tous les membres</option>
+            <option value="">Tous les institutions</option>
             {usersData?.allUsers?.map(user => (
               <option key={user.id} value={user.id}>
                 ({user.nomInstitution})

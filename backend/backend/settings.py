@@ -178,15 +178,13 @@ AUTHENTICATION_BACKENDS = [
 # JWT Settings
 GRAPHQL_JWT = {
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': timedelta(hours=1),
+    'JWT_EXPIRATION_DELTA': timedelta(hours=24),
     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': timedelta(hours=1),
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),
     'JWT_AUTH_HEADER_TYPES': ('JWT',),
 }
 

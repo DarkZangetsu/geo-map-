@@ -50,7 +50,7 @@ export default function AdminParcellesPage() {
 
   if (error || usersError) {
     return (
-      <div className="text-center text-red-600 py-8">Erreur lors du chargement des sites de référence ou des membres.</div>
+      <div className="text-center text-red-600 py-8">Erreur lors du chargement des sites de référence ou des institutions.</div>
     );
   }
 

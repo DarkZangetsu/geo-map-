@@ -251,7 +251,7 @@ export default function SiegesGlobauxPage() {
             Liste des locaux
           </h1>
           <p className="text-gray-600">
-            Consultez tous les locaux de tous les membres de la plateforme.
+            Consultez tous les locaux de tous les institutions de la plateforme.
           </p>
         </div>
 
