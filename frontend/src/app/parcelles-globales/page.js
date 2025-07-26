@@ -9,7 +9,9 @@ import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
 import PratiqueFilter from "@/components/PratiqueFilter";
 import { exportToCSV } from "../../lib/export-csv";
+
 import { Button } from "@/components/ui/button";
+import ParcelleDetailModal from "@/components/ParcelleDetailModal";
 
 export default function ParcellesGlobalesPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
@@ -187,12 +189,13 @@ export default function ParcellesGlobalesPage() {
   // Handler pour l'export CSV
   const handleExportCSV = () => {
     const data = filteredParcelles.map(parcelle => ({
-      nom: parcelle.nom,
-      proprietaire: parcelle.proprietaire,
-      membre: `${parcelle.user?.nomInstitution}`,
+      nom: parcelle.nom || '',
+      proprietaire: parcelle.proprietaire || '',
+      membre: parcelle.user?.nomInstitution || '',
+      pratique: parcelle.pratique || '',
       superficie_ha: parcelle.superficie || '',
       notes: parcelle.description || '',
-      date_creation: new Date(parcelle.createdAt).toLocaleDateString('fr-FR')
+      date_creation: parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : ''
     }));
     exportToCSV(data, "parcelles_globales.csv");
   };
@@ -373,6 +376,13 @@ export default function ParcellesGlobalesPage() {
             </div>
           )}
         </div>
+        {/* Modal de détails de la parcelle */}
+        {detailModal.open && detailModal.parcelle && (
+          <ParcelleDetailModal
+            parcelle={detailModal.parcelle}
+            onClose={handleCloseDetailModal}
+          />
+        )}
       </div>
     </div>
   );
