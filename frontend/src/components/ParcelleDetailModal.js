@@ -30,6 +30,15 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
     return `${value}`;
   };
 
+  // Fonction pour traiter les pratiques
+  const formatPratiques = (pratiques) => {
+    if (!pratiques) return [];
+    if (typeof pratiques === 'string') {
+      return pratiques.split(',').map(p => p.trim()).filter(p => p.length > 0);
+    }
+    return Array.isArray(pratiques) ? pratiques : [];
+  };
+
   const exportToCsv = () => {
     const data = [parcelleComplete];
     const csv = [
@@ -65,6 +74,8 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
     },
     { id: 'geometrie', label: 'Géométrie', icon: '📐' }
   ];
+
+  const pratiques = formatPratiques(parcelleComplete?.pratique);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -183,7 +194,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                   <div className="space-y-8">
                     {/* Informations principales */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      {/* Informations de base */}
+                      {/* Informations de base (sans pratiques) */}
                       <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-6 border border-blue-100/50">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -195,7 +206,6 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                           {[
                             { label: 'Nom', value: parcelleComplete?.nom },
                             { label: 'Superficie', value: `${formatDecimal(parcelleComplete?.superficie)} ha` },
-                            { label: 'Pratique', value: parcelleComplete?.pratique },
                             { label: 'Nom projet', value: parcelleComplete?.nomProjet }
                           ].map((item, index) => (
                             <div key={index} className="flex justify-between items-start py-2 border-b border-blue-100/50 last:border-b-0">
@@ -234,6 +244,34 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                       </div>
                     </div>
 
+                    {/* Section Pratiques - Nouvelle section dédiée */}
+                    {pratiques.length > 0 && (
+                      <div className="bg-gradient-to-br from-orange-50/50 to-amber-50/30 rounded-2xl p-6 border border-orange-100/50">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                            <span className="text-white text-sm">🌱</span>
+                          </div>
+                          <h4 className="text-lg font-bold text-slate-800">Pratiques agricoles</h4>
+                          <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-bold">
+                            {pratiques.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {pratiques.map((pratique, index) => (
+                            <div
+                              key={index}
+                              className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 border border-orange-200 rounded-xl px-4 py-2.5 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                            >
+                              <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                              <span className="text-slate-700 font-medium text-sm">
+                                {pratique}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Membre */}
                     <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/30 rounded-2xl p-6 border border-purple-100/50">
                       <div className="flex items-center gap-3 mb-4">
@@ -259,21 +297,20 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                           <div className="text-lg font-bold text-slate-800">
                             {parcelleComplete?.user?.nomInstitution || '-'}
                           </div>
-                          {/* <div className="text-purple-600 font-medium">{parcelleComplete?.user?.email || '-'}</div> */}
                         </div>
                       </div>
                     </div>
 
                     {/* Description */}
                     {parcelleComplete?.description && (
-                      <div className="bg-gradient-to-br from-amber-50/50 to-orange-50/30 rounded-2xl p-6 border border-amber-100/50">
+                      <div className="bg-gradient-to-br from-cyan-50/50 to-blue-50/30 rounded-2xl p-6 border border-cyan-100/50">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
                             <span className="text-white text-sm">📄</span>
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Description</h4>
                         </div>
-                        <p className="text-slate-700 leading-relaxed bg-white/60 p-4 rounded-xl border border-amber-100/50 whitespace-pre-wrap break-words">
+                        <p className="text-slate-700 leading-relaxed bg-white/60 p-4 rounded-xl border border-cyan-100/50 whitespace-pre-wrap break-words">
                           {parcelleComplete.description}
                         </p>
                       </div>
