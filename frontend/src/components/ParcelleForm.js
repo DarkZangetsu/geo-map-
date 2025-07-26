@@ -5,7 +5,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { CREATE_PARCELLE, UPDATE_PARCELLE, GET_ME, GET_MY_PARCELLES } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapDrawModal from './MapDrawModal';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import ConfirmationDialog from './ConfirmationDialog';
 import * as turf from '@turf/turf';
 
@@ -27,13 +27,36 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     telephone: parcelle?.telephone || '',
     email: parcelle?.email || '',
     superficie: parcelle?.superficie || '',
-    pratique: parcelle?.pratique || '',
+    pratique: parcelle?.pratique ? parcelle.pratique.split(',').map(p => p.trim()) : [],
+    autresPratiques: '',
     nomProjet: parcelle?.nomProjet || '',
     description: parcelle?.description || '',
     images: []
   });
   
   const [photos, setPhotos] = useState([]);
+  const [showPratiquesDropdown, setShowPratiquesDropdown] = useState(false);
+  
+  // Liste des pratiques disponibles
+  const pratiquesOptions = [
+    { value: 'Structure Brise-vent', label: 'Structure Brise-vent' },
+    { value: 'Structure Pare feu', label: 'Structure Pare feu' },
+    { value: 'Structures antiérosives', label: 'Structures antiérosives' },
+    { value: 'Structure Cultures en Couloir/allée', label: 'Structure Cultures en Couloir/allée' },
+    { value: 'Pratiques de taillage, coupe et application engrais verts', label: 'Pratiques de taillage, coupe et application engrais verts' },
+    { value: 'Pratiques couverture du sol', label: 'Pratiques couverture du sol' },
+    { value: 'Pratiques/structures conservation d\'eau', label: 'Pratiques/structures conservation d\'eau' },
+    { value: 'Système multi-étage diversifié', label: 'Système multi-étage diversifié' },
+    { value: 'Arbres Autochtones', label: 'Arbres Autochtones' },
+    { value: 'Production épices', label: 'Production épices' },
+    { value: 'Production Bois énergie', label: 'Production Bois énergie' },
+    { value: 'Production fruit', label: 'Production fruit' },
+    { value: 'Intégration cultures vivrières', label: 'Intégration cultures vivrières' },
+    { value: 'Intégration d\'élevage', label: 'Intégration d\'élevage' },
+    { value: 'Autres (saisir manuellement)', label: 'Autres (saisir manuellement)' }
+  ];
+
+
   // Charger les images existantes lors de l'édition
   useEffect(() => {
     if (isEdit && parcelle && parcelle.images && Array.isArray(parcelle.images)) {
@@ -47,6 +70,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
       })));
     }
   }, [isEdit, parcelle]);
+  
   const [imagePreviews, setImagePreviews] = useState([]);
   const [geojson, setGeojson] = useState(parcelle?.geojson || null);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -75,12 +99,9 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    
     if (type === 'file' && files) {
       const newFiles = Array.from(files);
       setImageFiles(prev => [...prev, ...newFiles]);
-      
-      // Créer les previews
       const newPreviews = newFiles.map(file => URL.createObjectURL(file));
       setImagePreviews(prev => [...prev, ...newPreviews]);
     } else if (type === 'checkbox') {
@@ -88,6 +109,41 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  // Gestion des pratiques avec checkboxes
+  const handlePratiqueChange = (pratiqueValue) => {
+    setFormData(prev => {
+      const currentPratiques = prev.pratique || [];
+      const isSelected = currentPratiques.includes(pratiqueValue);
+      
+      let newPratiques;
+      if (isSelected) {
+        newPratiques = currentPratiques.filter(p => p !== pratiqueValue);
+      } else {
+        newPratiques = [...currentPratiques, pratiqueValue];
+      }
+      
+      // Si on désélectionne "autres", vider le champ autresPratiques
+      if (pratiqueValue === 'autres' && isSelected) {
+        return { ...prev, pratique: newPratiques, autresPratiques: '' };
+      }
+      
+      return { ...prev, pratique: newPratiques };
+    });
+  };
+
+  // Fonction pour obtenir la valeur finale des pratiques
+  const getPratiqueValue = () => {
+    const pratiques = [...formData.pratique];
+    if (pratiques.includes('autres') && formData.autresPratiques) {
+      // Remplacer 'autres' par les pratiques saisies manuellement
+      const index = pratiques.indexOf('autres');
+      pratiques.splice(index, 1);
+      const autresPratiquesArray = formData.autresPratiques.split(',').map(p => p.trim()).filter(Boolean);
+      pratiques.push(...autresPratiquesArray);
+    }
+    return pratiques.join(', ');
   };
 
   const handleGeojsonUpload = (e) => {
@@ -161,6 +217,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
       }
       const variables = {
         ...formData,
+        pratique: getPratiqueValue(),
         geojson: JSON.stringify(geojsonToUse),
         images: imagesToSend.length > 0 ? imagesToSend : null,
         imagesToDelete: imagesToDelete.length > 0 ? imagesToDelete : null
@@ -295,32 +352,81 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
             <div className="border-b pb-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Informations agricoles</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pratique
+                    Pratiques (plusieurs choix possibles)
                   </label>
-                  <select
-                    name="pratique"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.pratique}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Sélectionner une pratique</option>
-                    <option value="structure_brise_vent">Structure Brise-vent</option>
-                    <option value="structure_pare_feu">Structure Pare feu</option>
-                    <option value="structures_antierosives">Structures antiérosives</option>
-                    <option value="structure_cultures_couloir">Structure Cultures en Couloir/allée</option>
-                    <option value="pratiques_taillage_coupe">Pratiques de taillage, coupe et application engrais verts</option>
-                    <option value="pratiques_couverture_sol">Pratiques couverture du sol</option>
-                    <option value="pratiques_conservation_eau">Pratiques/structures conservation d'eau</option>
-                    <option value="systeme_multi_etage">Système multi-étage diversifié</option>
-                    <option value="arbres_autochtones">Arbres Autochtones</option>
-                    <option value="production_epices">Production épices</option>
-                    <option value="production_bois_energie">Production Bois énergie</option>
-                    <option value="production_fruit">Production fruit</option>
-                    <option value="integration_cultures_vivrieres">Intégration cultures vivrières</option>
-                    <option value="integration_elevage">Intégration d'élevage</option>
-                  </select>
+                  <div className="relative">
+                    {/* Bouton dropdown */}
+                    <button
+                      type="button"
+                      onClick={() => setShowPratiquesDropdown(!showPratiquesDropdown)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-left flex items-center justify-between"
+                    >
+                      <span className="text-gray-700">
+                        {formData.pratique.length === 0 
+                          ? 'Sélectionnez les pratiques...' 
+                          : `${formData.pratique.length} pratique(s) sélectionnée(s)`
+                        }
+                      </span>
+                      {showPratiquesDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </button>
+                    
+                    {/* Affichage des pratiques sélectionnées */}
+                    {formData.pratique.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {formData.pratique.map(pratique => {
+                          const option = pratiquesOptions.find(opt => opt.value === pratique);
+                          return (
+                            <span
+                              key={pratique}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                            >
+                              {option ? option.label : pratique}
+                              <button
+                                type="button"
+                                onClick={() => handlePratiqueChange(pratique)}
+                                className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-600"
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {/* Dropdown des options */}
+                    {showPratiquesDropdown && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {pratiquesOptions.map(option => (
+                          <div key={option.value} className="p-2 hover:bg-gray-50">
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={formData.pratique.includes(option.value)}
+                                onChange={() => handlePratiqueChange(option.value)}
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                              />
+                              <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Champ pour "Autres pratiques" */}
+                  {formData.pratique.includes('autres') && (
+                    <input
+                      type="text"
+                      name="autresPratiques"
+                      className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Saisir les pratiques séparées par virgule"
+                      value={formData.autresPratiques}
+                      onChange={handleInputChange}
+                    />
+                  )}
                 </div>
                 
                 <div>
@@ -487,8 +593,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                 </div>
               )}
             </div>
-
-
           </form>
         </div>
       </div>
@@ -519,6 +623,15 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
           </button>
         </div>
       </div>
+      
+      {/* Fermer le dropdown si on clique ailleurs */}
+      {showPratiquesDropdown && (
+        <div
+          className="fixed inset-0 z-5"
+          onClick={() => setShowPratiquesDropdown(false)}
+        />
+      )}
+      
       {showConfirm && (
         <ConfirmationDialog
           isOpen={showConfirm}
@@ -537,4 +650,4 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
   );
 };
 
-export default ParcelleForm; 
+export default ParcelleForm;

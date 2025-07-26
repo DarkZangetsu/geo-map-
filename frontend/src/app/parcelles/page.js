@@ -70,23 +70,41 @@ export default function ParcellesPage() {
   const columns = [
     { key: 'nom', label: 'Site de référence' },
     { key: 'superficie', label: 'Superficie' },
-    { key: 'pratique', label: 'Pratique' },
+    { key: 'personneReferente', label: 'Personne référente' },
     { key: 'nomProjet', label: 'Projet rattaché' },
   ];
+  // On retire 'pratique' des colonnes visibles
   const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
 
 
   const columnsDT = [
     ...visibleColumns.map(colKey => {
       const col = columns.find(c => c.key === colKey);
-      return col && {
+      if (!col) return null;
+      if (col.key === 'personneReferente') {
+        return {
+          accessorKey: 'personneReferente',
+          header: 'Personne référente',
+          cell: info => {
+            const p = info.row.original;
+            return (
+              <div>
+                <div className="text-sm font-medium">{p.nomPersonneReferente || '-'}</div>
+                <div className="text-xs text-gray-500">{p.poste || '-'}</div>
+                <div className="text-xs text-gray-500">{p.telephone || '-'}</div>
+                <div className="text-xs text-gray-500">{p.email || '-'}</div>
+              </div>
+            );
+          },
+        };
+      }
+      return {
         accessorKey: col.key,
         header: col.label,
         cell: info => {
           const parcelle = info.row.original;
           if (col.key === 'superficie') return parcelle.superficie ? `${parcelle.superficie} ha` : '-';
           if (col.key === 'createdAt') return parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '';
-          if (col.key === 'pratique') return PRATIQUE_LABELS[(parcelle.pratique || '').toLowerCase()] || parcelle.pratique || '-';
           return parcelle[col.key] || '-';
         },
       };
@@ -134,27 +152,15 @@ export default function ParcellesPage() {
       const lowerSearch = search.toLowerCase();
       data = data.filter(row =>
         visibleColumns.some(col => {
+          if (col === 'personneReferente') {
+            return (
+              (row.nomPersonneReferente && row.nomPersonneReferente.toLowerCase().includes(lowerSearch)) ||
+              (row.poste && row.poste.toLowerCase().includes(lowerSearch)) ||
+              (row.telephone && row.telephone.toLowerCase().includes(lowerSearch)) ||
+              (row.email && row.email.toLowerCase().includes(lowerSearch))
+            );
+          }
           let value = row[col];
-          // Affichage lisible pour la colonne pratique
-          if (col === 'pratique') {
-            value = PRATIQUE_LABELS[(value || '').toLowerCase()] || value || '-';
-          }
-          // Affichage concaténé pour user (membre)
-          if (col === 'user' && row.user) {
-            value = [row.user.firstName, row.user.lastName, row.user.email, row.user.abreviation].filter(Boolean).join(' ');
-          }
-          // Affichage abréviation
-          if (col === 'user.abreviation' && row.user) {
-            value = row.user.abreviation || '-';
-          }
-          // Superficie formatée
-          if (col === 'superficie') {
-            value = row.superficie ? `${row.superficie} ha` : '-';
-          }
-          // Si tableau, joindre les valeurs
-          if (Array.isArray(value)) value = value.join(' ');
-          // Si objet, essayer de joindre les valeurs
-          if (typeof value === 'object' && value !== null) value = Object.values(value).join(' ');
           if (value === undefined || value === null) return false;
           return String(value).toLowerCase().includes(lowerSearch);
         })
@@ -163,10 +169,11 @@ export default function ParcellesPage() {
     data = [...data].sort((a, b) => {
       let vA = a[sortBy] || '';
       let vB = b[sortBy] || '';
-      if (typeof vA === 'string') vA = vA.toLowerCase();
-      if (typeof vB === 'string') vB = vB.toLowerCase();
-      if (vA < vB) return sortDir === 'asc' ? -1 : 1;
-      if (vA > vB) return sortDir === 'asc' ? 1 : -1;
+      if (typeof vA === 'string' && typeof vB === 'string') {
+        if (vA < vB) return sortDir === 'asc' ? -1 : 1;
+        if (vA > vB) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      }
       return 0;
     });
     return data;

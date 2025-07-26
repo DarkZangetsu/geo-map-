@@ -31,7 +31,7 @@ class CustomUserAdmin(BaseUserAdmin):
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
     list_display = ('nom', 'user', 'superficie', 'pratique', 'created_at')
-    list_filter = ('pratique', 'created_at')
+    list_filter = ('created_at',)
     search_fields = ('nom', 'user__email')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)

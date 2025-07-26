@@ -46,24 +46,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.email} ({self.role})"
 
 class Parcelle(models.Model):
-    # Choix pour les pratiques
-    PRATIQUE_CHOICES = (
-        ('structure_brise_vent', 'Structure Brise-vent'),
-        ('structure_pare_feu', 'Structure Pare feu'),
-        ('structures_antierosives', 'Structures antiérosives'),
-        ('structure_cultures_couloir', 'Structure Cultures en Couloir/allée'),
-        ('pratiques_taillage_coupe', 'Pratiques de taillage, coupe et application engrais verts'),
-        ('pratiques_couverture_sol', 'Pratiques couverture du sol'),
-        ('pratiques_conservation_eau', 'Pratiques/structures conservation d\'eau'),
-        ('systeme_multi_etage', 'Système multi-étage diversifié'),
-        ('arbres_autochtones', 'Arbres Autochtones'),
-        ('production_epices', 'Production épices'),
-        ('production_bois_energie', 'Production Bois énergie'),
-        ('production_fruit', 'Production fruit'),
-        ('integration_cultures_vivrieres', 'Intégration cultures vivrières'),
-        ('integration_elevage', 'Intégration d\'élevage'),
-    )
-    
     # Informations de base
     nom = models.CharField(max_length=100)
     
@@ -76,8 +58,8 @@ class Parcelle(models.Model):
     # Informations agricoles
     superficie = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Superficie en hectares")
     
-    # Nouveau champ pratique
-    pratique = models.CharField(max_length=50, choices=PRATIQUE_CHOICES, blank=True, help_text="Pratique agricole principale")
+    # Champ pratique : liste séparée par virgule, ou 'autres' si besoin
+    pratique = models.TextField(blank=True, help_text="Pratiques agricoles principales (plusieurs pratiques séparées par virgule, ou 'autres')")
     
     # Nouveau champ nom projet
     nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")

@@ -28,8 +28,6 @@ export default function SiegePage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [showSiegeForm, setShowSiegeForm] = useState(false);
-  // Réintégration de la fonctionnalité plein écran
   const [showMap, setShowMap] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [mapStyle, setMapStyle] = useState('street');
