@@ -30,11 +30,18 @@ export const parcellesColumns = (onViewDetails) => [
     cell: ({ row }) => row.getValue("nom"),
   },
   {
-    accessorKey: "pratique",
-    header: "Pratique",
+    accessorKey: "personneReferente",
+    header: "Personne référente",
     cell: ({ row }) => {
-      const pratique = row.getValue("pratique");
-      return PRATIQUE_LABELS[(pratique || '').toLowerCase()] || pratique || "-";
+      const p = row.original;
+      return (
+        <div>
+          <div className="text-sm font-medium">{p.nomPersonneReferente || '-'}</div>
+          <div className="text-xs text-gray-500">{p.poste || '-'}</div>
+          <div className="text-xs text-gray-500">{p.telephone || '-'}</div>
+          <div className="text-xs text-gray-500">{p.email || '-'}</div>
+        </div>
+      );
     },
   },
   {
