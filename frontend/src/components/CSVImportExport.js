@@ -98,12 +98,12 @@ const CSVImportExport = ({ onImportSuccess }) => {
 
   const downloadTemplate = () => {
     const templateHeaders = [
-      'nom', 'proprietaire', 'superficie', 'pratique',
+      'nom', 'superficie', 'pratique',
       'nom_projet', 'description', 'geometrie'
     ];
     // Exemple de géométrie : liste de points [lon,lat],[lon,lat],...
     const templateData = [
-      'Parcelle 1', 'Jean Dupont', '5.5', 'Structure Brise-vent',
+      'Parcelle 1', '5.5', 'Structure Brise-vent',
       'Projet Agroforestier', 'Parcelle bien exposée',
       '[44.2834,-20.2967],[44.2847,-20.2967],[44.2847,-20.298],[44.2834,-20.298],[44.2834,-20.2967]'
     ];

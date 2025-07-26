@@ -8,7 +8,6 @@ const ParcellesTable = ({ parcelles, onEdit, onDelete }) => {
                   <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Propriétaire</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pratique</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom Projet</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Personne Référente</th>
@@ -20,7 +19,6 @@ const ParcellesTable = ({ parcelles, onEdit, onDelete }) => {
             {parcelles.map((parcelle) => (
               <tr key={parcelle.id}>
                 <td className="px-4 py-2 whitespace-nowrap">{parcelle.nom}</td>
-                <td className="px-4 py-2 whitespace-nowrap">{parcelle.proprietaire}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{parcelle.pratique || '-'}</td>
                 <td className="px-4 py-2 whitespace-nowrap">{parcelle.nomProjet || '-'}</td>
               <td className="px-4 py-2 whitespace-nowrap">

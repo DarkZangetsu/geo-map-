@@ -109,7 +109,6 @@ export default function ParcellesGlobalesPage() {
         filtered = filtered.filter(parcelle => {
           return [
             parcelle.nom,
-            parcelle.proprietaire,
             parcelle.pratique,
             parcelle.nomProjet,
             parcelle.user?.nomInstitution,
@@ -190,7 +189,6 @@ export default function ParcellesGlobalesPage() {
   const handleExportCSV = () => {
     const data = filteredParcelles.map(parcelle => ({
       nom: parcelle.nom || '',
-      proprietaire: parcelle.proprietaire || '',
       membre: parcelle.user?.nomInstitution || '',
       pratique: parcelle.pratique || '',
       superficie_ha: parcelle.superficie || '',

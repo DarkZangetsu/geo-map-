@@ -33,10 +33,9 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
   const exportToCsv = () => {
     const data = [parcelleComplete];
     const csv = [
-      ['Nom', 'Propriétaire', 'Superficie', 'Pratique', 'Nom projet', 'Description', 'Créé le'],
+      ['Nom', 'Superficie', 'Pratique', 'Nom projet', 'Description', 'Créé le'],
       [
         parcelleComplete?.nom || '',
-        parcelleComplete?.proprietaire || '',
         parcelleComplete?.superficie || '',
         parcelleComplete?.pratique || '',
         parcelleComplete?.nomProjet || '',
@@ -195,7 +194,6 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                         <div className="space-y-4">
                           {[
                             { label: 'Nom', value: parcelleComplete?.nom },
-                            { label: 'Propriétaire', value: parcelleComplete?.proprietaire },
                             { label: 'Superficie', value: `${formatDecimal(parcelleComplete?.superficie)} ha` },
                             { label: 'Pratique', value: parcelleComplete?.pratique },
                             { label: 'Nom projet', value: parcelleComplete?.nomProjet }

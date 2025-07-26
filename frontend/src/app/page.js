@@ -25,7 +25,7 @@ export default function HomePage() {
   // Filtrage combiné recherche + membre
   function filterBySearchAndMember(items, search, memberId) {
     return items.filter(item => {
-      const text = (item.nom || '') + ' ' + (item.proprietaire || '') + ' ' + (item.user?.firstName || '') + ' ' + (item.user?.lastName || '');
+      const text = (item.nom || '') + ' ' + (item.user?.firstName || '') + ' ' + (item.user?.lastName || '');
       const matchSearch = search ? text.toLowerCase().includes(search.toLowerCase()) : true;
       const matchMember = memberId ? (item.user && item.user.id === memberId) : true;
       return matchSearch && matchMember;

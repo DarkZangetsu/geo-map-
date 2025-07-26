@@ -69,7 +69,6 @@ export default function ParcellesPage() {
 
   const columns = [
     { key: 'nom', label: 'Site de référence' },
-    { key: 'proprietaire', label: 'Propriétaire' },
     { key: 'superficie', label: 'Superficie' },
     { key: 'pratique', label: 'Pratique' },
     { key: 'nomProjet', label: 'Projet rattaché' },

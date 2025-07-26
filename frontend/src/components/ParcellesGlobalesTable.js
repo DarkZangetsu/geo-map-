@@ -108,9 +108,6 @@ const ParcellesGlobalesTable = ({ parcelles, loading }) => {
                   {parcelle.nom}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                  {parcelle.proprietaire}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                   {parcelle.pratique || '-'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">

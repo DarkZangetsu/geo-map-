@@ -22,7 +22,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     : `${userAbreviation}_site de référence ${myParcellesCount + 1}`;
   const [formData, setFormData] = useState({
     nom: defaultNom,
-    proprietaire: parcelle?.proprietaire || '',
     nomPersonneReferente: parcelle?.nomPersonneReferente || '',
     poste: parcelle?.poste || '',
     telephone: parcelle?.telephone || '',
@@ -229,19 +228,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
                     value={formData.nom}
                     onChange={handleInputChange}
                     readOnly={!isEdit}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Propriétaire *
-                  </label>
-                  <input
-                    type="text"
-                    name="proprietaire"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={formData.proprietaire}
-                    onChange={handleInputChange}
                   />
                 </div>
               </div>

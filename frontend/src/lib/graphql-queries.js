@@ -22,7 +22,6 @@ export const GET_MY_PARCELLES = gql`
     myParcelles {
       id
       nom
-      proprietaire
       nomPersonneReferente
       poste
       telephone
@@ -58,7 +57,6 @@ export const GET_ALL_PARCELLES = gql`
     allParcelles {
       id
       nom
-      proprietaire
       nomPersonneReferente
       poste
       telephone
@@ -94,7 +92,6 @@ export const GET_PARCELLE = gql`
     parcelle(id: $id) {
       id
       nom
-      proprietaire
       nomPersonneReferente
       poste
       telephone
@@ -436,7 +433,6 @@ export const LOGIN_USER = gql`
 export const CREATE_PARCELLE = gql`
   mutation CreateParcelle(
     $nom: String!
-    $proprietaire: String!
     $geojson: JSONString!
     $superficie: Decimal
     $pratique: String
@@ -450,7 +446,6 @@ export const CREATE_PARCELLE = gql`
   ) {
     createParcelle(
       nom: $nom
-      proprietaire: $proprietaire
       geojson: $geojson
       superficie: $superficie
       pratique: $pratique
@@ -467,7 +462,6 @@ export const CREATE_PARCELLE = gql`
       parcelle {
         id
         nom
-        proprietaire
         nomPersonneReferente
         poste
         telephone
@@ -503,7 +497,6 @@ export const UPDATE_PARCELLE = gql`
   mutation UpdateParcelle(
     $id: ID!
     $nom: String
-    $proprietaire: String
     $geojson: JSONString
     $superficie: Decimal
     $pratique: String
@@ -518,7 +511,6 @@ export const UPDATE_PARCELLE = gql`
     updateParcelle(
       id: $id
       nom: $nom
-      proprietaire: $proprietaire
       geojson: $geojson
       superficie: $superficie
       pratique: $pratique
@@ -535,7 +527,6 @@ export const UPDATE_PARCELLE = gql`
       parcelle {
         id
         nom
-        proprietaire
         nomPersonneReferente
         poste
         telephone

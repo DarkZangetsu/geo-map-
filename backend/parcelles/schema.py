@@ -166,7 +166,6 @@ class CreateParcelle(graphene.Mutation):
 
     class Arguments:
         nom = graphene.String(required=True)
-        proprietaire = graphene.String(required=True)
         geojson = graphene.JSONString(required=True)
         superficie = graphene.Decimal()
         pratique = graphene.String()
@@ -180,7 +179,7 @@ class CreateParcelle(graphene.Mutation):
         email = graphene.String()
 
     @login_required
-    def mutate(self, info, nom, proprietaire, geojson, **kwargs):
+    def mutate(self, info, nom, geojson, **kwargs):
         import json
         try:
             user = info.context.user
@@ -194,7 +193,6 @@ class CreateParcelle(graphene.Mutation):
                     pass
             parcelle = Parcelle.objects.create(
                 nom=nom,
-                proprietaire=proprietaire,
                 geojson=geojson,
                 user=user,
                 **kwargs
@@ -219,7 +217,6 @@ class UpdateParcelle(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
         nom = graphene.String()
-        proprietaire = graphene.String()
         geojson = graphene.JSONString()
         superficie = graphene.Decimal()
         pratique = graphene.String()
@@ -484,7 +481,6 @@ class ExportParcellesCSV(graphene.Mutation):
                 row = [
                     parcelle.id,
                     parcelle.nom,
-                    parcelle.proprietaire,
                     str(parcelle.superficie) if parcelle.superficie else '',
                     parcelle.get_pratique_display() if parcelle.pratique else '',
                     parcelle.nom_projet or '',
@@ -620,7 +616,6 @@ class ImportParcellesCSV(graphene.Mutation):
                     parcelle = Parcelle.objects.create(
                         user=user,
                         nom=row['Nom'],
-                        proprietaire=row['Propriétaire'],
                         nom_personne_referente=row.get('Nom Personne Référente', ''),
                         poste=row.get('Poste', ''),
                         telephone=row.get('Téléphone', ''),

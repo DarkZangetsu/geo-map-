@@ -440,13 +440,6 @@ const ParcellesMap = ({
               <div className="font-semibold text-xl text-slate-800 mb-2">
                 {selectedParcelle.nom || "Sans nom"}
               </div>
-              <div className="text-sm text-slate-600 flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                Propriétaire :{" "}
-                <span className="font-medium text-slate-700">
-                  {selectedParcelle.proprietaire || "Non défini"}
-                </span>
-              </div>
             </div>
 
             {/* Personne référente avec icônes douces */}

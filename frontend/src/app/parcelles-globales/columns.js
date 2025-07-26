@@ -30,11 +30,6 @@ export const parcellesColumns = (onViewDetails) => [
     cell: ({ row }) => row.getValue("nom"),
   },
   {
-    accessorKey: "proprietaire",
-    header: "Propriétaire",
-    cell: ({ row }) => row.getValue("proprietaire"),
-  },
-  {
     accessorKey: "pratique",
     header: "Pratique",
     cell: ({ row }) => {

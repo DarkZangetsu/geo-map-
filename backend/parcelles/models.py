@@ -66,7 +66,6 @@ class Parcelle(models.Model):
     
     # Informations de base
     nom = models.CharField(max_length=100)
-    proprietaire = models.CharField(max_length=100)
     
     # Nouveaux champs pour personne référente
     nom_personne_referente = models.CharField(max_length=100, blank=True, help_text="Nom de la personne référente")
@@ -95,7 +94,7 @@ class Parcelle(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.nom} - {self.proprietaire}"
+        return f"{self.nom}"
     
     class Meta:
         ordering = ['-created_at']
