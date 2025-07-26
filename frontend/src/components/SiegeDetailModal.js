@@ -75,11 +75,11 @@ const SiegeDetailModal = ({ siege, onClose }) => {
         <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 w-full max-w-5xl max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-4 duration-300 flex flex-col">
           
           {/* Header avec gradient subtil - Fixe */}
-          <div className="bg-gradient-to-r from-slate-50 to-purple-50/30 px-8 py-6 border-b border-slate-200/50 flex-shrink-0">
+          <div className="bg-gradient-to-r from-red-50 to-rose-50/30 px-8 py-6 border-b border-red-200/50 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white text-xl">🏢</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xl">2</span>
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
@@ -88,12 +88,11 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                   <p className="text-slate-500 text-sm font-medium">Détails du siège</p>
                 </div>
               </div>
-              
               <div className="flex items-center gap-3">
                 {/* Export Button */}
                 <button
                   onClick={exportToCsv}
-                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                   title="Exporter en CSV"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +100,6 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                   </svg>
                   <span className="hidden sm:inline">Exporter</span>
                 </button>
-                
                 {/* Close Button */}
                 <button
                   onClick={onClose}

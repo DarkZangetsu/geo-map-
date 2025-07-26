@@ -78,25 +78,25 @@ export default function HomePage() {
             Sites de référence
             <span className="ml-1 text-xs bg-blue-200 text-blue-900 rounded px-2 py-0.5 font-bold">{allParcelles.length}</span>
           </label>
-          <label className="flex items-center gap-2 text-green-900 font-semibold bg-green-50 px-3 py-2 rounded-lg border border-green-100">
+          <label className="flex items-center gap-2 text-red-900 font-semibold bg-red-50 px-3 py-2 rounded-lg border border-red-100">
             <input
               type="checkbox"
               checked={showSieges}
               onChange={() => setShowSieges(v => !v)}
-              className="accent-green-600"
+              className="accent-red-600"
             />
             Locaux
-            <span className="ml-1 text-xs bg-green-200 text-green-900 rounded px-2 py-0.5 font-bold">{allSieges.length}</span>
+            <span className="ml-1 text-xs bg-red-200 text-red-900 rounded px-2 py-0.5 font-bold">{allSieges.length}</span>
           </label>
-          <label className="flex items-center gap-2 text-orange-900 font-semibold bg-orange-50 px-3 py-2 rounded-lg border border-orange-100">
+          <label className="flex items-center gap-2 text-green-900 font-semibold bg-green-50 px-3 py-2 rounded-lg border border-green-100">
             <input
               type="checkbox"
               checked={showPepinieres}
               onChange={() => setShowPepinieres(v => !v)}
-              className="accent-orange-600"
+              className="accent-green-600"
             />
             Pépinières
-            <span className="ml-1 text-xs bg-orange-200 text-orange-900 rounded px-2 py-0.5 font-bold">{allPepinieres.length}</span>
+            <span className="ml-1 text-xs bg-green-200 text-green-900 rounded px-2 py-0.5 font-bold">{allPepinieres.length}</span>
           </label>
           <select
             value={mapStyle}

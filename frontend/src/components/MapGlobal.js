@@ -27,8 +27,8 @@ const full3DIcon = new L.DivIcon({
   `
 });
 
-const greenIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -36,8 +36,8 @@ const greenIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const orangeIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+const greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -173,7 +173,7 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
           <Marker
             key={siege.id}
             position={[parseFloat(siege.latitude), parseFloat(siege.longitude)]}
-            icon={greenIcon}
+            icon={redIcon}
             eventHandlers={{
               click: () => {
                 setSelectedSiege(siege);
@@ -189,7 +189,7 @@ export default function MapGlobal({ parcelles = [], sieges = [], pepinieres = []
           <Marker
             key={pepiniere.id}
             position={[parseFloat(pepiniere.latitude), parseFloat(pepiniere.longitude)]}
-            icon={orangeIcon}
+            icon={greenIcon}
             eventHandlers={{
               click: () => {
                 setSelectedPepiniere(pepiniere);

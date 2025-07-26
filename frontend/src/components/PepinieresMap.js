@@ -7,7 +7,7 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import L from "leaflet";
 import React from "react";
 
-// Icône personnalisée pour les pépinières
+// Icône personnalisée pour les pépinières (VERT)
 const pepiniereIcon = new L.DivIcon({
   className: "",
   iconSize: [36, 42],
@@ -16,8 +16,8 @@ const pepiniereIcon = new L.DivIcon({
   html: `
     <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g filter="url(#shadow)">
-        <path d="M18 2C10.268 2 4 8.268 4 16.001c0 7.732 11.09 22.13 13.97 25.89a2 2 0 0 0 3.06 0C20.91 38.13 32 23.733 32 16.001 32 8.268 25.732 2 18 2Z" fill="#f97316"/>
-        <circle cx="18" cy="16" r="6" fill="#fff" stroke="#f97316" stroke-width="2"/>
+        <path d="M18 2C10.268 2 4 8.268 4 16.001c0 7.732 11.09 22.13 13.97 25.89a2 2 0 0 0 3.06 0C20.91 38.13 32 23.733 32 16.001 32 8.268 25.732 2 18 2Z" fill="#22c55e"/>
+        <circle cx="18" cy="16" r="6" fill="#fff" stroke="#22c55e" stroke-width="2"/>
       </g>
       <defs>
         <filter id="shadow" x="0" y="0" width="36" height="42" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -261,12 +261,12 @@ const PepinieresMap = ({
       {selectedPepiniere && (
         <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gradient-to-br from-slate-50 to-white backdrop-blur-lg shadow-xl z-50 flex flex-col border-0 rounded-3xl m-3 max-w-[440px]">
           {/* Header fixe avec gradient doux */}
-          <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-orange-50/80 to-amber-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-orange-100/50">
+          <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-green-100/50">
             <div className="flex items-center gap-3">
               <img
                 src={`${process.env.NEXT_PUBLIC_API_URL}/media/${selectedPepiniere.user.logo}`}
                 alt="Logo"
-                className="w-10 h-10 rounded-full object-cover border border-orange-200 bg-white"
+                className="w-10 h-10 rounded-full object-cover border border-green-200 bg-white"
               />
              <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
                 Détails de la pépinière
@@ -274,7 +274,7 @@ const PepinieresMap = ({
             </div>
             <button
               onClick={() => setSelectedPepiniere(null)}
-              className="text-slate-400 hover:text-orange-500 text-2xl transition-all duration-200 rounded-2xl p-2 hover:bg-orange-50/50 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              className="text-slate-400 hover:text-green-500 text-2xl transition-all duration-200 rounded-2xl p-2 hover:bg-green-50/50 focus:outline-none focus:ring-2 focus:ring-green-200"
               title="Fermer"
             >
               ×
@@ -289,9 +289,9 @@ const PepinieresMap = ({
                 {selectedPepiniere.nom || "Sans nom"}
               </h3>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
                 <span className="text-sm text-slate-600">Projet rattaché : </span>
-                <span className="font-medium text-orange-700 text-sm">
+                <span className="font-medium text-green-700 text-sm">
                   {selectedPepiniere.nomProjet || "Non défini"}
                 </span>
               </div>
@@ -463,7 +463,7 @@ const PepinieresMap = ({
                 !showGallery && (
                   <button
                     onClick={() => setShowGallery(true)}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

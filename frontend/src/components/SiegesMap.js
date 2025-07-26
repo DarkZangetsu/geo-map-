@@ -7,7 +7,8 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import L from 'leaflet';
 import React from 'react';
 
-// Icône personnalisée pour les sièges
+
+// Icône personnalisée pour les sièges (ROUGE)
 const siegeIcon = new L.DivIcon({
   className: '',
   iconSize: [36, 42],
@@ -16,8 +17,8 @@ const siegeIcon = new L.DivIcon({
   html: `
     <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g filter="url(#shadow)">
-        <path d="M18 2C10.268 2 4 8.268 4 16.001c0 7.732 11.09 22.13 13.97 25.89a2 2 0 0 0 3.06 0C20.91 38.13 32 23.733 32 16.001 32 8.268 25.732 2 18 2Z" fill="#22c55e"/>
-        <circle cx="18" cy="16" r="6" fill="#fff" stroke="#22c55e" stroke-width="2"/>
+        <path d="M18 2C10.268 2 4 8.268 4 16.001c0 7.732 11.09 22.13 13.97 25.89a2 2 0 0 0 3.06 0C20.91 38.13 32 23.733 32 16.001 32 8.268 25.732 2 18 2Z" fill="#ef4444"/>
+        <circle cx="18" cy="16" r="6" fill="#fff" stroke="#ef4444" stroke-width="2"/>
       </g>
       <defs>
         <filter id="shadow" x="0" y="0" width="36" height="42" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -208,9 +209,9 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
 {selectedSiege && (
   <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-gradient-to-br from-slate-50 to-white backdrop-blur-lg shadow-xl z-50 flex flex-col border-0 rounded-3xl m-3 max-w-[440px]">
     {/* Header fixe avec gradient doux */}
-    <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-emerald-50/80 to-green-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-emerald-100/50">
+    <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-red-50/80 to-rose-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-red-100/50">
       <div className="flex items-center gap-3">
-        <span className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-emerald-100 to-green-100 text-emerald-600 rounded-2xl shadow-sm">
+        <span className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-100 to-rose-100 text-red-600 rounded-2xl shadow-sm">
           <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' />
           </svg>
@@ -219,7 +220,7 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
       </div>
       <button
         onClick={() => setSelectedSiege(null)}
-        className="text-slate-400 hover:text-emerald-500 text-2xl transition-all duration-200 rounded-2xl p-2 hover:bg-emerald-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        className="text-slate-400 hover:text-red-500 text-2xl transition-all duration-200 rounded-2xl p-2 hover:bg-red-50/50 focus:outline-none focus:ring-2 focus:ring-red-200"
         title="Fermer"
       >
         ×
@@ -232,9 +233,9 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
       <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
         <h3 className="font-semibold text-xl text-slate-800 mb-2">{selectedSiege.nom || 'Sans nom'}</h3>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
+          <span className="w-2 h-2 bg-red-400 rounded-full"></span>
           <span className="text-sm text-slate-600">Catégorie : </span>
-          <span className="font-medium text-emerald-700 text-sm">
+          <span className="font-medium text-red-700 text-sm">
             {(() => {
               const CATEGORIE_LABELS = {
                 social: 'Siège social',
@@ -328,7 +329,7 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
       {Array.isArray(selectedSiege.photosBatiment) && selectedSiege.photosBatiment.length > 0 && !showSiegeGallery && (
         <button
           onClick={() => setShowSiegeGallery(true)}
-          className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-2xl font-medium hover:from-emerald-600 hover:to-green-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-2xl font-medium hover:from-red-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
         >
           <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' />
@@ -341,8 +342,8 @@ const SiegesMap = ({ sieges = [], onSiegeClick, mapStyle = 'street', style, cent
       {showSiegeGallery && Array.isArray(selectedSiege.photosBatiment) && selectedSiege.photosBatiment.length > 0 && (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
           <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center">
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-emerald-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+            <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-rose-100 rounded-xl flex items-center justify-center">
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4 text-red-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' />
               </svg>
             </div>

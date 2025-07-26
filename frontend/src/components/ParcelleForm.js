@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_PARCELLE, UPDATE_PARCELLE, GET_ME } from '../lib/graphql-queries';
+import { CREATE_PARCELLE, UPDATE_PARCELLE, GET_ME, GET_MY_PARCELLES } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapDrawModal from './MapDrawModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
@@ -11,15 +11,15 @@ import * as turf from '@turf/turf';
 
 const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0, mode = 'add' }) => {
   const { data: meData } = useQuery(GET_ME);
+  const { data: myParcellesData } = useQuery(GET_MY_PARCELLES);
   const userAbreviation = meData?.me?.abreviation || '';
-  // Déterminer le nom par défaut si création
   const isEdit = !!parcelle;
-  const currentAbreviation = isEdit
-    ? (''|| userAbreviation)
-    : userAbreviation;
+  // Nombre réel de sites de référence de l'utilisateur connecté
+  const myParcellesCount = myParcellesData?.myParcelles?.length || 0;
+  // Utiliser le nombre réel pour l'auto-incrémentation
   const defaultNom = isEdit
     ? parcelle?.nom || ''
-    : `${currentAbreviation}_site de référence ${parcellesCount + 1}`;
+    : `${userAbreviation}_site de référence ${myParcellesCount + 1}`;
   const [formData, setFormData] = useState({
     nom: defaultNom,
     proprietaire: parcelle?.proprietaire || '',
@@ -64,15 +64,15 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     .map(p => p.trim())
     .filter(Boolean);
 
-  // Mettre à jour le nom si l'abréviation utilisateur change et qu'on est en mode création
+  // Mettre à jour le nom si l'abréviation utilisateur ou le nombre de sites change et qu'on est en mode création
   useEffect(() => {
     if (!isEdit && userAbreviation) {
       setFormData(prev => ({
         ...prev,
-        nom: `${userAbreviation}_site de référence ${parcellesCount + 1}`
+        nom: `${userAbreviation}_site de référence ${myParcellesCount + 1}`
       }));
     }
-  }, [userAbreviation, parcellesCount, isEdit]);
+  }, [userAbreviation, myParcellesCount, isEdit]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -89,14 +89,6 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-  };
-
-  const removeImage = (index) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => {
-      const newPreviews = prev.filter((_, i) => i !== index);
-      return newPreviews;
-    });
   };
 
   const handleGeojsonUpload = (e) => {
