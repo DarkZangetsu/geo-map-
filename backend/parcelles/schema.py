@@ -254,9 +254,10 @@ class UpdateParcelle(graphene.Mutation):
                 if value is not None:
                     setattr(parcelle, field, value)
             parcelle.save()
-            # Ajouter les nouvelles images si fournies
-            if images:
-                for i, image_file in enumerate(images):
+            # Mettre à jour les images si fournies
+            if images is not None:
+                parcelle.images.all().delete()
+                for i, image_file in enumerate(images[:3]):
                     if image_file:
                         ParcelleImage.objects.create(
                             parcelle=parcelle,

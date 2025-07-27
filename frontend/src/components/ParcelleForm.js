@@ -61,13 +61,17 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
   useEffect(() => {
     if (isEdit && parcelle && parcelle.images && Array.isArray(parcelle.images)) {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/media/` || '';
-      setPhotos(parcelle.images.map(photo => ({
-        id: photo.id,
-        url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
-        titre: photo.titre || '',
-        description: photo.description || '',
-        isExisting: true
-      })));
+      setPhotos(
+        parcelle.images.slice(0, 3).map(photo => ({
+          id: photo.id,
+          url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
+          titre: photo.titre || '',
+          description: photo.description || '',
+          isExisting: true
+        }))
+      );
+    } else {
+      setPhotos([]);
     }
   }, [isEdit, parcelle]);
   
@@ -165,8 +169,8 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
 
   const handlePhotoChange = (e) => {
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 2) {
-      showError('Vous ne pouvez ajouter que 2 images maximum.');
+    if (photos.length + files.length > 3) {
+      showError('Vous pouvez ajouter au maximum 3 images.');
       return;
     }
     const newPhotos = files.map(file => ({
@@ -176,7 +180,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
       description: '',
       isExisting: false
     }));
-    setPhotos(prev => [...prev, ...newPhotos]);
+    setPhotos(prev => [...prev, ...newPhotos].slice(0, 3));
   };
 
   const removePhoto = (index) => {
@@ -526,7 +530,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
             </div>
 
             {/* Images */}
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Images du site de référence (max 2)</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Images du site de référence (max 3)</h3>
             <div className="space-y-4">
               {/* Upload de nouvelles images */}
               {photos.length < 2 && (

@@ -50,13 +50,15 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
       // Charger les photos existantes si en mode édition
       if (initialData.photos) {
         const apiUrl =  `${process.env.NEXT_PUBLIC_API_URL}/media/` || '';
-        setPhotos(initialData.photos.map(photo => ({
-          id: photo.id,
-          url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
-          titre: photo.titre || '',
-          description: photo.description || '',
-          isExisting: true
-        })));
+        setPhotos(
+          initialData.photos.slice(0, 3).map(photo => ({
+            id: photo.id,
+            url: photo.image ? (photo.image.startsWith('http') ? photo.image : `${apiUrl.replace(/\/$/, '')}/${photo.image.replace(/^\//, '')}`) : '',
+            titre: photo.titre || '',
+            description: photo.description || '',
+            isExisting: true
+          }))
+        );
       }
     }
   }, [initialData]);
@@ -68,8 +70,8 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
 
   const handlePhotoChange = (e) => {
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 2) {
-      showError('Vous ne pouvez ajouter que 2 photos maximum.');
+    if (photos.length + files.length > 3) {
+      showError('Vous pouvez ajouter au maximum 3 photos.');
       return;
     }
     
@@ -81,7 +83,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
       isExisting: false
     }));
     
-    setPhotos(prev => [...prev, ...newPhotos]);
+    setPhotos(prev => [...prev, ...newPhotos].slice(0, 3));
   };
 
   const removePhoto = (index) => {
@@ -363,7 +365,7 @@ const PepiniereForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', 
 
             {/* Photos (tout en bas) */}
             <div className="border-t pt-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Photos de la pépinière (max 2)</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Photos de la pépinière (max 3)</h3>
               <div className="space-y-4">
                 {/* Upload de nouvelles photos */}
                 {photos.length < 2 && (
