@@ -31,16 +31,35 @@ const contentStyle = {
 
 
 export default function PepiniereMapModal({ open, onClose, pepiniere }) {
+  const [mapStyle, setMapStyle] = React.useState('street');
   if (!open || !pepiniere) return null;
   return (
     <div style={modalStyle}>
       <div style={contentStyle}>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold">Voir la pépinière sur la carte</h2>
+          <h2 className="text-lg font-bold">Voir sur la carte</h2>
           <button onClick={onClose} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Fermer</button>
         </div>
+        <div className="mb-2 flex gap-2 items-center">
+          <label htmlFor="map-style" className="font-medium">Style de carte :</label>
+          <select
+            id="map-style"
+            value={mapStyle}
+            onChange={e => setMapStyle(e.target.value)}
+            className="px-2 py-1 border rounded"
+          >
+            <option value="street">Carte routière</option>
+            <option value="satellite">Satellite</option>
+            <option value="hybrid">Hybride</option>
+          </select>
+        </div>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <PepinieresMap pepinieres={[pepiniere]} style={{ height: '100%', width: '100%' }} center={[parseFloat(pepiniere.latitude) || -18.7669, parseFloat(pepiniere.longitude) || 46.8691]} />
+          <PepinieresMap
+            pepinieres={[pepiniere]}
+            style={{ height: '100%', width: '100%' }}
+            center={[parseFloat(pepiniere.latitude) || -18.7669, parseFloat(pepiniere.longitude) || 46.8691]}
+            mapStyle={mapStyle}
+          />
         </div>
       </div>
     </div>
