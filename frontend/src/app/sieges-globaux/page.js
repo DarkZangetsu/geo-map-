@@ -5,19 +5,21 @@ import { useQuery } from "@apollo/client";
 import { GET_ALL_SIEGES, GET_ALL_USERS } from "../../lib/graphql-queries";
 import { useToast } from "../../lib/useToast";
 import { siegesColumns } from "./columns";
+import SiegeMapModal from "@/components/SiegeMapModal";
 import { DataTable } from "@/components/ui/table-data-table";
 import MemberFilter from "@/components/MemberFilter";
 import CategorieFilter from "@/components/CategorieFilter";
 import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
 
-export default function SiegesGlobauxPage() {
+export default function SiegesPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [filteredSieges, setFilteredSieges] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, siege: null });
+  const [mapModal, setMapModal] = useState({ open: false, siege: null });
   
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,6 +159,16 @@ export default function SiegesGlobauxPage() {
   // Handler pour ouvrir le modal de détail
   const handleViewDetails = (siege) => {
     setDetailModal({ open: true, siege });
+  };
+
+  // Handler pour ouvrir la modal carte
+  const handleViewMap = (siege) => {
+    setMapModal({ open: true, siege });
+  };
+
+  // Handler pour fermer la modal carte
+  const handleCloseMapModal = () => {
+    setMapModal({ open: false, siege: null });
   };
 
   // Handler pour fermer le modal de détail
@@ -336,7 +348,7 @@ export default function SiegesGlobauxPage() {
           
           <div className="p-6">
             <DataTable
-              columns={siegesColumns(handleViewDetails)}
+              columns={siegesColumns(handleViewDetails, handleViewMap)}
               data={paginatedData}
             />
           </div>
@@ -384,6 +396,15 @@ export default function SiegesGlobauxPage() {
             </div>
           )}
         </div>
+
+        {/* Modal carte du siège */}
+        {mapModal.open && mapModal.siege && (
+          <SiegeMapModal
+            open={mapModal.open}
+            siege={mapModal.siege}
+            onClose={handleCloseMapModal}
+          />
+        )}
       </div>
     </div>
   );

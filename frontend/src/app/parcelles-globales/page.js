@@ -12,15 +12,17 @@ import { exportToCSV } from "../../lib/export-csv";
 
 import { Button } from "@/components/ui/button";
 import ParcelleDetailModal from "@/components/ParcelleDetailModal";
+import ParcelleMapModal from "@/components/ParcelleMapModal";
 
-export default function ParcellesGlobalesPage() {
+export default function ParcellesPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredParcelles, setFilteredParcelles] = useState([]);
   const [selectedPratiques, setSelectedPratiques] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
   const [detailModal, setDetailModal] = useState({ open: false, parcelle: null });
-  
+  // Ajout pour la modal carte
+  const [mapModal, setMapModal] = useState({ open: false, parcelle: null });
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -157,6 +159,16 @@ export default function ParcellesGlobalesPage() {
   // Handler pour fermer le modal de détail
   const handleCloseDetailModal = () => {
     setDetailModal({ open: false, parcelle: null });
+  };
+
+  // Handler pour ouvrir la modal carte
+  const handleViewMap = (parcelle) => {
+    setMapModal({ open: true, parcelle });
+  };
+
+  // Handler pour fermer la modal carte
+  const handleCloseMapModal = () => {
+    setMapModal({ open: false, parcelle: null });
   };
 
   // Handler pour le filtre membre
@@ -326,7 +338,7 @@ export default function ParcellesGlobalesPage() {
           
           <div className="p-6">
             <DataTable
-              columns={parcellesColumns(handleViewDetails)}
+              columns={parcellesColumns(handleViewDetails, handleViewMap)}
               data={paginatedData}
             />
           </div>
@@ -374,11 +386,21 @@ export default function ParcellesGlobalesPage() {
             </div>
           )}
         </div>
+        
         {/* Modal de détails de la parcelle */}
         {detailModal.open && detailModal.parcelle && (
           <ParcelleDetailModal
             parcelle={detailModal.parcelle}
             onClose={handleCloseDetailModal}
+          />
+        )}
+        
+        {/* Modal carte de la parcelle */}
+        {mapModal.open && mapModal.parcelle && (
+          <ParcelleMapModal
+            open={mapModal.open}
+            parcelle={mapModal.parcelle}
+            onClose={handleCloseMapModal}
           />
         )}
       </div>

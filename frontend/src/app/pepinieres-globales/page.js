@@ -5,6 +5,7 @@ import { useQuery } from "@apollo/client";
 import { GET_ALL_PEPINIERES, GET_ALL_USERS } from "../../lib/graphql-queries";
 import { useToast } from "../../lib/useToast";
 import { pepinieresColumns } from "./columns";
+import PepiniereMapModal from "@/components/PepiniereMapModal";
 import { DataTable } from "@/components/ui/table-data-table";
 import PepiniereDetailModal from "@/components/PepiniereDetailModal";
 import MemberFilter from "@/components/MemberFilter";
@@ -12,13 +13,14 @@ import { exportToCSV } from "../../lib/export-csv";
 import { Button } from "@/components/ui/button";
 import CSVImportExportPepiniere from "../../components/CSVImportExportPepiniere";
 
-export default function PepinieresGlobalesPage() {
+export default function PepinieresPage() {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [filteredPepinieres, setFilteredPepinieres] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const { showError, showToast } = useToast();
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [selectedPepiniere, setSelectedPepiniere] = useState(null);
+  const [mapModal, setMapModal] = useState({ open: false, pepiniere: null });
   
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -302,7 +304,10 @@ export default function PepinieresGlobalesPage() {
           
           <div className="p-6">
             <DataTable
-              columns={pepinieresColumns((pepiniere) => setSelectedPepiniere(pepiniere))}
+              columns={pepinieresColumns(
+                (pepiniere) => setSelectedPepiniere(pepiniere),
+                (pepiniere) => setMapModal({ open: true, pepiniere })
+              )}
               data={paginatedData}
             />
           </div>
@@ -350,6 +355,15 @@ export default function PepinieresGlobalesPage() {
             </div>
           )}
         </div>
+
+        {/* Modal carte de la pépinière */}
+        {mapModal.open && mapModal.pepiniere && (
+          <PepiniereMapModal
+            open={mapModal.open}
+            pepiniere={mapModal.pepiniere}
+            onClose={() => setMapModal({ open: false, pepiniere: null })}
+          />
+        )}
 
         {/* Modal de détails de la pépinière */}
         {selectedPepiniere && (

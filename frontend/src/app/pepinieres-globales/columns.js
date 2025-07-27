@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { getLogoUrl } from '../../lib/utils';
 
-export const pepinieresColumns = (onViewDetails) => [
+export const pepinieresColumns = (onViewDetails, onViewMap) => [
   {
     accessorKey: "Nom pépinière",
     header: ({ column }) => (
@@ -91,6 +91,9 @@ export const pepinieresColumns = (onViewDetails) => [
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
             Voir détails
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewMap(row.original)}>
+            Voir sur la carte
           </DropdownMenuItem>
           <DropdownMenuSeparator />
         </DropdownMenuContent>

@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { getLogoUrl } from '../../lib/utils';
 import SiegeDetailModal from "@/components/SiegeDetailModal";
+import SiegeMapModal from "@/components/SiegeMapModal";
 import { useState } from 'react';
 
 // Composant pour les actions avec le modal
-const ActionCell = ({ row }) => {
+const ActionCell = ({ row, onViewDetails, onViewMap }) => {
   const [showModal, setShowModal] = useState(false);
-  
+  const [showMapModal, setShowMapModal] = useState(false);
   return (
     <>
       <DropdownMenu>
@@ -24,6 +25,9 @@ const ActionCell = ({ row }) => {
           <DropdownMenuItem onClick={() => setShowModal(true)}>
             Voir détails
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowMapModal(true)}>
+            Voir sur la carte
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
         </DropdownMenuContent>
       </DropdownMenu>
@@ -32,6 +36,13 @@ const ActionCell = ({ row }) => {
         <SiegeDetailModal 
           siege={row.original}
           onClose={() => setShowModal(false)}
+        />
+      )}
+      {showMapModal && (
+        <SiegeMapModal
+          open={showMapModal}
+          siege={row.original}
+          onClose={() => setShowMapModal(false)}
         />
       )}
     </>
@@ -46,7 +57,7 @@ const CATEGORIE_LABELS = {
   provisoire: "Siège provisoire",
 };
 
-export const siegesColumns = (onViewDetails) => [
+export const siegesColumns = (onViewDetails, onViewMap) => [
   {
     accessorKey: "Nom du local",
     header: ({ column }) => (
@@ -121,7 +132,7 @@ export const siegesColumns = (onViewDetails) => [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => <ActionCell row={row} />,
+    cell: ({ row }) => <ActionCell row={row} onViewDetails={onViewDetails} onViewMap={onViewMap} />,
     enableSorting: false,
     enableHiding: false,
   },

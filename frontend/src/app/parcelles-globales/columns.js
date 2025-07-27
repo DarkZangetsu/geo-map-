@@ -21,7 +21,7 @@ const PRATIQUE_LABELS = {
   integration_elevage: "Intégration d'élevage",
 };
 
-export const parcellesColumns = (onViewDetails) => [
+export const parcellesColumns = (onViewDetails, onViewMap) => [
   {
     accessorKey: "Nom site de référence",
     header: ({ column }) => (
@@ -102,8 +102,10 @@ export const parcellesColumns = (onViewDetails) => [
           <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
             Voir détails
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onViewMap(row.original)}>
+            Voir sur la carte
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* Ajoute d'autres actions ici si besoin */}
         </DropdownMenuContent>
       </DropdownMenu>
     ),
