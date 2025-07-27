@@ -5,24 +5,32 @@ import { getLogoUrl } from '../../lib/utils';
 
 export const pepinieresColumns = (onViewDetails) => [
   {
-    accessorKey: "nom",
+    accessorKey: "Nom pépinière",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      <div className="text-center">
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom pépinière<ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      </div>
     ),
-    cell: ({ row }) => row.getValue("nom"),
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nom}</div>
+    ),
   },
   {
     accessorKey: "adresse",
-    header: "Adresse",
-    cell: ({ row }) => row.getValue("adresse") || "-",
+    header: () => <div className="text-center">Adresse</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("adresse") || "-"}</div>
+    ),
   },
   {
-    accessorKey: "nomProjet",
-    header: "Projet rattaché",
-    cell: ({ row }) => row.getValue("nomProjet") || "-",
+    accessorKey: "Projet rattaché",
+    header: () => <div className="text-center">Projet rattaché</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nomProjet || "-"}</div>
+    ),
   },
   {
-    id: "gestionnaire",
+    id: "Gestionnaire",
     header: "Gestionnaire",
     cell: ({ row }) => {
       const pepiniere = row.original;
@@ -45,8 +53,8 @@ export const pepinieresColumns = (onViewDetails) => [
     },
   },
   {
-    id: "membre",
-    header: "Nom Institution",
+    id: "Institutions",
+    header: "Institutions",
     cell: ({ row }) => {
       const user = row.original.user;
       return (
@@ -62,9 +70,11 @@ export const pepinieresColumns = (onViewDetails) => [
     },
   },
   {
-    accessorKey: "user.abreviation",
-    header: "Abréviation",
-    cell: ({ row }) => row.original.user?.abreviation || "-",
+    accessorKey: "Abréviation",
+    header: () => <div className="text-center">Abréviation</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
+    ),
   },
   {
     id: "actions",

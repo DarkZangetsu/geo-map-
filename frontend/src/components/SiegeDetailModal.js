@@ -213,8 +213,9 @@ const SiegeDetailModal = ({ siege, onClose }) => {
                           <h4 className="text-lg font-bold text-slate-800">Informations de base</h4>
                         </div>
                         <div className="space-y-4">
-                          {[
+                          {[ 
                             { label: 'Nom', value: siegeComplete?.nom },
+                            { label: 'Projet', value: siegeComplete?.nomProjet },
                             { label: 'Adresse', value: siegeComplete?.adresse },
                             { label: 'Latitude', value: siegeComplete?.latitude },
                             { label: 'Longitude', value: siegeComplete?.longitude }

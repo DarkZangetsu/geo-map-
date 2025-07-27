@@ -112,11 +112,14 @@ class Siege(models.Model):
     poste = models.CharField(max_length=100, blank=True, help_text="Poste du point de contact")
     telephone = models.CharField(max_length=20, blank=True, help_text="Téléphone du point de contact")
     email = models.EmailField(blank=True, help_text="Email du point de contact")
-    
+
+    # Champ projet rattaché
+    nom_projet = models.CharField(max_length=200, blank=True, help_text="Nom du projet")
+
     # Horaires fixes
     horaire_matin = models.CharField(max_length=100, blank=True, help_text="Horaires du matin")
     horaire_apres_midi = models.CharField(max_length=100, blank=True, help_text="Horaires de l'après-midi")
-    
+
     adresse = models.CharField(max_length=255)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)

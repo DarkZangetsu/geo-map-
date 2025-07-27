@@ -144,6 +144,7 @@ export const GET_MY_SIEGES = gql`
     mySieges {
       id
       nom
+      nomProjet
       adresse
       latitude
       longitude
@@ -178,6 +179,7 @@ export const GET_ALL_SIEGES = gql`
     allSieges {
       id
       nom
+      nomProjet
       adresse
       latitude
       longitude
@@ -217,6 +219,7 @@ export const GET_SIEGE = gql`
     siege(id: $id) {
       id
       nom
+      nomProjet
       adresse
       latitude
       longitude
@@ -627,6 +630,7 @@ export const CREATE_SIEGE = gql`
     $poste: String
     $telephone: String
     $email: String
+    $nomProjet: String
     $horaireMatin: String
     $horaireApresMidi: String
     $photosBatiment: [Upload]
@@ -642,6 +646,7 @@ export const CREATE_SIEGE = gql`
       poste: $poste
       telephone: $telephone
       email: $email
+      nomProjet: $nomProjet
       horaireMatin: $horaireMatin
       horaireApresMidi: $horaireApresMidi
       photosBatiment: $photosBatiment
@@ -651,6 +656,7 @@ export const CREATE_SIEGE = gql`
       siege {
         id
         nom
+        nomProjet
         adresse
         latitude
         longitude
@@ -693,6 +699,7 @@ export const UPDATE_SIEGE = gql`
     $poste: String
     $telephone: String
     $email: String
+    $nomProjet: String
     $horaireMatin: String
     $horaireApresMidi: String
     $photosBatiment: [Upload]
@@ -709,6 +716,7 @@ export const UPDATE_SIEGE = gql`
       poste: $poste
       telephone: $telephone
       email: $email
+      nomProjet: $nomProjet
       horaireMatin: $horaireMatin
       horaireApresMidi: $horaireApresMidi
       photosBatiment: $photosBatiment
@@ -718,6 +726,7 @@ export const UPDATE_SIEGE = gql`
       siege {
         id
         nom
+        nomProjet
         adresse
         latitude
         longitude

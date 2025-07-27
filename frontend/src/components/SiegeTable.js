@@ -4,6 +4,7 @@ import { Edit, Trash } from 'lucide-react';
 const ALL_COLUMNS = [
   { key: 'nom', label: 'Nom' },
   { key: 'categorie', label: 'Catégorie' },
+  { key: 'nomProjet', label: 'Projet' },
   { key: 'adresse', label: 'Adresse' },
   { key: 'pointContact', label: 'Point de Contact' },
   { key: 'horaires', label: 'Horaires' },
@@ -26,6 +27,9 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
             )}
             {columns.includes('categorie') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Catégorie</th>
+            )}
+            {columns.includes('nomProjet') && (
+              <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Projet</th>
             )}
             {columns.includes('adresse') && (
               <th className="px-3 py-2 text-xs font-bold text-blue-900 uppercase tracking-wider text-left whitespace-nowrap">Adresse</th>
@@ -58,6 +62,9 @@ const SiegeTable = ({ sieges, onEdit, onDelete, visibleColumns }) => {
                     {siege.categorie || 'social'}
                   </span>
                 </td>
+              )}
+              {columns.includes('nomProjet') && (
+                <td className="px-3 py-2">{siege.nomProjet || '-'}</td>
               )}
               {columns.includes('adresse') && (
                 <td className="px-3 py-2">{siege.adresse}</td>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_SIEGE, UPDATE_SIEGE } from '../lib/graphql-queries';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_SIEGE, UPDATE_SIEGE, GET_ME } from '../lib/graphql-queries';
 import { useToast } from '../lib/useToast';
 import MapPointModal from './MapPointModal';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
@@ -18,6 +18,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
     poste: '',
     telephone: '',
     email: '',
+    nomProjet: '',
     horaireMatin: '',
     horaireApresMidi: ''
   });
@@ -28,6 +29,8 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
   const [updateSiege, { loading: loadingUpdate }] = useMutation(UPDATE_SIEGE);
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const { data: meData } = useQuery(GET_ME);
+  const projets = (meData?.me?.nomProjet || '').split(',').map(p => p.trim()).filter(Boolean);
 
   useEffect(() => {
     if (initialData) {
@@ -42,6 +45,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
         poste: initialData.poste || '',
         telephone: initialData.telephone || '',
         email: initialData.email || '',
+        nomProjet: initialData.nomProjet || '',
         horaireMatin: initialData.horaireMatin || '',
         horaireApresMidi: initialData.horaireApresMidi || ''
       });
@@ -131,6 +135,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
             poste: formData.poste,
             telephone: formData.telephone,
             email: formData.email,
+            nomProjet: formData.nomProjet,
             horaireMatin: formData.horaireMatin,
             horaireApresMidi: formData.horaireApresMidi,
             photosBatiment: newPhotos
@@ -155,6 +160,7 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
             poste: formData.poste,
             telephone: formData.telephone,
             email: formData.email,
+            nomProjet: formData.nomProjet,
             horaireMatin: formData.horaireMatin,
             horaireApresMidi: formData.horaireApresMidi,
             photosBatiment: newPhotos
@@ -214,6 +220,20 @@ const SiegeForm = ({ onSuccess, onCancel, initialData = null, mode = 'add', sieg
                   <option value="regional">Siège régional</option>
                   <option value="technique">Siège technique</option>
                   <option value="provisoire">Siège provisoire</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Projet rattaché</label>
+                <select
+                  name="nomProjet"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={formData.nomProjet}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Sélectionner un projet</option>
+                  {projets.map((projet, idx) => (
+                    <option key={idx} value={projet}>{projet}</option>
+                  ))}
                 </select>
               </div>
             </div>

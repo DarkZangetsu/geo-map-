@@ -48,20 +48,33 @@ const CATEGORIE_LABELS = {
 
 export const siegesColumns = (onViewDetails) => [
   {
-    accessorKey: "nom",
+    accessorKey: "Nom du local",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      <div className="text-center">
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom du local <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      </div>
     ),
-    cell: ({ row }) => row.getValue("nom"),
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nom}</div>
+    ),
   },
   {
-    accessorKey: "adresse",
-    header: "Adresse",
-    cell: ({ row }) => row.getValue("adresse"),
+    accessorKey: "Adresse",
+    header: () => <div className="text-center">Adresse</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.adresse}</div>
+    ),
+  },
+   {
+    accessorKey: "Projet rattaché",
+    header: () => <div className="text-center">Projet rattaché</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nomProjet || "-"}</div>
+    ),
   },
   {
-    id: "membre",
-    header: "Membre",
+    id: "Institutions",
+    header: "Institutions",
     cell: ({ row }) => {
       const user = row.original.user;
       return (
@@ -77,32 +90,33 @@ export const siegesColumns = (onViewDetails) => [
     },
   },
   {
-    accessorKey: "user.abreviation",
-    header: "Abréviation",
-    cell: ({ row }) => row.original.user?.abreviation || "-",
+    accessorKey: "Abréviation",
+    header: () => <div className="text-center">Abréviation</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
+    ),
   },
   {
-    accessorKey: "latitude",
-    header: "Latitude",
-    cell: ({ row }) => row.original.latitude || "-",
+    accessorKey: "Latitude",
+    header: () => <div className="text-center">Latitude</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.latitude || "-"}</div>
+    ),
   },
   {
-    accessorKey: "longitude",
-    header: "Longitude",
-    cell: ({ row }) => row.original.longitude || "-",
+    accessorKey: "Longitude",
+    header: () => <div className="text-center">Longitude</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.longitude || "-"}</div>
+    ),
   },
   {
-    accessorKey: "categorie",
-    header: "Catégorie",
+    accessorKey: "Catégorie",
+    header: () => <div className="text-center">Catégorie</div>,
     cell: ({ row }) => {
       const cat = row.original.categorie;
-      return CATEGORIE_LABELS[(cat || '').toLowerCase()] || cat || "-";
+      return <div className="text-center">{CATEGORIE_LABELS[(cat || '').toLowerCase()] || cat || "-"}</div>;
     },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date création",
-    cell: ({ row }) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString('fr-FR') : "-",
   },
   {
     id: "actions",

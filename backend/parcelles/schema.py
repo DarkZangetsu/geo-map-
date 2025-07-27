@@ -61,6 +61,7 @@ class SiegeImageType(DjangoObjectType):
 
 class SiegeType(DjangoObjectType):
     photos_batiment = graphene.List(SiegeImageType)
+    nom_projet = graphene.String()
     
     class Meta:
         model = Siege
@@ -68,6 +69,9 @@ class SiegeType(DjangoObjectType):
     
     def resolve_photos_batiment(self, info):
         return self.photos_batiment.all()
+
+    def resolve_nom_projet(self, info):
+        return self.nom_projet
 
 class PepiniereImageType(DjangoObjectType):
     class Meta:
@@ -305,12 +309,13 @@ class CreateSiege(graphene.Mutation):
         poste = graphene.String()
         telephone = graphene.String()
         email = graphene.String()
+        nom_projet = graphene.String()
         horaire_matin = graphene.String()
         horaire_apres_midi = graphene.String()
         photos_batiment = graphene.List(Upload)
 
     @login_required
-    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='social', nom_point_contact="", poste="", telephone="", email="", horaire_matin="", horaire_apres_midi="", photos_batiment=None):
+    def mutate(self, info, nom, adresse, latitude, longitude, description=None, categorie='social', nom_point_contact="", poste="", telephone="", email="", nom_projet="", horaire_matin="", horaire_apres_midi="", photos_batiment=None):
         try:
             user = info.context.user
             siege = Siege.objects.create(
@@ -325,6 +330,7 @@ class CreateSiege(graphene.Mutation):
                 poste=poste,
                 telephone=telephone,
                 email=email,
+                nom_projet=nom_projet,
                 horaire_matin=horaire_matin,
                 horaire_apres_midi=horaire_apres_midi
             )
@@ -361,6 +367,7 @@ class UpdateSiege(graphene.Mutation):
         poste = graphene.String()
         telephone = graphene.String()
         email = graphene.String()
+        nom_projet = graphene.String()
         horaire_matin = graphene.String()
         horaire_apres_midi = graphene.String()
         photos_batiment = graphene.List(Upload)

@@ -41,7 +41,7 @@ export default function SiegePage() {
     "pointContact",
     "horaires",
     "description",
-    "createdAt"
+    "nomProjet"
   ]);
   const { showSuccess, showError } = useToast();
   const [editingSiege, setEditingSiege] = useState(null);
@@ -201,10 +201,10 @@ export default function SiegePage() {
         );
       },
     },
-    visibleColumns.includes('createdAt') && {
-      accessorKey: 'createdAt',
-      header: 'Date de création',
-      cell: info => info.getValue() ? new Date(info.getValue()).toLocaleDateString('fr-FR') : '-',
+    visibleColumns.includes('nomProjet') && {
+      accessorKey: 'nomProjet',
+      header: 'Projet rattaché',
+      cell: info => info.getValue() || '-',
     },
     {
       id: 'actions',

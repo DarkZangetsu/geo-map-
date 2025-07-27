@@ -23,14 +23,18 @@ const PRATIQUE_LABELS = {
 
 export const parcellesColumns = (onViewDetails) => [
   {
-    accessorKey: "nom",
+    accessorKey: "Nom site de référence",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      <div className="text-center">
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>Nom site de référence <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      </div>
     ),
-    cell: ({ row }) => row.getValue("nom"),
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nom}</div>
+    ),
   },
   {
-    accessorKey: "personneReferente",
+    accessorKey: "Personne Référente",
     header: "Personne référente",
     cell: ({ row }) => {
       const p = row.original;
@@ -45,13 +49,15 @@ export const parcellesColumns = (onViewDetails) => [
     },
   },
   {
-    accessorKey: "nomProjet",
-    header: "Nom Projet",
-    cell: ({ row }) => row.getValue("nomProjet") || "-",
+    accessorKey: "Projet rattaché",
+    header: () => <div className="text-center">Projet rattaché</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nomProjet || "-"}</div>
+    ),
   },
   {
-    id: "membre",
-    header: "Membre",
+    id: "Institutions",
+    header: "Institutions",
     cell: ({ row }) => {
       const user = row.original.user;
       return (
@@ -67,14 +73,18 @@ export const parcellesColumns = (onViewDetails) => [
     },
   },
   {
-    accessorKey: "user.abreviation",
-    header: "Abréviation",
-    cell: ({ row }) => row.original.user?.abreviation || "-",
+    accessorKey: "Abreviation",
+    header: () => <div className="text-center">Abréviation</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
+    ),
   },
   {
     accessorKey: "superficie",
-    header: "Superficie (ha)",
-    cell: ({ row }) => row.original.superficie ? `${row.original.superficie} ha` : "-",
+    header: () => <div className="text-center">Superficie (ha)</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.superficie ? `${row.original.superficie} ha` : "-"}</div>
+    ),
   },
   {
     id: "actions",

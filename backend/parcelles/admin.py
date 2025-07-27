@@ -88,14 +88,14 @@ class SiegeImageInline(admin.TabularInline):
 
 @admin.register(Siege)
 class SiegeAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'categorie', 'user', 'adresse', 'latitude', 'longitude', 'created_at')
+    list_display = ('nom', 'categorie', 'nom_projet', 'user', 'adresse', 'latitude', 'longitude', 'created_at')
     list_filter = ('categorie', 'created_at')
     search_fields = ('nom', 'user__email', 'adresse')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
     fieldsets = (
         ('Informations de base', {
-            'fields': ('nom', 'categorie', 'user', 'adresse', 'latitude', 'longitude')
+            'fields': ('nom', 'categorie', 'nom_projet', 'user', 'adresse', 'latitude', 'longitude')
         }),
         ('Point de contact', {
             'fields': ('nom_point_contact', 'poste', 'telephone', 'email')
