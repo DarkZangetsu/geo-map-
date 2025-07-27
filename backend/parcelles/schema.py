@@ -469,50 +469,61 @@ class ExportParcellesCSV(graphene.Mutation):
     def mutate(self, info):
         try:
             user = info.context.user
-            if user.role != 'admin':
-                parcelles = Parcelle.objects.filter(user=user)
-            else:
+            if hasattr(user, 'role') and user.role == 'admin':
                 parcelles = Parcelle.objects.all()
+            else:
+                parcelles = Parcelle.objects.filter(user=user)
             
             output = io.StringIO()
             writer = csv.writer(output)
-            
-            # En-têtes avec nouveaux champs
+
+            # En-têtes
             headers = [
-                'ID', 'Nom', 'Propriétaire', 'Superficie', 
-                'Pratique', 'Nom projet', 'Description', 'Nom Personne Référente',
-                'Poste', 'Téléphone', 'Email', 'Utilisateur', 
-                'Date Création', 'Date Modification'
+                'SITES DE REFERENCE',
+                'SUPERFICIE (ha)',
+                'PRATIQUE',
+                'PROJET RATTACHE',
+                'DESCRIPTION',
+                'NOM PERSONNE REFERENTE',
+                'POSTE',
+                'TELEPHONE',
+                'GEOJSON',
+                'DATE DE CREATION',
+                'DATE DE MODIFICATION'
             ]
             writer.writerow(headers)
+
+            # Données
             for parcelle in parcelles:
                 row = [
-                    parcelle.id,
                     parcelle.nom,
-                    str(parcelle.superficie) if parcelle.superficie else '',
-                    parcelle.get_pratique_display() if parcelle.pratique else '',
+                    str(parcelle.superficie or ''),
+                    parcelle.pratique or '',
                     parcelle.nom_projet or '',
                     parcelle.description or '',
                     parcelle.nom_personne_referente or '',
                     parcelle.poste or '',
                     parcelle.telephone or '',
-                    parcelle.email or '',
-                    parcelle.user.email,
+                    json.dumps(parcelle.geojson, ensure_ascii=False) if parcelle.geojson else '',
                     parcelle.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                     parcelle.updated_at.strftime('%Y-%m-%d %H:%M:%S')
                 ]
                 writer.writerow(row)
+
             csv_content = output.getvalue()
             output.close()
+
             return ExportParcellesCSV(
                 csv_data=csv_content,
                 success=True,
-                message=f"Export CSV réussi - {parcelles.count()} parcelles exportées"
+                message=f"Export CSV réussi - {parcelles.count()} parcelle(s) exportée(s)."
             )
+
         except Exception as e:
             return ExportParcellesCSV(
                 success=False,
-                message=f"Erreur lors de l'export: {str(e)}"
+                csv_data="",
+                message=f"Erreur lors de l'export : {str(e)}"
             )
 
 class ImportParcellesCSV(graphene.Mutation):
@@ -543,39 +554,6 @@ class ImportParcellesCSV(graphene.Mutation):
                             superficie = Decimal(row['Superficie'].replace(',', '.'))
                         except:
                             errors.append(f"Ligne {row_num}: Superficie invalide")
-                            continue
-                    date_semis = None
-                    if row.get('Date Semis'):
-                        try:
-                            date_semis = datetime.strptime(row['Date Semis'], '%Y-%m-%d').date()
-                        except:
-                            errors.append(f"Ligne {row_num}: Date de semis invalide (format: YYYY-MM-DD)")
-                            continue
-                    date_recolte_prevue = None
-                    if row.get('Date Récolte Prévue'):
-                        try:
-                            date_recolte_prevue = datetime.strptime(row['Date Récolte Prévue'], '%Y-%m-%d').date()
-                        except:
-                            errors.append(f"Ligne {row_num}: Date de récolte prévue invalide (format: YYYY-MM-DD)")
-                            continue
-                    def parse_bool(val):
-                        return str(val).strip().lower() in ['1', 'oui', 'yes', 'true', 'vrai']
-                    irrigation = parse_bool(row.get('Irrigation', '0'))
-                    certification_bio = parse_bool(row.get('Certification Bio', '0'))
-                    certification_hve = parse_bool(row.get('Certification HVE', '0'))
-                    rendement_prevue = None
-                    if row.get('Rendement Prévu'):
-                        try:
-                            rendement_prevue = Decimal(row['Rendement Prévu'].replace(',', '.'))
-                        except:
-                            errors.append(f"Ligne {row_num}: Rendement prévu invalide")
-                            continue
-                    cout_production = None
-                    if row.get('Coût Production'):
-                        try:
-                            cout_production = Decimal(row['Coût Production'].replace(',', '.'))
-                        except:
-                            errors.append(f"Ligne {row_num}: Coût de production invalide")
                             continue
                     # Gestion de la géométrie
                     geojson = None
@@ -664,52 +642,67 @@ class ExportSiegesCSV(graphene.Mutation):
     def mutate(self, info):
         try:
             user = info.context.user
-            if user.role != 'admin':
-                sieges = Siege.objects.filter(user=user)
-            else:
-                sieges = Siege.objects.all()
+            sieges = Siege.objects.all() if getattr(user, 'role', '') == 'admin' else Siege.objects.filter(user=user)
             
             output = io.StringIO()
             writer = csv.writer(output)
-            
-            # En-têtes avec nouveaux champs
+
+            # En-têtes CSV
             headers = [
-                'ID', 'Nom', 'Adresse', 'Latitude', 'Longitude', 'Description',
-                'Catégorie', 'Nom Point Contact', 'Poste', 'Téléphone', 'Email',
-                'Horaire Matin', 'Horaire Après-midi', 'Utilisateur',
-                'Date Création', 'Date Modification'
+                'LOCAUX',
+                'ADRESSE',
+                'LATITUDE',
+                'LONGITUDE',
+                'DESCRIPTION',
+                'CATÉGORIE',
+                'NOM POINT CONTACT',
+                'POSTE',
+                'TÉLÉPHONE',
+                'PROJET RATTACHÉ',
+                'HORAIRE MATIN',
+                'HORAIRE APRÈS-MIDI',
+                'UTILISATEUR (EMAIL)',
+                'DATE CRÉATION',
+                'DATE MODIFICATION'
             ]
             writer.writerow(headers)
-            
+
+            # Contenu des lignes
             for siege in sieges:
                 row = [
-                    siege.id,
                     siege.nom,
                     siege.adresse,
                     str(siege.latitude),
                     str(siege.longitude),
                     siege.description or '',
-                    siege.categorie,
+                    siege.get_categorie_display(), 
                     siege.nom_point_contact or '',
                     siege.poste or '',
                     siege.telephone or '',
                     siege.email or '',
+                    siege.nom_projet or '',
                     siege.horaire_matin or '',
                     siege.horaire_apres_midi or '',
-                    siege.user.username,
                     siege.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                    siege.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+                    siege.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
                 ]
                 writer.writerow(row)
+
             csv_content = output.getvalue()
             output.close()
+
             return ExportSiegesCSV(
                 csv_data=csv_content,
                 success=True,
-                message=f"Export CSV réussi - {sieges.count()} sièges exportés"
+                message=f"Export CSV réussi - {sieges.count()} siège(s) exporté(s)"
             )
+
         except Exception as e:
-            return ExportSiegesCSV(success=False, message=f"Erreur lors de l'export: {str(e)}")
+            return ExportSiegesCSV(
+                success=False,
+                csv_data="",
+                message=f"Erreur lors de l'export : {str(e)}"
+            )
 
 class ImportSiegesCSV(graphene.Mutation):
     success = graphene.Boolean()
@@ -915,47 +908,64 @@ class ExportPepinieresCSV(graphene.Mutation):
     def mutate(self, info):
         try:
             user = info.context.user
-            if user.role != 'admin':
-                pepinieres = Pepiniere.objects.filter(user=user)
-            else:
-                pepinieres = Pepiniere.objects.all()
+            pepinieres = Pepiniere.objects.all() if getattr(user, 'role', '') == 'admin' else Pepiniere.objects.filter(user=user)
             
             output = io.StringIO()
             writer = csv.writer(output)
-            
-            # En-têtes
+
+            # En-têtes en MAJUSCULES
             headers = [
-                'ID', 'Nom', 'Adresse', 'Latitude', 'Longitude', 'Description',
-                'Catégorie', 'Nom Gestionnaire', 'Poste Gestionnaire', 
-                'Téléphone Gestionnaire', 'Email Gestionnaire',
-                'Espèces Produites', 'Quantité Production Générale',
-                'Nom projet',
-                'Utilisateur', 'Date Création', 'Date Modification'
+                'PEPINIERES',
+                'ADRESSE',
+                'LATITUDE',
+                'LONGITUDE',
+                'DESCRIPTION',
+                'NOM GESTIONNAIRE',
+                'POSTE GESTIONNAIRE',
+                'TÉLÉPHONE GESTIONNAIRE',
+                'EMAIL GESTIONNAIRE',
+                'ESPÈCES PRODUITES',
+                'QUANTITÉ PRODUCTION GÉNÉRALE',
+                'PROJET RATTACHÉ',
+                'DATE CRÉATION',
+                'DATE MODIFICATION'
             ]
             writer.writerow(headers)
-            
+
             # Données
-            for pepiniere in pepinieres:
-                writer.writerow([
-                    pepiniere.id, pepiniere.nom, pepiniere.adresse,
-                    pepiniere.latitude, pepiniere.longitude, pepiniere.description,
-                    pepiniere.categorie, pepiniere.nom_gestionnaire,
-                    pepiniere.poste_gestionnaire, pepiniere.telephone_gestionnaire,
-                    pepiniere.email_gestionnaire, pepiniere.especes_produites,
-                    pepiniere.quantite_production_generale,
-                    pepiniere.nom_projet,
-                    pepiniere.user.username, pepiniere.created_at, pepiniere.updated_at
-                ])
-            
+            for pep in pepinieres:
+                row = [
+                    pep.nom,
+                    pep.adresse,
+                    str(pep.latitude),
+                    str(pep.longitude),
+                    pep.description or '',
+                    pep.nom_gestionnaire or '',
+                    pep.poste_gestionnaire or '',
+                    pep.telephone_gestionnaire or '',
+                    pep.email_gestionnaire or '',
+                    pep.especes_produites or '',
+                    pep.quantite_production_generale or '',
+                    pep.nom_projet or '',
+                    pep.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    pep.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+                ]
+                writer.writerow(row)
+
+            csv_content = output.getvalue()
+            output.close()
+
             return ExportPepinieresCSV(
-                csv_data=output.getvalue(),
+                csv_data=csv_content,
                 success=True,
-                message="Export CSV réussi"
+                message=f"Export CSV réussi - {pepinieres.count()} pépinière(s) exportée(s)"
             )
+
         except Exception as e:
             return ExportPepinieresCSV(
                 success=False,
-                message=f"Erreur lors de l'export: {str(e)}"
+                csv_data="",
+                message=f"Erreur lors de l'export : {str(e)}"
             )
 
 class ImportPepinieresCSV(graphene.Mutation):

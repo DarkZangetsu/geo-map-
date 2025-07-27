@@ -104,14 +104,14 @@ export default function PepinieresPage() {
         filtered = filtered.filter(pepin => {
           return [
             pepin.nom,
-            pepin.categorie,
             pepin.adresse,
-            pepin.user?.firstName,
-            pepin.user?.lastName,
             pepin.user?.nomInstitution,
             pepin.user?.abreviation,
-            pepin.variete,
-            pepin.description
+            pepin.nomProjet,
+            pepin.nomGestionnaire,
+            pepin.posteGestionnaire,
+            pepin.telephoneGestionnaire,
+            pepin.emailGestionnaire
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
@@ -171,17 +171,31 @@ export default function PepinieresPage() {
 
   // Handler pour l'export CSV
   const handleExportCSV = () => {
+    const today = new Date().toISOString().slice(0, 10); 
+    const filename = `pepiniere_export_${today}.csv`;
+
     const data = filteredPepinieres.map(pepin => ({
-      nom: pepin.nom,
-      categorie: pepin.categorie,
-      adresse: pepin.adresse,
-      institution: pepin.user?.nomInstitution,
-      abreviation: pepin.user?.abreviation || '',
-      description: pepin.description || '',
-      date_creation: pepin.createdAt ? new Date(pepin.createdAt).toLocaleDateString('fr-FR') : '',
+      NOM: pepin.nom || '',
+      INSTITUTION: pepin.user?.nomInstitution || '',
+      ABREVIATION: pepin.user?.abreviation || '',
+      PROJET_RATTACHE: pepin.nomProjet || '',
+      ADRESSE: pepin.adresse || '',
+      LATITUDE: pepin.latitude || '',
+      LONGITUDE: pepin.longitude || '',
+      DESCRIPTION: pepin.description || '',
+      NOM_GESTIONNAIRE: pepin.nomGestionnaire || '',
+      POSTE_GESTIONNAIRE: pepin.posteGestionnaire || '',
+      TELEPHONE_GESTIONNAIRE: pepin.telephoneGestionnaire || '',
+      EMAIL_GESTIONNAIRE: pepin.emailGestionnaire || '',
+      ESPECES_PRODUITES: pepin.especesProduites || '',
+      QUANTITE_PRODUCTION_GENERALE: pepin.quantiteProductionGenerale || '',
+      DATE_CREATION: pepin.createdAt ? new Date(pepin.createdAt).toLocaleDateString('fr-FR') : '',
+      DERNIERE_MODIFICATION: pepin.updatedAt ? new Date(pepin.updatedAt).toLocaleDateString('fr-FR') : ''
     }));
-    exportToCSV(data, "pepinieres_globales.csv");
+
+    exportToCSV(data, filename);
   };
+
 
   // Génération des numéros de pages à afficher
   const getPageNumbers = () => {

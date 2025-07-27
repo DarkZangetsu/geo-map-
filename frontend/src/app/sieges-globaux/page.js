@@ -113,13 +113,11 @@ export default function SiegesPage() {
           return [
             siege.nom,
             siege.adresse,
-            siege.categorie,
-            siege.user?.firstName,
-            siege.user?.lastName,
+            siege.nomProjet,
             siege.user?.nomInstitution,
-            siege.description,
+            siege.user?.abreviation,
             siege.latitude,
-            siege.longitude
+            siege.longitude,
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
@@ -204,19 +202,32 @@ export default function SiegesPage() {
 
   // Handler pour l'export CSV
   const handleExportCSV = () => {
+    const today = new Date().toISOString().slice(0, 10); 
+    const filename = `locaux_export_${today}.csv`;
+
     const data = filteredSieges.map(siege => ({
-      nom: siege.nom,
-      adresse: siege.adresse,
-      categorie: siege.categorie || '',
-      membre: `${siege.user?.nomInstitution}`,
-      institution: siege.user?.nomInstitution || '',
-      latitude: siege.latitude,
-      longitude: siege.longitude,
-      description: siege.description || '',
-      date_creation: new Date(siege.createdAt).toLocaleDateString('fr-FR')
+      NOM: siege.nom || '',
+      INSTITUTION: siege.user?.nomInstitution || '',
+      ABREVIATION: siege.user?.abreviation || '',
+      PROJET_RATTACHE: siege.nomProjet || '',
+      CATEGORIE: siege.categorie || '',
+      NOM_POINT_CONTACT: siege.nomPointContact || '',
+      POSTE: siege.poste || '',
+      TELEPHONE: siege.telephone || '',
+      EMAIL: siege.email || '',
+      HORAIRE_MATIN: siege.horaireMatin || '',
+      HORAIRE_APRES_MIDI: siege.horaireApresMidi || '',
+      ADRESSE: siege.adresse || '',
+      LATITUDE: siege.latitude || '',
+      LONGITUDE: siege.longitude || '',
+      DESCRIPTION: siege.description || '',
+      DATE_CREATION: siege.createdAt ? new Date(siege.createdAt).toLocaleDateString('fr-FR') : '',
+      DERNIERE_MODIFICATION: siege.updatedAt ? new Date(siege.updatedAt).toLocaleDateString('fr-FR') : ''
     }));
-    exportToCSV(data, "locaux_globaux.csv");
+
+    exportToCSV(data, filename);
   };
+
 
   // Génération des numéros de pages à afficher
   const getPageNumbers = () => {

@@ -111,11 +111,15 @@ export default function ParcellesPage() {
         filtered = filtered.filter(parcelle => {
           return [
             parcelle.nom,
-            parcelle.pratique,
             parcelle.nomProjet,
             parcelle.user?.nomInstitution,
+            parcelle.user?.abreviation,
             parcelle.superficie,
-            parcelle.description
+            parcelle.nomPersonneReferente,
+            parcelle.poste,
+            parcelle.telephone,
+            parcelle.email
+
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
@@ -199,16 +203,29 @@ export default function ParcellesPage() {
 
   // Handler pour l'export CSV
   const handleExportCSV = () => {
+    const today = new Date().toISOString().slice(0, 10); 
+    const filename = `Sites_de_reference_export_${today}.csv`;
+
     const data = filteredParcelles.map(parcelle => ({
-      nom: parcelle.nom || '',
-      membre: parcelle.user?.nomInstitution || '',
-      pratique: parcelle.pratique || '',
-      superficie_ha: parcelle.superficie || '',
-      notes: parcelle.description || '',
-      date_creation: parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : ''
+      NOM: parcelle.nom || '',
+      INSTITUTION: parcelle.user?.nomInstitution || '',
+      ABREVIATION: parcelle.user?.abreviation || '',
+      PROJET_RATTACHE: parcelle.nomProjet || '',
+      NOM_PERSONNE_REFERENTE: parcelle.nomPersonneReferente || '',
+      POSTE: parcelle.poste || '',
+      TELEPHONE: parcelle.telephone || '',
+      EMAIL: parcelle.email || '',
+      SUPERFICIE: parcelle.superficie || '',
+      PRATIQUE: parcelle.pratique || '',
+      GEOJSON: JSON.stringify(parcelle.geojson) || '',
+      DESCRIPTION: parcelle.description || '',
+      DATE_CREATION: parcelle.createdAt ? new Date(parcelle.createdAt).toLocaleDateString('fr-FR') : '',
+      DERNIERE_MODIFICATION: parcelle.updatedAt ? new Date(parcelle.updatedAt).toLocaleDateString('fr-FR') : ''
     }));
-    exportToCSV(data, "parcelles_globales.csv");
+
+    exportToCSV(data, filename);
   };
+
 
   // Génération des numéros de pages à afficher
   const getPageNumbers = () => {

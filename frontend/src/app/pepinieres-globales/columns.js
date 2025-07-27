@@ -43,10 +43,10 @@ export const pepinieresColumns = (onViewDetails, onViewMap) => [
             <div className="text-xs text-gray-500">{pepiniere.posteGestionnaire}</div>
           )}
           {pepiniere.telephoneGestionnaire && (
-            <div className="text-xs text-gray-500">📞 {pepiniere.telephoneGestionnaire}</div>
+            <div className="text-xs text-gray-500">{pepiniere.telephoneGestionnaire}</div>
           )}
           {pepiniere.emailGestionnaire && (
-            <div className="text-xs text-gray-500">✉️ {pepiniere.emailGestionnaire}</div>
+            <div className="text-xs text-gray-500">{pepiniere.emailGestionnaire}</div>
           )}
         </div>
       );
