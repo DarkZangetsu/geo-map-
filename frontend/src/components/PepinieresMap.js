@@ -143,12 +143,12 @@ const PepinieresMap = ({
   };
 
   const prepareGalleryImages = (photos) => {
-  return photos.map((photo) => ({
-    original: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
-    thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
-    description: photo.titre || photo.description || `Image ${photo.id}`,
-  }));
-};
+    return photos.map((photo) => ({
+      original: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+      thumbnail: `${process.env.NEXT_PUBLIC_API_URL}/media/${photo.image}`,
+      description: photo.titre || photo.description || `Image ${photo.id}`,
+    }));
+  };
 
   // Gestion du clic sur la carte pour fermer les panneaux de détail
   const handleMapClick = (e) => {
@@ -263,12 +263,22 @@ const PepinieresMap = ({
           {/* Header fixe avec gradient doux */}
           <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-green-100/50">
             <div className="flex items-center gap-3">
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}/media/${selectedPepiniere.user.logo}`}
-                alt="Logo"
-                className="w-10 h-10 rounded-full object-cover border border-green-200 bg-white"
-              />
-             <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
+              {selectedPepiniere.user.logo ? (
+                <img
+                  src={
+                    selectedPepiniere.user.logo.startsWith('http')
+                      ? selectedPepiniere.user.logo
+                      : `${process.env.NEXT_PUBLIC_API_URL}/media/${selectedPepiniere.user.logo}`
+                  }
+                  alt="Logo"
+                  className="w-10 h-10 rounded-full object-cover border border-green-200 bg-white"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border border-green-200">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-7 8-7s8 3 8 7" /></svg>
+                </div>
+              )}
+              <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
                 Détails de la pépinière
               </h3>
             </div>
@@ -356,16 +366,16 @@ const PepinieresMap = ({
               </div>
               <div className="space-y-1">
                 <div className="text-base font-medium text-slate-800">
-                 - {selectedPepiniere.nomGestionnaire|| "-"}
+                  - {selectedPepiniere.nomGestionnaire || "-"}
                 </div>
-                 <div className="text-base font-medium text-slate-800">
-                 - {selectedPepiniere.posteGestionnaire|| "-"}
-                </div>
-                <div className="text-sm text-slate-600">
-                 - {selectedPepiniere.telephoneGestionnaire || "-"}
+                <div className="text-base font-medium text-slate-800">
+                  - {selectedPepiniere.posteGestionnaire || "-"}
                 </div>
                 <div className="text-sm text-slate-600">
-                 - {selectedPepiniere.emailGestionnaire || "-"}
+                  - {selectedPepiniere.telephoneGestionnaire || "-"}
+                </div>
+                <div className="text-sm text-slate-600">
+                  - {selectedPepiniere.emailGestionnaire || "-"}
                 </div>
               </div>
             </div>
@@ -459,74 +469,74 @@ const PepinieresMap = ({
 
             {/* Bouton voir images */}
             {Array.isArray(selectedPepiniere.photos) &&
-                selectedPepiniere.photos.length > 0 &&
-                !showGallery && (
-                  <button
-                    onClick={() => setShowGallery(true)}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              selectedPepiniere.photos.length > 0 &&
+              !showGallery && (
+                <button
+                  onClick={() => setShowGallery(true)}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Voir les images ({selectedPepiniere.photos.length})
-                  </button>
-                )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Voir les images ({selectedPepiniere.photos.length})
+                </button>
+              )}
 
             {/* Galerie d'images */}
             {showGallery &&
-  Array.isArray(selectedPepiniere.photos) &&
-  selectedPepiniere.photos.length > 0 && (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
-      <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
-        <div className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 text-orange-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
-        Galerie d'images
-      </div>
-      <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-200/50">
-        <ImageGallery
-          items={prepareGalleryImages(selectedPepiniere.photos)}
-          showPlayButton={false}
-          showFullscreenButton={true}
-          showNav={true}
-          showThumbnails={true}
-          slideInterval={3000}
-          slideOnThumbnailOver={true}
-          additionalClass="custom-gallery"
-        />
-      </div>
-      <button
-        onClick={() => setShowGallery(false)}
-        className="mt-4 w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
-      >
-        Fermer la galerie
-      </button>
-    </div>
-  )}
+              Array.isArray(selectedPepiniere.photos) &&
+              selectedPepiniere.photos.length > 0 && (
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+                  <div className="mb-4 text-lg font-semibold text-slate-800 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-orange-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    Galerie d'images
+                  </div>
+                  <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-200/50">
+                    <ImageGallery
+                      items={prepareGalleryImages(selectedPepiniere.photos)}
+                      showPlayButton={false}
+                      showFullscreenButton={true}
+                      showNav={true}
+                      showThumbnails={true}
+                      slideInterval={3000}
+                      slideOnThumbnailOver={true}
+                      additionalClass="custom-gallery"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowGallery(false)}
+                    className="mt-4 w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
+                  >
+                    Fermer la galerie
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       )}

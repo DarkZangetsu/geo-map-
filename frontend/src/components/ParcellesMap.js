@@ -415,11 +415,21 @@ const ParcellesMap = ({
           {/* Header fixe avec gradient doux */}
           <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm sticky top-0 z-10 rounded-t-3xl border-b border-blue-100/50">
             <div className="flex items-center gap-3">
-             <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}/media/${selectedParcelle.user.logo}`}
-                alt="Logo"
-                className="w-10 h-10 rounded-full object-cover border border-orange-200 bg-white"
-              />
+              {selectedParcelle.user.logo ? (
+                <img
+                  src={
+                    selectedParcelle.user.logo.startsWith('http')
+                      ? selectedParcelle.user.logo
+                      : `${process.env.NEXT_PUBLIC_API_URL}/media/${selectedParcelle.user.logo}`
+                  }
+                  alt="Logo"
+                  className="w-10 h-10 rounded-full object-cover border border-orange-200 bg-white"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border border-orange-200">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-7 8-7s8 3 8 7" /></svg>
+                </div>
+              )}
               <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
                 Détails du site de référence
               </h3>
@@ -447,35 +457,35 @@ const ParcellesMap = ({
               selectedParcelle.poste ||
               selectedParcelle.telephone ||
               selectedParcelle.email) && (
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                    Personne référente
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-100/50 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Personne référente
+                    </div>
                   </div>
+                  {selectedParcelle.nomPersonneReferente && (
+                    <div className="text-base font-medium text-slate-800 mb-1">
+                      {selectedParcelle.nomPersonneReferente}
+                    </div>
+                  )}
+                  {selectedParcelle.poste && (
+                    <div className="text-sm text-slate-600 mb-1">
+                      {selectedParcelle.poste}
+                    </div>
+                  )}
+                  {selectedParcelle.telephone && (
+                    <div className="text-sm text-slate-600 mb-1">
+                      {selectedParcelle.telephone}
+                    </div>
+                  )}
+                  {selectedParcelle.email && (
+                    <div className="text-sm text-slate-600">
+                      {selectedParcelle.email}
+                    </div>
+                  )}
                 </div>
-                {selectedParcelle.nomPersonneReferente && (
-                  <div className="text-base font-medium text-slate-800 mb-1">
-                    {selectedParcelle.nomPersonneReferente}
-                  </div>
-                )}
-                {selectedParcelle.poste && (
-                  <div className="text-sm text-slate-600 mb-1">
-                    {selectedParcelle.poste}
-                  </div>
-                )}
-                {selectedParcelle.telephone && (
-                  <div className="text-sm text-slate-600 mb-1">
-                    {selectedParcelle.telephone}
-                  </div>
-                )}
-                {selectedParcelle.email && (
-                  <div className="text-sm text-slate-600">
-                    {selectedParcelle.email}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
 
             {/* Superficie avec design minimaliste */}
             {selectedParcelle.superficie && (
