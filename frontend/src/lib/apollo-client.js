@@ -63,19 +63,34 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       console.error(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
       );
-      
-      // Si l'erreur est liée à l'authentification, déconnecter l'utilisateur
+      // Gestion des erreurs GraphQL
       if (extensions?.code === 'UNAUTHENTICATED' || 
           message.includes('authentication') || 
           message.includes('decoding signature') ||
           message.includes('token') ||
           message.includes('expired')) {
-        console.log('Token expiré ou invalide, redirection vers login...');
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          // Rediriger vers la page de login au lieu de recharger
-          window.location.href = '/';
+          window.location.href = '/errors/401';
+        }
+      }
+      // Erreur 400
+      if (extensions?.code === 'BAD_REQUEST' || message.includes('bad request') || message.includes('invalid')) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/errors/400';
+        }
+      }
+      // Erreur 404
+      if (extensions?.code === 'NOT_FOUND' || message.includes('not found')) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/errors/404';
+        }
+      }
+      // Erreur 500
+      if (extensions?.code === 'INTERNAL_SERVER_ERROR' || message.includes('server error')) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/errors/500';
         }
       }
     });
@@ -83,13 +98,18 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);
-    // Gérer les erreurs réseau liées à l'authentification
-    if (networkError.statusCode === 401) {
-      console.log('Erreur 401 - Token invalide, redirection vers login...');
-      if (typeof window !== 'undefined') {
+    // Gestion des erreurs réseau HTTP
+    if (typeof window !== 'undefined') {
+      if (networkError.statusCode === 400) {
+        window.location.href = '/errors/400';
+      } else if (networkError.statusCode === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/';
+        window.location.href = '/errors/401';
+      } else if (networkError.statusCode === 404) {
+        window.location.href = '/errors/404';
+      } else if (networkError.statusCode === 500) {
+        window.location.href = '/errors/500';
       }
     }
   }

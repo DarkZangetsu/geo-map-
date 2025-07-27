@@ -21,6 +21,9 @@ function LayoutContent({ children }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const pathname = usePathname();
 
+  // Ajout d'un état global d'erreur
+  const [errorCode, setErrorCode] = useState(null);
+
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
   // Fermer les dropdowns quand on clique ailleurs
@@ -59,6 +62,24 @@ function LayoutContent({ children }) {
         </body>
       </html>
     );
+  }
+
+  // Affichage dynamique de la page d'erreur
+  if (errorCode === 400) {
+    const Error400 = require('./errors/400').default;
+    return <Error400 />;
+  }
+  if (errorCode === 401) {
+    const Error401 = require('./errors/401').default;
+    return <Error401 />;
+  }
+  if (errorCode === 404) {
+    const Error404 = require('./errors/404').default;
+    return <Error404 />;
+  }
+  if (errorCode === 500) {
+    const Error500 = require('./errors/500').default;
+    return <Error500 />;
   }
 
   return (
