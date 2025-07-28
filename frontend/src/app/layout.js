@@ -8,7 +8,7 @@ import Toast from '../components/Toast';
 import { Toaster } from "@/components/ui/sonner"
 import './globals.css';
 import { AuthProvider, useAuth } from '../components/Providers';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getLogoUrl } from '../lib/utils';
 
 function LayoutContent({ children }) {
@@ -20,6 +20,7 @@ function LayoutContent({ children }) {
   const [showPersonalDropdown, setShowPersonalDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Ajout d'un état global d'erreur
   const [errorCode, setErrorCode] = useState(null);
@@ -29,6 +30,11 @@ function LayoutContent({ children }) {
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Vérifier si l'élément existe encore dans le DOM
+      if (!event.target || !document.contains(event.target)) {
+        return;
+      }
+      
       if (!event.target.closest('.dropdown-container')) {
         setShowGlobalDropdown(false);
         setShowPersonalDropdown(false);
@@ -37,13 +43,38 @@ function LayoutContent({ children }) {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  // Fermer le menu mobile lors du changement de route
   useEffect(() => {
     setShowMenu(false);
+
+    setShowGlobalDropdown(false);
+    setShowPersonalDropdown(false);
+    setShowUserDropdown(false);
+    setShowLogoutConfirm(false);
   }, [pathname]);
+
+  const handleLogout = async () => {
+    try {
+      setShowLogoutConfirm(false);
+      setShowUserDropdown(false);
+      setShowMenu(false);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      await logout();
+      
+      router.push('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      setShowLogoutConfirm(false);
+      setShowUserDropdown(false);
+      setShowMenu(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -62,24 +93,6 @@ function LayoutContent({ children }) {
         </body>
       </html>
     );
-  }
-
-  // Affichage dynamique de la page d'erreur
-  if (errorCode === 400) {
-    const Error400 = require('./errors/400').default;
-    return <Error400 />;
-  }
-  if (errorCode === 401) {
-    const Error401 = require('./errors/401').default;
-    return <Error401 />;
-  }
-  if (errorCode === 404) {
-    const Error404 = require('./errors/404').default;
-    return <Error404 />;
-  }
-  if (errorCode === 500) {
-    const Error500 = require('./errors/500').default;
-    return <Error500 />;
   }
 
   return (
@@ -117,16 +130,15 @@ function LayoutContent({ children }) {
                     <div className="flex gap-4">
                       <button
                         className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold transition-all duration-200 transform hover:scale-105"
-                        onClick={async () => {
-                          setShowLogoutConfirm(false);
-                          await logout();
-                        }}
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
                       >
                         Oui, me déconnecter
                       </button>
                       <button
                         className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all duration-200 transform hover:scale-105"
                         onClick={() => setShowLogoutConfirm(false)}
+                        disabled={isLoggingOut}
                       >
                         Annuler
                       </button>
