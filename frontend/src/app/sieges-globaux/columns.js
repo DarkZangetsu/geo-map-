@@ -101,13 +101,6 @@ export const siegesColumns = (onViewDetails, onViewMap) => [
     },
   },
   {
-    accessorKey: "Abréviation",
-    header: () => <div className="text-center">Abréviation</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
-    ),
-  },
-  {
     accessorKey: "Latitude",
     header: () => <div className="text-center">Latitude</div>,
     cell: ({ row }) => (

@@ -3,24 +3,6 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { getLogoUrl } from '../../lib/utils';
 
-// Ajout du mapping pour les pratiques
-const PRATIQUE_LABELS = {
-  structure_brise_vent: "Structure Brise-vent",
-  structure_pare_feu: "Structure Pare feu",
-  structures_antierosives: "Structures antiérosives",
-  structure_cultures_couloir: "Structure Cultures en Couloir/allée",
-  pratiques_taillage_coupe: "Pratiques de taillage, coupe et application engrais verts",
-  pratiques_couverture_sol: "Pratiques couverture du sol",
-  pratiques_conservation_eau: "Pratiques/structures conservation d'eau",
-  systeme_multi_etage: "Système multi-étage diversifié",
-  arbres_autochtones: "Arbres Autochtones",
-  production_epices: "Production épices",
-  production_bois_energie: "Production Bois énergie",
-  production_fruit: "Production fruit",
-  integration_cultures_vivrieres: "Intégration cultures vivrières",
-  integration_elevage: "Intégration d'élevage",
-};
-
 export const parcellesColumns = (onViewDetails, onViewMap) => [
   {
     accessorKey: "Nom site de référence",
@@ -56,6 +38,27 @@ export const parcellesColumns = (onViewDetails, onViewMap) => [
     ),
   },
   {
+    accessorKey: "Pratiques",
+    header: () => <div className="text-center">Pratiques</div>,
+    cell: ({ row }) => {
+      const pratiques = row.original.pratique ? row.original.pratique.split(',') : [];
+      if (!pratiques.length) return <div className="text-center">-</div>;
+      return (
+        <div className="flex justify-center">
+          <ul className="text-center inline-block max-w-xs">
+            {pratiques.map((p, idx) => {
+              const pratiqueTrim = p.trim();
+              const pratiqueAffiche = pratiqueTrim.length > 30 ? pratiqueTrim.slice(0, 30) + '...' : pratiqueTrim;
+              return (
+                <li key={idx} title={pratiqueTrim} className="truncate overflow-hidden whitespace-nowrap">{pratiqueAffiche}</li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    },
+  },
+  {
     id: "Institutions",
     header: "Institutions",
     cell: ({ row }) => {
@@ -71,20 +74,6 @@ export const parcellesColumns = (onViewDetails, onViewMap) => [
         </div>
       );
     },
-  },
-  {
-    accessorKey: "Abreviation",
-    header: () => <div className="text-center">Abréviation</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
-    ),
-  },
-  {
-    accessorKey: "superficie",
-    header: () => <div className="text-center">Superficie (ha)</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.superficie ? `${row.original.superficie} ha` : "-"}</div>
-    ),
   },
   {
     id: "actions",

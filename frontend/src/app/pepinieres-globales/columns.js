@@ -70,13 +70,6 @@ export const pepinieresColumns = (onViewDetails, onViewMap) => [
     },
   },
   {
-    accessorKey: "Abréviation",
-    header: () => <div className="text-center">Abréviation</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.user?.abreviation || "-"}</div>
-    ),
-  },
-  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
