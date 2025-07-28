@@ -251,7 +251,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                           <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
                             <span className="text-white text-sm">🌱</span>
                           </div>
-                          <h4 className="text-lg font-bold text-slate-800">Pratiques agricoles</h4>
+                          <h4 className="text-lg font-bold text-slate-800">Pratique</h4>
                           <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-bold">
                             {pratiques.length}
                           </span>
@@ -278,7 +278,7 @@ const ParcelleDetailModal = ({ parcelle, onClose }) => {
                         <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
                           <span className="text-white text-sm">👥</span>
                         </div>
-                        <h4 className="text-lg font-bold text-slate-800">Membre</h4>
+                        <h4 className="text-lg font-bold text-slate-800">Institution</h4>
                       </div>
                       <div className="flex items-center gap-4">
                         {parcelleComplete?.user?.logo && (
