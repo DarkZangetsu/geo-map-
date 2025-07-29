@@ -8,7 +8,7 @@ import SiegeMapModal from "@/components/SiegeMapModal";
 import { useState } from 'react';
 
 // Composant pour les actions avec le modal
-const ActionCell = ({ row, onViewDetails, onViewMap }) => {
+const ActionCell = ({ row }) => {
   const [showModal, setShowModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   return (
@@ -70,20 +70,6 @@ export const siegesColumns = (onViewDetails, onViewMap) => [
     ),
   },
   {
-    accessorKey: "Adresse",
-    header: () => <div className="text-center">Adresse</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.adresse}</div>
-    ),
-  },
-   {
-    accessorKey: "Projet rattaché",
-    header: () => <div className="text-center">Projet rattaché</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.nomProjet || "-"}</div>
-    ),
-  },
-  {
     id: "Institutions",
     header: "Institutions",
     cell: ({ row }) => {
@@ -101,17 +87,32 @@ export const siegesColumns = (onViewDetails, onViewMap) => [
     },
   },
   {
-    accessorKey: "Latitude",
-    header: () => <div className="text-center">Latitude</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.latitude || "-"}</div>
-    ),
+    accessorKey: "Personne Référente",
+    header: "Personne référente",
+    cell: ({ row }) => {
+      const p = row.original;
+      return (
+        <div>
+          <div className="text-sm font-medium">{p.nomPointContact || '-'}</div>
+          <div className="text-xs text-gray-500">{p.poste || '-'}</div>
+          <div className="text-xs text-gray-500">{p.telephone || '-'}</div>
+          <div className="text-xs text-gray-500">{p.email || '-'}</div>
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "Longitude",
-    header: () => <div className="text-center">Longitude</div>,
+    accessorKey: "Adresse",
+    header: () => <div className="text-center">Adresse</div>,
     cell: ({ row }) => (
-      <div className="text-center">{row.original.longitude || "-"}</div>
+      <div className="text-center">{row.original.adresse}</div>
+    ),
+  },
+   {
+    accessorKey: "Projet rattaché",
+    header: () => <div className="text-center">Projet rattaché</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nomProjet || "-"}</div>
     ),
   },
   {

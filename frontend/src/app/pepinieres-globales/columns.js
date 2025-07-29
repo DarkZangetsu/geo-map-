@@ -16,18 +16,21 @@ export const pepinieresColumns = (onViewDetails, onViewMap) => [
     ),
   },
   {
-    accessorKey: "adresse",
-    header: () => <div className="text-center">Adresse</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("adresse") || "-"}</div>
-    ),
-  },
-  {
-    accessorKey: "Projet rattaché",
-    header: () => <div className="text-center">Projet rattaché</div>,
-    cell: ({ row }) => (
-      <div className="text-center">{row.original.nomProjet || "-"}</div>
-    ),
+    id: "Institutions",
+    header: "Institutions",
+    cell: ({ row }) => {
+      const user = row.original.user;
+      return (
+        <div className="flex items-center">
+          {user?.logo && (
+            <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
+          )}
+          <div>
+            <div className="text-sm font-medium text-gray-900">{user?.nomInstitution}</div>
+          </div>
+        </div>
+      );
+    },
   },
   {
     id: "Gestionnaire",
@@ -53,21 +56,18 @@ export const pepinieresColumns = (onViewDetails, onViewMap) => [
     },
   },
   {
-    id: "Institutions",
-    header: "Institutions",
-    cell: ({ row }) => {
-      const user = row.original.user;
-      return (
-        <div className="flex items-center">
-          {user?.logo && (
-            <img src={getLogoUrl(user.logo)} alt="Logo" className="w-6 h-6 rounded-full mr-2" />
-          )}
-          <div>
-            <div className="text-sm font-medium text-gray-900">{user?.nomInstitution}</div>
-          </div>
-        </div>
-      );
-    },
+    accessorKey: "adresse",
+    header: () => <div className="text-center">Adresse</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("adresse") || "-"}</div>
+    ),
+  },
+  {
+    accessorKey: "Projet rattaché",
+    header: () => <div className="text-center">Projet rattaché</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.nomProjet || "-"}</div>
+    ),
   },
   {
     id: "actions",

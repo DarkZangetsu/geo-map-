@@ -115,9 +115,10 @@ export default function SiegesPage() {
             siege.adresse,
             siege.nomProjet,
             siege.user?.nomInstitution,
-            siege.user?.abreviation,
-            siege.latitude,
-            siege.longitude,
+            siege.nomPointContact,
+            siege.email,
+            siege.telephone,
+            siege.poste
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
