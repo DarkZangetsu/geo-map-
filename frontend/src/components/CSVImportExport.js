@@ -37,7 +37,7 @@ const CSVImportExport = ({ onImportSuccess }) => {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `Sites_de_reference_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', `parcelles_export_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -98,21 +98,23 @@ const CSVImportExport = ({ onImportSuccess }) => {
 
   const downloadTemplate = () => {
     const templateHeaders = [
-      'nom', 'superficie', 'pratique',
-      'nom_projet', 'description', 'geometrie'
+      'Nom', 'Nom Personne Référente', 'Poste', 'Téléphone', 'Email',
+      'Superficie', 'Pratique', 'Nom projet', 'Description', 'geometrie'
     ];
-    // Exemple de géométrie : liste de points [lon,lat],[lon,lat],...
+    
+    // Exemple de données avec géométrie (coordonnées pour Madagascar)
     const templateData = [
-      'Parcelle 1', '5.5', 'Structure Brise-vent',
-      'Projet Agroforestier', 'Parcelle bien exposée',
-      '[44.2834,-20.2967],[44.2847,-20.2967],[44.2847,-20.298],[44.2834,-20.298],[44.2834,-20.2967]'
+      'Parcelle Exemple', 'Jean Dupont', 'Responsable Terrain', '+261 32 12 34 56', 'jean.dupont@email.com',
+      '5.75', 'Agroforesterie, Cultures vivrières', 'Projet Agroécologique 2024', 'Parcelle bien exposée avec système agroforestier',
+      '[[47.5208,-18.8792],[47.5228,-18.8792],[47.5228,-18.8812],[47.5208,-18.8812],[47.5208,-18.8792]]'
     ];
+    
     const csvContent = [templateHeaders.join(','), templateData.join(',')].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'template_sites_de_reference.csv');
+    link.setAttribute('download', 'template_parcelles_import.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -121,13 +123,13 @@ const CSVImportExport = ({ onImportSuccess }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-6 text-gray-800 text-center">Import/Export CSV Sites de référence</h3>
+      <h3 className="text-xl font-semibold mb-6 text-gray-800 text-center">Import/Export CSV Parcelles</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Export Section */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-700">Exporter les sites de référence</h4>
+          <h4 className="text-lg font-medium text-gray-700">Exporter les parcelles</h4>
           <p className="text-sm text-gray-600">
-            Téléchargez toutes vos sites de référence au format CSV pour sauvegarder ou partager vos données.
+            Téléchargez toutes vos parcelles au format CSV pour sauvegarder ou partager vos données.
           </p>
           <button
             onClick={handleExport}
@@ -155,9 +157,9 @@ const CSVImportExport = ({ onImportSuccess }) => {
 
         {/* Import Section */}
         <div className="space-y-4">
-          <h4 className="text-lg font-medium text-gray-700">Importer des sites de référence</h4>
+          <h4 className="text-lg font-medium text-gray-700">Importer des parcelles</h4>
           <p className="text-sm text-gray-600">
-            Importez des sites de référence depuis un fichier CSV. Téléchargez d'abord le modèle pour voir le format attendu.
+            Importez des parcelles depuis un fichier CSV. Téléchargez d'abord le modèle pour voir le format attendu.
           </p>
           
           <div className="space-y-3">
@@ -228,15 +230,16 @@ const CSVImportExport = ({ onImportSuccess }) => {
       <div className="mt-6 p-4 bg-gray-50 rounded-md">
         <h5 className="text-sm font-medium text-gray-700 mb-2">Instructions :</h5>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Les champs <strong>nom</strong> et <strong>propriétaire</strong> sont obligatoires</li>
-          <li>• Les dates doivent être au format <strong>YYYY-MM-DD</strong> (ex: 2024-10-15)</li>
-          <li>• Les valeurs booléennes (irrigation, certifications) acceptent : Oui/Non, Yes/No, True/False, 1/0</li>
-          <li>• Les nombres décimaux utilisent le point comme séparateur (ex: 5.5)</li>
-          <li>• Les parcelles importées auront un polygone par défaut que vous pourrez modifier ensuite</li>
+          <li>• Le champ <strong>Nom</strong> est obligatoire</li>
+          <li>• La <strong>Superficie</strong> doit être un nombre décimal (ex: 5.75)</li>
+          <li>• Les <strong>Pratiques</strong> peuvent être multiples, séparées par des virgules</li>
+          <li>• La <strong>géométrie</strong> doit être au format liste de points [[lon,lat],[lon,lat],...]</li>
+          <li>• Tous les autres champs sont optionnels</li>
+          <li>• Les parcelles importées sans géométrie auront un polygone par défaut</li>
         </ul>
       </div>
     </div>
   );
 };
 
-export default CSVImportExport; 
+export default CSVImportExport;

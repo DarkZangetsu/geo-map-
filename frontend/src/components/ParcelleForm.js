@@ -8,8 +8,9 @@ import MapDrawModal from './MapDrawModal';
 import { Upload, X, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import ConfirmationDialog from './ConfirmationDialog';
 import * as turf from '@turf/turf';
+import { calculateArea, parseFile } from '@/lib/file-parser';
 
-const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0, mode = 'add' }) => {
+const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, mode = 'add' }) => {
   const { data: meData } = useQuery(GET_ME);
   const { data: myParcellesData } = useQuery(GET_MY_PARCELLES);
   const userAbreviation = meData?.me?.abreviation || '';
@@ -110,6 +111,10 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
       setImagePreviews(prev => [...prev, ...newPreviews]);
     } else if (type === 'checkbox') {
       setFormData(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'superficie') {
+      // Pour le champ superficie, s'assurer qu'on garde une valeur numérique ou vide
+      const numericValue = value === '' ? '' : value;
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -150,20 +155,22 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     return pratiques.join(', ');
   };
 
-  const handleGeojsonUpload = (e) => {
+  const handleGeojsonUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const geojsonData = JSON.parse(event.target.result);
-          setGeojson(geojsonData);
-          showSuccess('Fichier GeoJSON chargé avec succès');
-        } catch (error) {
-          showError('Erreur lors du chargement du fichier GeoJSON');
-        }
-      };
-      reader.readAsText(file);
+    if (!file) return;
+
+    try {
+      const geometry = await parseFile(file);
+      setGeojson(geometry);
+    
+      if (geometry && (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon')) {
+        const superficieHa = calculateArea(geometry);
+        setFormData(prev => ({ ...prev, superficie: superficieHa }));
+      }
+      showSuccess('Fichier chargé avec succès');
+    } catch (error) {
+      console.error('Erreur lors du chargement du fichier:', error);
+      showError(error.message || 'Erreur lors du chargement du fichier');
     }
   };
 
@@ -198,68 +205,76 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, parcellesCount = 0
     setShowConfirm(true);
   };
 
-  const handleConfirm = async () => {
-    setConfirmLoading(true);
-    let geojsonToUse = geojson;
-    if (showMapModal) {
-      geojsonToUse = null;
+  
+const handleConfirm = async () => {
+  setConfirmLoading(true);
+  let geojsonToUse = geojson;
+  if (showMapModal) {
+    geojsonToUse = null;
+  }
+  if (!geojsonToUse) {
+    showError('Veuillez fournir un fichier GeoJSON ou dessiner sur la carte.');
+    setConfirmLoading(false);
+    return;
+  }
+  try {
+    const imagesToSend = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
+    // Gestion suppression d'images existantes
+    let imagesToDelete = [];
+    if (mode === 'edit' && parcelle && Array.isArray(parcelle.images)) {
+      const currentIds = photos.filter(photo => photo.isExisting).map(photo => photo.id);
+      imagesToDelete = parcelle.images
+        .filter(img => !currentIds.includes(img.id))
+        .map(img => img.id);
     }
-    if (!geojsonToUse) {
-      showError('Veuillez fournir un fichier GeoJSON ou dessiner sur la carte.');
-      setConfirmLoading(false);
-      return;
-    }
-    try {
-      const imagesToSend = photos.filter(photo => !photo.isExisting).map(photo => photo.file);
-      // Gestion suppression d'images existantes
-      let imagesToDelete = [];
-      if (mode === 'edit' && parcelle && Array.isArray(parcelle.images)) {
-        const currentIds = photos.filter(photo => photo.isExisting).map(photo => photo.id);
-        imagesToDelete = parcelle.images
-          .filter(img => !currentIds.includes(img.id))
-          .map(img => img.id);
-      }
-      const variables = {
-        ...formData,
-        pratique: getPratiqueValue(),
-        geojson: JSON.stringify(geojsonToUse),
-        images: imagesToSend.length > 0 ? imagesToSend : null,
-        imagesToDelete: imagesToDelete.length > 0 ? imagesToDelete : null
-      };
-      if (mode === 'edit' && parcelle) {
-        // Mise à jour
-        const { data } = await updateParcelle({
-          variables: {
-            id: parcelle.id,
-            ...variables
-          }
-        });
-        if (data.updateParcelle.success) {
-          showSuccess('Site de référence mis à jour avec succès !');
-          onSuccess && onSuccess(data.updateParcelle.parcelle);
-        } else {
-          showError(data.updateParcelle.message);
+
+    // Préparer les variables avec conversion appropriée de la superficie
+    const variables = {
+      ...formData,
+      // Convertir la superficie en nombre ou null si vide
+      superficie: formData.superficie && formData.superficie !== '' 
+        ? parseFloat(formData.superficie) 
+        : null,
+      pratique: getPratiqueValue(),
+      geojson: JSON.stringify(geojsonToUse),
+      images: imagesToSend.length > 0 ? imagesToSend : null,
+      imagesToDelete: imagesToDelete.length > 0 ? imagesToDelete : null
+    };
+
+    if (mode === 'edit' && parcelle) {
+      // Mise à jour
+      const { data } = await updateParcelle({
+        variables: {
+          id: parcelle.id,
+          ...variables
         }
+      });
+      if (data.updateParcelle.success) {
+        showSuccess('Site de référence mis à jour avec succès !');
+        onSuccess && onSuccess(data.updateParcelle.parcelle);
       } else {
-        // Création
-        const { data } = await createParcelle({
-          variables: variables
-        });
-        if (data.createParcelle.success) {
-          showSuccess('Site de référence créé avec succès !');
-          onSuccess && onSuccess(data.createParcelle.parcelle);
-        } else {
-          showError(data.createParcelle.message);
-        }
+        showError(data.updateParcelle.message);
       }
-    } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
-      showError('Une erreur est survenue. Veuillez réessayer.');
-    } finally {
-      setConfirmLoading(false);
-      setShowConfirm(false);
+    } else {
+      // Création
+      const { data } = await createParcelle({
+        variables: variables
+      });
+      if (data.createParcelle.success) {
+        showSuccess('Site de référence créé avec succès !');
+        onSuccess && onSuccess(data.createParcelle.parcelle);
+      } else {
+        showError(data.createParcelle.message);
+      }
     }
-  };
+  } catch (error) {
+    console.error('Erreur lors de la soumission:', error);
+    showError('Une erreur est survenue. Veuillez réessayer.');
+  } finally {
+    setConfirmLoading(false);
+    setShowConfirm(false);
+  }
+};
 
   return (
     <>

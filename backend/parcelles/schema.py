@@ -543,11 +543,15 @@ class ImportParcellesCSV(graphene.Mutation):
             errors = []
             csv_content = csv_file.read().decode('utf-8')
             csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
             for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    if not row.get('Nom') or not row.get('Propriétaire'):
-                        errors.append(f"Ligne {row_num}: Nom et Propriétaire sont requis")
+                    # Validation des champs obligatoires
+                    if not row.get('Nom'):
+                        errors.append(f"Ligne {row_num}: Le nom est requis")
                         continue
+                    
+                    # Gestion de la superficie
                     superficie = None
                     if row.get('Superficie'):
                         try:
@@ -555,6 +559,7 @@ class ImportParcellesCSV(graphene.Mutation):
                         except:
                             errors.append(f"Ligne {row_num}: Superficie invalide")
                             continue
+                    
                     # Gestion de la géométrie
                     geojson = None
                     geometrie_str = row.get('geometrie', '').strip()
@@ -567,7 +572,6 @@ class ImportParcellesCSV(graphene.Mutation):
                                 geojson = {
                                     "type": "Feature",
                                     "geometry": geojson_candidate,
-                                    "properties": {}
                                 }
                         except Exception:
                             # Sinon, on suppose que c'est une liste de points
@@ -584,21 +588,23 @@ class ImportParcellesCSV(graphene.Mutation):
                                     "geometry": {
                                         "type": "Polygon",
                                         "coordinates": [coords]
-                                    },
-                                    "properties": {}
+                                    }
                                 }
                             except Exception:
                                 errors.append(f"Ligne {row_num}: Format de géométrie invalide")
                                 geojson = None
+                    
+                    # Si pas de géométrie fournie, créer une géométrie par défaut
                     if not geojson:
                         geojson = {
-                        "type": "Feature",
-                        "geometry": {
-                            "type": "Polygon",
-                            "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
-                        },
-                        "properties": {}
-                    }
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Polygon",
+                                "coordinates": [[[0, 0], [0, 0.001], [0.001, 0.001], [0.001, 0], [0, 0]]]
+                            }
+                        }
+                    
+                    # Création de la parcelle avec le nouveau modèle
                     parcelle = Parcelle.objects.create(
                         user=user,
                         nom=row['Nom'],
@@ -613,18 +619,23 @@ class ImportParcellesCSV(graphene.Mutation):
                         geojson=geojson
                     )
                     imported_count += 1
+                    
                 except Exception as e:
                     errors.append(f"Ligne {row_num}: {str(e)}")
                     continue
+            
+            # Message de retour
             message = f"Import terminé: {imported_count} parcelles importées"
             if errors:
                 message += f", {len(errors)} erreurs"
+            
             return ImportParcellesCSV(
                 success=True,
                 message=message,
                 imported_count=imported_count,
                 errors=errors
             )
+            
         except Exception as e:
             return ImportParcellesCSV(
                 success=False,
