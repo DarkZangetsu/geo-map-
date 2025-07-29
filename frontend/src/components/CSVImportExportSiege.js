@@ -145,7 +145,7 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
   link.setAttribute('href', url);
-  link.setAttribute('download', 'template_sieges.csv');
+  link.setAttribute('download', 'template_locaux.csv');
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();
