@@ -54,7 +54,7 @@ const ParcelleForm = ({ parcelle = null, onSuccess, onCancel, mode = 'add' }) =>
     { value: 'Production fruit', label: 'Production fruit' },
     { value: 'Intégration cultures vivrières', label: 'Intégration cultures vivrières' },
     { value: 'Intégration d\'élevage', label: 'Intégration d\'élevage' },
-    { value: 'Autres (saisir manuellement)', label: 'Autres (saisir manuellement)' }
+    { value: 'autres', label: 'Autres (saisir manuellement)' }
   ];
 
 
