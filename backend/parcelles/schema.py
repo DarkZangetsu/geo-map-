@@ -13,8 +13,6 @@ from decimal import Decimal
 from decimal import Decimal, InvalidOperation
 
 class UserType(DjangoObjectType):
-    firstName = graphene.String(source='first_name')
-    lastName = graphene.String(source='last_name')
     abreviation = graphene.String()
     nomInstitution = graphene.String(source='nom_institution')
     nomProjet = graphene.String(source='nom_projet')
@@ -97,23 +95,19 @@ class CreateUser(graphene.Mutation):
     class Arguments:
         email = graphene.String(required=True)
         password = graphene.String(required=True)
-        first_name = graphene.String()
-        last_name = graphene.String()
         role = graphene.String()
         logo = Upload()
         abreviation = graphene.String()
         nom_institution = graphene.String()
         nom_projet = graphene.String()
 
-    def mutate(self, info, email, password, first_name="", last_name="", role="membre", logo=None, abreviation="", nom_institution="", nom_projet=""):
+    def mutate(self, info, email, password, role="membre", logo=None, abreviation="", nom_institution="", nom_projet=""):
         try:
             if User.objects.filter(email=email).exists():
                 return CreateUser(success=False, message="Email déjà utilisé")
             user = User.objects.create_user(
                 email=email,
                 password=password,
-                first_name=first_name,
-                last_name=last_name,
                 role=role,
                 abreviation=abreviation,
                 nom_institution=nom_institution,

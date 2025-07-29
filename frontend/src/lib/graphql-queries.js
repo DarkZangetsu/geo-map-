@@ -6,8 +6,6 @@ export const GET_ME = gql`
     me {
       id
       email
-      firstName
-      lastName
       role
       logo
       abreviation
@@ -36,8 +34,6 @@ export const GET_MY_PARCELLES = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -71,8 +67,6 @@ export const GET_ALL_PARCELLES = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -106,8 +100,6 @@ export const GET_PARCELLE = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -127,8 +119,6 @@ export const GET_ALL_USERS = gql`
     allUsers {
       id
       email
-      firstName
-      lastName
       role
       logo
       abreviation
@@ -196,8 +186,6 @@ export const GET_ALL_SIEGES = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -236,8 +224,6 @@ export const GET_SIEGE = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -276,8 +262,6 @@ export const GET_MY_PEPINIERES = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -315,8 +299,6 @@ export const GET_ALL_PEPINIERES = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -354,8 +336,6 @@ export const GET_PEPINIERE = gql`
       user {
         id
         email
-        firstName
-        lastName
         logo
         abreviation
         nomInstitution
@@ -377,8 +357,6 @@ export const CREATE_USER = gql`
   mutation CreateUser(
     $email: String!
     $password: String!
-    $firstName: String
-    $lastName: String
     $abreviation: String
     $role: String
     $logo: Upload
@@ -388,8 +366,6 @@ export const CREATE_USER = gql`
     createUser(
       email: $email
       password: $password
-      firstName: $firstName
-      lastName: $lastName
       abreviation: $abreviation
       role: $role
       logo: $logo
@@ -401,8 +377,6 @@ export const CREATE_USER = gql`
       user {
         id
         email
-        firstName
-        lastName
         abreviation
         role
         logo
@@ -422,8 +396,6 @@ export const LOGIN_USER = gql`
       user {
         id
         email
-        firstName
-        lastName
         role
         logo
         nomInstitution
@@ -479,8 +451,6 @@ export const CREATE_PARCELLE = gql`
         user {
           id
           email
-          firstName
-          lastName
           logo
           abreviation
           nomInstitution
@@ -544,8 +514,6 @@ export const UPDATE_PARCELLE = gql`
         user {
           id
           email
-          firstName
-          lastName
           logo
           abreviation
           nomInstitution
@@ -588,8 +556,6 @@ export const TOKEN_AUTH_WITH_USER = gql`
       user {
         id
         email
-        firstName
-        lastName
         role
         logo
         nomInstitution
@@ -993,8 +959,6 @@ export const UPDATE_USER_ABREVIATION = gql`
       user {
         id
         abreviation
-        firstName
-        lastName
         email
         logo
         nomInstitution
@@ -1011,8 +975,6 @@ export const UPDATE_USER_LOGO = gql`
       message
       user {
         id
-        firstName
-        lastName
         email
         abreviation
         logo
