@@ -9,8 +9,8 @@ from .models import User, Parcelle, ParcelleImage, Siege, SiegeImage, Pepiniere,
 import csv
 import io
 import json
-from datetime import datetime
 from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 class UserType(DjangoObjectType):
     firstName = graphene.String(source='first_name')
@@ -730,47 +730,148 @@ class ImportSiegesCSV(graphene.Mutation):
             user = info.context.user
             imported_count = 0
             errors = []
+            
+            # Lire le contenu du fichier CSV
             csv_content = csv_file.read().decode('utf-8')
             csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
+            # Validation des en-têtes requis
+            required_headers = ['Nom', 'Adresse', 'Latitude', 'Longitude']
+            if not all(header in csv_reader.fieldnames for header in required_headers):
+                missing_headers = [h for h in required_headers if h not in csv_reader.fieldnames]
+                return ImportSiegesCSV(
+                    success=False,
+                    message=f"En-têtes manquants: {', '.join(missing_headers)}",
+                    imported_count=0,
+                    errors=[f"En-têtes manquants: {', '.join(missing_headers)}"]
+                )
+            
+            # Traitement des lignes
             for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    if not row.get('Nom') or not row.get('Adresse') or not row.get('Latitude') or not row.get('Longitude'):
+                    # Validation des champs obligatoires
+                    nom = row.get('Nom', '').strip()
+                    adresse = row.get('Adresse', '').strip()
+                    latitude_str = row.get('Latitude', '').strip()
+                    longitude_str = row.get('Longitude', '').strip()
+                    
+                    if not nom or not adresse or not latitude_str or not longitude_str:
                         errors.append(f"Ligne {row_num}: Nom, Adresse, Latitude et Longitude sont requis")
                         continue
+                    
+                    # Validation et conversion des coordonnées avec Decimal
                     try:
-                        latitude = float(row['Latitude'].replace(',', '.'))
-                        longitude = float(row['Longitude'].replace(',', '.'))
-                    except:
-                        errors.append(f"Ligne {row_num}: latitude ou longitude invalide")
+                        # Remplacer les virgules par des points et nettoyer les espaces
+                        latitude_clean = latitude_str.replace(',', '.').replace(' ', '')
+                        longitude_clean = longitude_str.replace(',', '.').replace(' ', '')
+                        
+                        # Conversion en Decimal (plus précis que float pour les coordonnées)
+                        latitude = Decimal(latitude_clean)
+                        longitude = Decimal(longitude_clean)
+                        
+                        # Validation des limites géographiques
+                        if not (Decimal('-90') <= latitude <= Decimal('90')):
+                            errors.append(f"Ligne {row_num}: Latitude doit être entre -90 et 90 (valeur: {latitude})")
+                            continue
+                        if not (Decimal('-180') <= longitude <= Decimal('180')):
+                            errors.append(f"Ligne {row_num}: Longitude doit être entre -180 et 180 (valeur: {longitude})")
+                            continue
+                            
+                    except (ValueError, InvalidOperation, TypeError) as e:
+                        errors.append(f"Ligne {row_num}: Format de coordonnées invalide - Latitude: '{latitude_str}', Longitude: '{longitude_str}' - Erreur: {str(e)}")
                         continue
-                    siege = Siege.objects.create(
+                    
+                    # Validation de la catégorie
+                    categorie = row.get('Catégorie', 'social').strip().lower()
+                    valid_categories = ['social', 'regional', 'technique', 'provisoire']
+                    if categorie not in valid_categories:
+                        errors.append(f"Ligne {row_num}: Catégorie invalide '{categorie}'. Valeurs possibles: {', '.join(valid_categories)}")
+                        continue
+                    
+                    # Validation de l'email si fourni
+                    email = row.get('Email', '').strip()
+                    if email and '@' not in email:
+                        errors.append(f"Ligne {row_num}: Format d'email invalide '{email}'")
+                        continue
+                    
+                    # Validation de la longueur des champs
+                    if len(nom) > 100:
+                        errors.append(f"Ligne {row_num}: Le nom est trop long (max 100 caractères)")
+                        continue
+                    if len(adresse) > 255:
+                        errors.append(f"Ligne {row_num}: L'adresse est trop longue (max 255 caractères)")
+                        continue
+                    
+                    # Préparation des champs optionnels
+                    description = row.get('Description', '').strip()
+                    nom_point_contact = row.get('Nom Point Contact', '').strip()
+                    poste = row.get('Poste', '').strip()
+                    telephone = row.get('Téléphone', '').strip()
+                    nom_projet = row.get('Nom Projet', '').strip()
+                    horaire_matin = row.get('Horaire Matin', '').strip()
+                    horaire_apres_midi = row.get('Horaire Après-midi', '').strip()
+                    
+                    # Validation des longueurs des champs optionnels
+                    if len(nom_point_contact) > 100:
+                        errors.append(f"Ligne {row_num}: Le nom du point de contact est trop long (max 100 caractères)")
+                        continue
+                    if len(poste) > 100:
+                        errors.append(f"Ligne {row_num}: Le poste est trop long (max 100 caractères)")
+                        continue
+                    if len(telephone) > 20:
+                        errors.append(f"Ligne {row_num}: Le téléphone est trop long (max 20 caractères)")
+                        continue
+                    if len(nom_projet) > 200:
+                        errors.append(f"Ligne {row_num}: Le nom du projet est trop long (max 200 caractères)")
+                        continue
+                    if len(horaire_matin) > 100:
+                        errors.append(f"Ligne {row_num}: L'horaire matin est trop long (max 100 caractères)")
+                        continue
+                    if len(horaire_apres_midi) > 100:
+                        errors.append(f"Ligne {row_num}: L'horaire après-midi est trop long (max 100 caractères)")
+                        continue
+                    
+                    # Création du siège
+                    Siege.objects.create(
                         user=user,
-                        nom=row['Nom'],
-                        adresse=row['Adresse'],
+                        nom=nom,
+                        adresse=adresse,
                         latitude=latitude,
                         longitude=longitude,
-                        description=row.get('Description', ''),
-                        categorie=row.get('Catégorie', 'social'),
-                        nom_point_contact=row.get('Nom Point Contact', ''),
-                        poste=row.get('Poste', ''),
-                        telephone=row.get('Téléphone', ''),
-                        email=row.get('Email', ''),
-                        horaire_matin=row.get('Horaire Matin', ''),
-                        horaire_apres_midi=row.get('Horaire Après-midi', '')
+                        description=description,
+                        categorie=categorie,
+                        nom_point_contact=nom_point_contact,
+                        poste=poste,
+                        telephone=telephone,
+                        email=email,
+                        nom_projet=nom_projet,
+                        horaire_matin=horaire_matin,
+                        horaire_apres_midi=horaire_apres_midi
                     )
                     imported_count += 1
+                    
                 except Exception as e:
-                    errors.append(f"Ligne {row_num}: {str(e)}")
+                    errors.append(f"Ligne {row_num}: Erreur lors de la création - {str(e)}")
                     continue
-            message = f"Import terminé: {imported_count} sièges importés"
+            
+            # Message de retour
+            if imported_count == 0:
+                message = "Aucun siège n'a pu être importé"
+                success = False
+            else:
+                message = f"Import terminé: {imported_count} siège(s) importé(s)"
+                success = True
+                
             if errors:
-                message += f", {len(errors)} erreurs"
+                message += f", {len(errors)} erreur(s)"
+            
             return ImportSiegesCSV(
-                success=True,
+                success=success,
                 message=message,
                 imported_count=imported_count,
                 errors=errors
             )
+            
         except Exception as e:
             return ImportSiegesCSV(
                 success=False,
@@ -992,52 +1093,132 @@ class ImportPepinieresCSV(graphene.Mutation):
     def mutate(self, info, csv_file):
         try:
             user = info.context.user
-            content = csv_file.read().decode('utf-8')
-            csv_data = csv.DictReader(io.StringIO(content))
-            
             imported_count = 0
             errors = []
             
-            for row in csv_data:
+            # Lire le contenu du fichier CSV
+            csv_content = csv_file.read().decode('utf-8')
+            csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
+            # Validation des en-têtes requis
+            required_headers = ['Nom', 'Adresse', 'Latitude', 'Longitude']
+            if not all(header in csv_reader.fieldnames for header in required_headers):
+                missing_headers = [h for h in required_headers if h not in csv_reader.fieldnames]
+                return ImportPepinieresCSV(
+                    success=False,
+                    message=f"En-têtes manquants: {', '.join(missing_headers)}",
+                    imported_count=0,
+                    errors=[f"En-têtes manquants: {', '.join(missing_headers)}"]
+                )
+            
+            # Traitement des lignes
+            for row_num, row in enumerate(csv_reader, start=2):
                 try:
-                    # Validation des champs requis
-                    if not row.get('Nom') or not row.get('Adresse'):
-                        errors.append(f"Ligne {imported_count + 1}: Nom et Adresse sont requis")
+                    # Validation des champs obligatoires
+                    nom = row.get('Nom', '').strip()
+                    adresse = row.get('Adresse', '').strip()
+                    latitude_str = row.get('Latitude', '').strip()
+                    longitude_str = row.get('Longitude', '').strip()
+                    
+                    if not nom or not adresse or not latitude_str or not longitude_str:
+                        errors.append(f"Ligne {row_num}: Nom, Adresse, Latitude et Longitude sont requis")
                         continue
                     
-                    # Conversion des coordonnées
+                    # Validation et conversion des coordonnées avec Decimal
                     try:
-                        latitude = Decimal(row.get('Latitude', '0'))
-                        longitude = Decimal(row.get('Longitude', '0'))
-                    except (ValueError, TypeError):
-                        latitude = Decimal('0')
-                        longitude = Decimal('0')
+                        # Remplacer les virgules par des points et nettoyer les espaces
+                        latitude_clean = latitude_str.replace(',', '.').replace(' ', '')
+                        longitude_clean = longitude_str.replace(',', '.').replace(' ', '')
+                        
+                        # Conversion en Decimal (plus précis que float pour les coordonnées)
+                        latitude = Decimal(latitude_clean)
+                        longitude = Decimal(longitude_clean)
+                        
+                        # Validation des limites géographiques
+                        if not (Decimal('-90') <= latitude <= Decimal('90')):
+                            errors.append(f"Ligne {row_num}: Latitude doit être entre -90 et 90 (valeur: {latitude})")
+                            continue
+                        if not (Decimal('-180') <= longitude <= Decimal('180')):
+                            errors.append(f"Ligne {row_num}: Longitude doit être entre -180 et 180 (valeur: {longitude})")
+                            continue
+                            
+                    except (ValueError, InvalidOperation, TypeError) as e:
+                        errors.append(f"Ligne {row_num}: Format de coordonnées invalide - Latitude: '{latitude_str}', Longitude: '{longitude_str}' - Erreur: {str(e)}")
+                        continue
                     
-                    pepiniere = Pepiniere.objects.create(
+                    # Validation de l'email si fourni
+                    email_gestionnaire = row.get('Email Gestionnaire', '').strip()
+                    if email_gestionnaire and '@' not in email_gestionnaire:
+                        errors.append(f"Ligne {row_num}: Format d'email gestionnaire invalide '{email_gestionnaire}'")
+                        continue
+                    
+                    # Validation de la longueur des champs obligatoires
+                    if len(nom) > 100:
+                        errors.append(f"Ligne {row_num}: Le nom est trop long (max 100 caractères)")
+                        continue
+                    if len(adresse) > 255:
+                        errors.append(f"Ligne {row_num}: L'adresse est trop longue (max 255 caractères)")
+                        continue
+                    
+                    # Préparation des champs optionnels
+                    description = row.get('Description', '').strip()
+                    nom_gestionnaire = row.get('Nom Gestionnaire', '').strip()
+                    poste_gestionnaire = row.get('Poste Gestionnaire', '').strip()
+                    telephone_gestionnaire = row.get('Téléphone Gestionnaire', '').strip()
+                    especes_produites = row.get('Espèces Produites', '').strip()
+                    quantite_production_generale = row.get('Quantité Production Générale', '').strip()
+                    nom_projet = row.get('Nom Projet', '').strip()
+                    
+                    # Validation des longueurs des champs optionnels
+                    if len(nom_gestionnaire) > 100:
+                        errors.append(f"Ligne {row_num}: Le nom du gestionnaire est trop long (max 100 caractères)")
+                        continue
+                    if len(poste_gestionnaire) > 100:
+                        errors.append(f"Ligne {row_num}: Le poste du gestionnaire est trop long (max 100 caractères)")
+                        continue
+                    if len(telephone_gestionnaire) > 20:
+                        errors.append(f"Ligne {row_num}: Le téléphone du gestionnaire est trop long (max 20 caractères)")
+                        continue
+                    if len(nom_projet) > 200:
+                        errors.append(f"Ligne {row_num}: Le nom du projet est trop long (max 200 caractères)")
+                        continue
+                    
+                    # Création de la pépinière
+                    Pepiniere.objects.create(
                         user=user,
-                        nom=row.get('Nom', ''),
-                        adresse=row.get('Adresse', ''),
+                        nom=nom,
+                        adresse=adresse,
                         latitude=latitude,
                         longitude=longitude,
-                        description=row.get('Description', ''),
-                        categorie=row.get('Catégorie', 'social'),
-                        nom_gestionnaire=row.get('Nom Gestionnaire', ''),
-                        poste_gestionnaire=row.get('Poste Gestionnaire', ''),
-                        telephone_gestionnaire=row.get('Téléphone Gestionnaire', ''),
-                        email_gestionnaire=row.get('Email Gestionnaire', ''),
-                        especes_produites=row.get('Espèces Produites', ''),
-                        quantite_production_generale=row.get('Quantité Production Générale', ''),
-                        nom_projet=row.get('Nom projet', ''),
+                        description=description,
+                        nom_gestionnaire=nom_gestionnaire,
+                        poste_gestionnaire=poste_gestionnaire,
+                        telephone_gestionnaire=telephone_gestionnaire,
+                        email_gestionnaire=email_gestionnaire,
+                        especes_produites=especes_produites,
+                        quantite_production_generale=quantite_production_generale,
+                        nom_projet=nom_projet
                     )
-                    
                     imported_count += 1
                     
                 except Exception as e:
-                    errors.append(f"Ligne {imported_count + 1}: {str(e)}")
+                    errors.append(f"Ligne {row_num}: Erreur lors de la création - {str(e)}")
+                    continue
+            
+            # Message de retour
+            if imported_count == 0:
+                message = "Aucune pépinière n'a pu être importée"
+                success = False
+            else:
+                message = f"Import terminé: {imported_count} pépinière(s) importée(s)"
+                success = True
+                
+            if errors:
+                message += f", {len(errors)} erreur(s)"
             
             return ImportPepinieresCSV(
-                success=True,
-                message=f"{imported_count} pépinières importées avec succès",
+                success=success,
+                message=message,
                 imported_count=imported_count,
                 errors=errors
             )

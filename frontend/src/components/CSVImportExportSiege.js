@@ -84,19 +84,73 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
   };
 
   const downloadTemplate = () => {
-    const templateHeaders = ['nom', 'adresse', 'latitude', 'longitude', 'description'];
-    const templateData = ['Siège principal', '123 rue de la Ferme', '48.8566', '2.3522', 'Siège social principal'];
-    const csvContent = [templateHeaders.join(','), templateData.join(',')].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'template_sieges.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  // En-têtes correspondant exactement aux champs attendus par la mutation
+  const templateHeaders = [
+    'Nom',
+    'Adresse', 
+    'Latitude', 
+    'Longitude', 
+    'Description',
+    'Catégorie',
+    'Nom Point Contact',
+    'Poste',
+    'Téléphone',
+    'Email',
+    'Nom Projet',
+    'Horaire Matin',
+    'Horaire Après-midi'
+  ];
+  
+  // Données d'exemple avec des coordonnées correctement formatées
+  const templateData = [
+    '"Siège Principal Paris"',
+    '"123 Avenue des Champs-Élysées, 75008 Paris"',
+    '48.866667',  // Format décimal sans guillemets
+    '2.333333',   // Format décimal sans guillemets
+    '"Siège social principal de l\'entreprise"',
+    'social',
+    '"Jean Dupont"',
+    '"Directeur Général"',
+    '"+33 1 23 45 67 89"',
+    'jean.dupont@entreprise.com',
+    '"Projet Alpha"',
+    '"08:00 - 12:00"',
+    '"14:00 - 18:00"'
+  ];
+  
+  // Exemple avec différents formats de coordonnées pour montrer la flexibilité
+  const templateData2 = [
+    '"Siège Régional Lyon"',
+    '"Place Bellecour, 69002 Lyon"',
+    '45,764043',  
+    '4,835659', 
+    '"Siège régional pour le Sud-Est"',
+    'regional',
+    '"Marie Martin"',
+    '"Responsable Régionale"',
+    '"+33 4 78 90 12 34"',
+    'marie.martin@entreprise.com',
+    '"Projet Beta"',
+    '"09:00 - 12:30"',
+    '"13:30 - 17:30"'
+  ];
+  
+  const csvContent = [
+    templateHeaders.join(','),
+    templateData.join(','),
+    templateData2.join(',')
+  ].join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'template_sieges.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
   return (
     <div>
@@ -169,17 +223,17 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Import en cours...
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Importer le CSV
-              </>
-            )}
+                  </svg>
+                  Import en cours...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Importer le CSV
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -201,13 +255,15 @@ const CSVImportExportSiege = ({ onImportSuccess }) => {
       <div className="mt-6 p-4 bg-gray-50 rounded-md">
         <h5 className="text-sm font-medium text-gray-700 mb-2">Instructions :</h5>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Les champs <strong>nom</strong>, <strong>adresse</strong>, <strong>latitude</strong> et <strong>longitude</strong> sont obligatoires</li>
+          <li>• Les champs <strong>Nom</strong>, <strong>Adresse</strong>, <strong>Latitude</strong> et <strong>Longitude</strong> sont obligatoires</li>
           <li>• Les coordonnées doivent être des nombres (ex: 48.8566, 2.3522)</li>
-          <li>• Le champ description est optionnel</li>
+          <li>• Les champs optionnels : Description, Catégorie, Nom Point Contact, Poste, Téléphone, Email, Nom Projet, Horaire Matin, Horaire Après-midi</li>
+          <li>• Catégories possibles : social, regional, technique, provisoire (défaut: social)</li>
+          <li>• L'utilisateur sera automatiquement associé lors de l'enregistrement</li>
         </ul>
       </div>
     </div>
   );
 };
 
-export default CSVImportExportSiege; 
+export default CSVImportExportSiege;
