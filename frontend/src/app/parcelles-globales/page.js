@@ -90,21 +90,36 @@ export default function ParcellesPage() {
   const { data: usersData, loading: usersLoading, error: usersError } = useQuery(GET_ALL_USERS);
 
   // Filtrage des parcelles selon les membres sélectionnés
+
   useEffect(() => {
     if (parcellesData?.allParcelles) {
       let filtered = parcellesData.allParcelles;
+      
       // Filtre par membre
       if (selectedMembers.length > 0) {
         filtered = filtered.filter(parcelle => selectedMembers.includes(parcelle.user.id));
       }
-      // Filtre par pratique
+      
+      // Filtre par pratique - CORRECTION ICI
       if (selectedPratiques.length > 0) {
-        filtered = filtered.filter(parcelle =>
-          selectedPratiques.some(sel =>
-            (parcelle.pratique || "").toLowerCase().replace(/\s+/g, "") === sel.toLowerCase().replace(/\s+/g, "")
-          )
-        );
+        filtered = filtered.filter(parcelle => {
+          if (!parcelle.pratique) return false;
+          
+          // Diviser les pratiques de la parcelle par virgule et nettoyer les espaces
+          const parcellesPratiques = parcelle.pratique
+            .split(',')
+            .map(p => p.trim().toLowerCase().replace(/\s+/g, ""));
+          
+          // Vérifier si au moins une pratique sélectionnée correspond
+          return selectedPratiques.some(selectedPratique => {
+            const cleanSelected = selectedPratique.toLowerCase().replace(/\s+/g, "");
+            return parcellesPratiques.some(parcellePratique => 
+              parcellePratique.includes(cleanSelected) || cleanSelected.includes(parcellePratique)
+            );
+          });
+        });
       }
+      
       // Recherche globale sur toutes les colonnes principales
       if (searchValue.trim() !== "") {
         const lowerSearch = searchValue.toLowerCase();
@@ -112,17 +127,15 @@ export default function ParcellesPage() {
           return [
             parcelle.nom,
             parcelle.nomProjet,
-            parcelle.user?.nomInstitution,
-            parcelle.user?.abreviation,
-            parcelle.superficie,
+            parcelle.pratique,
             parcelle.nomPersonneReferente,
             parcelle.poste,
             parcelle.telephone,
             parcelle.email
-
           ].some(val => (val || "").toString().toLowerCase().includes(lowerSearch));
         });
       }
+      
       setFilteredParcelles(filtered);
       // Réinitialiser à la première page quand les filtres changent
       setCurrentPage(1);
