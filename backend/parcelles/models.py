@@ -44,6 +44,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.email} ({self.role})"
+    class Meta : 
+        verbose_name = "Utilisateur"
+        verbose_name_plural = "Utilisateurs"
 
 class Parcelle(models.Model):
     # Informations de base
@@ -80,6 +83,8 @@ class Parcelle(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        verbose_name = "Site de référence"
+        verbose_name_plural = "Sites de référence"
 
 class ParcelleImage(models.Model):
     parcelle = models.ForeignKey(Parcelle, on_delete=models.CASCADE, related_name='images')
@@ -91,6 +96,8 @@ class ParcelleImage(models.Model):
     
     class Meta:
         ordering = ['ordre', 'created_at']
+        verbose_name = "Images du site de référence"
+        verbose_name_plural = "Images des sites de référence"
     
     def __str__(self):
         return f"Image {self.ordre} - {self.parcelle.nom}"
@@ -129,6 +136,9 @@ class Siege(models.Model):
 
     def __str__(self):
         return f"{self.nom} - {self.user.email}"
+    class Meta : 
+        verbose_name = "Local"
+        verbose_name_plural = "Locaux"
 
 class SiegeImage(models.Model):
     siege = models.ForeignKey(Siege, on_delete=models.CASCADE, related_name='photos_batiment')
@@ -140,6 +150,8 @@ class SiegeImage(models.Model):
     
     class Meta:
         ordering = ['ordre', 'created_at']
+        verbose_name = "Images du local"
+        verbose_name_plural = "Images des locaux"
     
     def __str__(self):
         return f"Photo {self.ordre} - {self.siege.nom}"
@@ -177,6 +189,8 @@ class PepiniereImage(models.Model):
     
     class Meta:
         ordering = ['ordre', 'created_at']
+        verbose_name = "Images de pépinière"
+        verbose_name_plural = "Images des pépinières"
     
     def __str__(self):
         return f"Photo {self.ordre} - {self.pepiniere.nom}"

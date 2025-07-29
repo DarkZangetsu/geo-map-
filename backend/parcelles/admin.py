@@ -6,6 +6,15 @@ class ParcelleImageInline(admin.TabularInline):
     model = ParcelleImage
     extra = 1
     fields = ('image', 'titre', 'description', 'ordre')
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
@@ -60,6 +69,19 @@ class ParcelleAdmin(admin.ModelAdmin):
         }),
     )
     inlines = [ParcelleImageInline]
+    
+    class Meta:
+        verbose_name = "Site de référence"
+        verbose_name_plural = "Sites de référence"
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(ParcelleImage)
 class ParcelleImageAdmin(admin.ModelAdmin):
@@ -80,11 +102,29 @@ class ParcelleImageAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('created_at',)
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class SiegeImageInline(admin.TabularInline):
     model = SiegeImage
     extra = 1
     fields = ('image', 'titre', 'description', 'ordre')
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Siege)
 class SiegeAdmin(admin.ModelAdmin):
@@ -112,6 +152,19 @@ class SiegeAdmin(admin.ModelAdmin):
         }),
     )
     inlines = [SiegeImageInline]
+    
+    class Meta:
+        verbose_name = "Local"
+        verbose_name_plural = "Locaux"
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(SiegeImage)
 class SiegeImageAdmin(admin.ModelAdmin):
@@ -132,11 +185,29 @@ class SiegeImageAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('created_at',)
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class PepiniereImageInline(admin.TabularInline):
     model = PepiniereImage
     extra = 1
     fields = ('image', 'titre', 'description', 'ordre')
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Pepiniere)
 class PepiniereAdmin(admin.ModelAdmin):
@@ -167,6 +238,15 @@ class PepiniereAdmin(admin.ModelAdmin):
         }),
     )
     inlines = [PepiniereImageInline]
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(PepiniereImage)
 class PepiniereImageAdmin(admin.ModelAdmin):
@@ -187,3 +267,12 @@ class PepiniereImageAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('created_at',)
+    
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
