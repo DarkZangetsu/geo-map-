@@ -1,4 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+admin.site.unregister(Group)
+admin.site.index_title = "Alliance Agroforesterie"
+admin.site.site_title = "Alliance Agroforesterie"
+admin.site.site_header = "Alliance Agroforesterie"
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Parcelle, ParcelleImage, Siege, SiegeImage, Pepiniere, PepiniereImage
 
@@ -18,24 +23,23 @@ class ParcelleImageInline(admin.TabularInline):
 
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
-    list_display = ('email', 'first_name', 'last_name', 'role', 'is_staff', 'date_joined')
+    list_display = ('email','nom_institution','role', 'is_staff', 'date_joined')
     list_filter = ('role', 'is_staff', 'is_superuser', 'date_joined')
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('-date_joined',)
     readonly_fields = ('last_login', 'date_joined')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Informations personnelles', {'fields': ('first_name', 'last_name', 'role', 'logo', 'abreviation', 'nom_institution', 'nom_projet')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Informations personnelles', {'fields': ('role', 'logo', 'abreviation', 'nom_institution', 'nom_projet')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         ('Dates importantes', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'role', 'logo', 'abreviation', 'nom_institution', 'nom_projet', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'fields': ('email', 'password1', 'password2','role', 'logo', 'abreviation', 'nom_institution', 'nom_projet', 'is_active', 'is_staff', 'is_superuser'),
         }),
     )
-    filter_horizontal = ('groups', 'user_permissions')
 
 @admin.register(Parcelle)
 class ParcelleAdmin(admin.ModelAdmin):
