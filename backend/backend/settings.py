@@ -14,6 +14,11 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+import pymysql
+pymysql.install_as_MySQLdb()
+from decouple import config
+
+
 
 load_dotenv()
 
@@ -34,10 +39,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'alliance-agroforesterie.vercel.app',
-    'geo-map-o6k0.onrender.com',
-    '.onrender.com',
-    '.vercel.app',
+    'allianceagroforesterie.mg',
     '0.0.0.0',
 ]
 
@@ -94,11 +96,34 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 import dj_database_url
 
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+#     )
+# }
+
 DATABASES = {
-    'default': dj_database_url.parse(
-        os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}')
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQL_DB', 'allianc4_allianceagroBD'),
+        'USER': os.getenv('MYSQL_USER', 'allianc4_allianceagroBD'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'XHB2YTrxtrGpHRsbRcQF'),
+        'HOST': os.getenv('MYSQL_HOST', 'localhost'),
+        'PORT': os.getenv('MYSQL_PORT', '3306'),
+    }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': config('DB_ENGINE'),
+#         'NAME': config('DB_NAME'),
+#         'USER': config('DB_USER'),
+#         'PASSWORD': config('DB_PASSWORD'),
+#         'HOST': config('DB_HOST'),
+#         'PORT': config('DB_PORT'),
+#     }
+# }
+
 
 # Exemple de configuration PostgreSQL (décommentez et adaptez si besoin)
 # DATABASES = {
@@ -203,10 +228,7 @@ def get_list_env(var, default=None):
     return default or []
 
 CORS_ALLOWED_ORIGINS = get_list_env('CORS_ALLOWED_ORIGINS', [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://alliance-agroforesterie.vercel.app",
-    'localhost:8000',
+    "https://allianceagroforesterie.mg",
 ])
 
 CORS_ALLOW_CREDENTIALS = True
@@ -249,7 +271,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 CSRF_TRUSTED_ORIGINS = get_list_env('CSRF_TRUSTED_ORIGINS', [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://geo-map-o6k0.onrender.com",
+    "allianceagroforesterie.mg",
 ])
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
