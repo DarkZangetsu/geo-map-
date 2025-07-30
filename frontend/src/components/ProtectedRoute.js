@@ -6,18 +6,15 @@ import { useAuth } from './Providers';
 import { authUtils } from '../lib/utils';
 
 export default function ProtectedRoute({ children, requireAuth = true }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est connecté
     const checkAuth = () => {
       const token = authUtils.getToken();
       const savedUser = authUtils.getUser();
       const path = typeof window !== 'undefined' ? window.location.pathname : '';
-      // Si aucun token ou utilisateur, ou si le token est expiré
       if (!token || !savedUser || authUtils.isTokenExpired(token)) {
-        console.log('Utilisateur non authentifié, redirection vers login...');
         authUtils.clearAuthData();
         if (path !== '/login' && path !== '/register') {
           router.push('/login');
@@ -26,7 +23,6 @@ export default function ProtectedRoute({ children, requireAuth = true }) {
       }
     };
 
-    // Vérifier l'authentification après le chargement
     if (!isLoading) {
       if (requireAuth && !isAuthenticated) {
         checkAuth();
@@ -34,7 +30,7 @@ export default function ProtectedRoute({ children, requireAuth = true }) {
     }
   }, [isLoading, isAuthenticated, requireAuth, router]);
 
-  // Afficher un loader pendant la vérification
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">

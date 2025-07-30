@@ -17,7 +17,6 @@ export function useAuthGuard(requireAuth = true) {
       const path = typeof window !== 'undefined' ? window.location.pathname : '';
       // Vérifier si l'authentification est requise et si l'utilisateur n'est pas connecté
       if (requireAuth && (!token || !savedUser || authUtils.isTokenExpired(token))) {
-        console.log('Authentification requise mais utilisateur non connecté, redirection...');
         authUtils.clearAuthData();
         if (path !== '/login' && path !== '/register') {
           router.push('/login');

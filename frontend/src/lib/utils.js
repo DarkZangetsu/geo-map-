@@ -26,15 +26,11 @@ export const authUtils = {
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      console.log('Données d\'authentification stockées');
       
       // Décoder et afficher les informations du token
       try {
         const decoded = jwtDecode(token);
-        console.log('Token décodé:', decoded);
-        console.log('Expiration:', new Date(decoded.exp * 1000).toLocaleString());
       } catch (error) {
-        console.error('Erreur lors du décodage du token:', error);
       }
     }
   },
@@ -75,7 +71,6 @@ export const authUtils = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      console.log('Données d\'authentification supprimées');
     }
   },
 
@@ -86,15 +81,10 @@ export const authUtils = {
     try {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      
-      console.log('Vérification du token:');
-      console.log('  - Expiration:', new Date(decoded.exp * 1000).toLocaleString());
-      console.log('  - Temps actuel:', new Date(currentTime * 1000).toLocaleString());
-      console.log('  - Expiré:', decoded.exp < currentTime);
+    
       
       return decoded.exp < currentTime;
     } catch (error) {
-      console.error('Erreur lors de la vérification du token:', error);
       return true;
     }
   },
@@ -105,10 +95,8 @@ export const authUtils = {
     
     try {
       const decoded = jwtDecode(token);
-      console.log('Token décodé:', decoded);
       return decoded;
     } catch (error) {
-      console.error('Erreur lors du décodage:', error);
       return null;
     }
   },
@@ -116,17 +104,11 @@ export const authUtils = {
   // Vérifier la validité du token
   validateToken: (token) => {
     if (!token || typeof token !== 'string' || token.trim() === '') {
-      console.log('Aucun token fourni ou token non valide');
       return false;
     }
     try {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      console.log('Validation du token:');
-      console.log('  - Payload:', decoded);
-      console.log('  - Expiration:', new Date(decoded.exp * 1000).toLocaleString());
-      console.log('  - Temps actuel:', new Date(currentTime * 1000).toLocaleString());
-      console.log('  - Valide:', decoded.exp > currentTime);
       return decoded.exp > currentTime;
     } catch (error) {
       console.error('Token invalide:', error);

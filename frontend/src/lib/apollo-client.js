@@ -14,7 +14,6 @@ const authLink = setContext((_, { headers }) => {
   // Récupérer le token depuis localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
-  console.log('Apollo Client - Token récupéré:', token ? 'Token présent' : 'Aucun token');
   
   // Vérifier la validité du token si présent
   if (token) {
@@ -23,7 +22,6 @@ const authLink = setContext((_, { headers }) => {
       const currentTime = Date.now() / 1000;
       
       if (decoded.exp < currentTime) {
-        console.log('Apollo Client - Token expiré, nettoyage...');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         return {
@@ -34,7 +32,6 @@ const authLink = setContext((_, { headers }) => {
         };
       }
       
-      console.log('Apollo Client - Token valide, expiration:', new Date(decoded.exp * 1000).toLocaleString());
     } catch (error) {
       console.error('Apollo Client - Erreur lors du décodage du token:', error);
       localStorage.removeItem('token');
