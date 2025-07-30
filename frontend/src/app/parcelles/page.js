@@ -65,7 +65,7 @@ export default function ParcellesPage() {
       if (!col) return null;
       if (col.key === 'personneReferente') {
         return {
-          accessorKey: 'personneReferente',
+          accessorKey: 'Personne référente',
           header: 'Personne référente',
           cell: info => {
             const p = info.row.original;

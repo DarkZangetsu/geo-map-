@@ -205,7 +205,7 @@ export default function PepinieresPage() {
       cell: info => info.getValue(),
     },
     visibleColumns.includes('nomGestionnaire') && {
-      accessorKey: 'nomGestionnaire',
+      accessorKey: 'Gestionnaire',
       header: 'Gestionnaire',
       cell: info => {
         const p = info.row.original;
@@ -218,9 +218,9 @@ export default function PepinieresPage() {
       },
     },
     visibleColumns.includes('nomProjet') && {
-      accessorKey: 'nomProjet',
+      accessorKey: 'projet rattaché',
       header: 'Projet rattaché',
-      cell: info => info.getValue(),
+      cell: info => info.row.original.nomProjet,
     },
     {
       id: 'actions',
