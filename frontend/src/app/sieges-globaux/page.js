@@ -18,7 +18,7 @@ export default function SiegesPage() {
   const [filteredSieges, setFilteredSieges] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const { showError } = useToast();
-  const [detailModal, setDetailModal] = useState({ open: false, siege: null });
+  const [ setDetailModal] = useState({ open: false, siege: null });
   const [mapModal, setMapModal] = useState({ open: false, siege: null });
   
   // États pour la pagination

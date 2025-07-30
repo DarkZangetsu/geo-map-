@@ -31,10 +31,10 @@ export default function SiegePage() {
   const [showMap, setShowMap] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [mapStyle, setMapStyle] = useState('street');
-  const [search, setSearch] = useState("");
+  const [search ] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [visibleColumns, setVisibleColumns] = useState([
+  const [visibleColumns ] = useState([
     "nom",
     "categorie",
     "adresse",

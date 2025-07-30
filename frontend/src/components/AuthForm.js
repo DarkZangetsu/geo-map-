@@ -37,7 +37,7 @@ const PasswordField = ({ id, name, value, onChange, placeholder, label, showPass
 
 export default function AuthForm({ onLogin, onRegister, loading, mode }) {
   // Si mode est défini, on force le mode login/register, sinon on laisse le switch interne
-  const [isLogin, setIsLogin] = useState(mode ? mode === 'login' : true);
+  const [isLogin] = useState(mode ? mode === 'login' : true);
   const [step, setStep] = useState(0); // Pour la pagination
   const [formData, setFormData] = useState({
     email: '',

@@ -13,38 +13,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Edit, Trash, Plus, ChevronLeft, ChevronRight, Map, Eye } from 'lucide-react';
 import { useAuth } from '../../components/Providers';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
-import ParcelleDetailModal from '@/components/ParcelleDetailModal';
-
-// Mapping des pratiques pour affichage lisible
-const PRATIQUE_LABELS = {
-  structure_brise_vent: "Structure Brise-vent",
-  structure_pare_feu: "Structure Pare feu",
-  structures_antierosives: "Structures antiérosives",
-  structure_cultures_couloir: "Structure Cultures en Couloir/allée",
-  pratiques_taillage_coupe: "Pratiques de taillage, coupe et application engrais verts",
-  pratiques_couverture_sol: "Pratiques couverture du sol",
-  pratiques_conservation_eau: "Pratiques/structures conservation d'eau",
-  systeme_multi_etage: "Système multi-étage diversifié",
-  arbres_autochtones: "Arbres Autochtones",
-  production_epices: "Production épices",
-  production_bois_energie: "Production Bois énergie",
-  production_fruit: "Production fruit",
-  integration_cultures_vivrieres: "Intégration cultures vivrières",
-  integration_elevage: "Intégration d'élevage",
-};
+import ParcelleDetailModal from '@/components/ParcelleDetailModal'
 
 export default function ParcellesPage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   // toast de sonner utilisé pour les notifications
   const [showForm, setShowForm] = useState(false);
-  const [selectedParcelle, setSelectedParcelle] = useState(null);
+  const [setSelectedParcelle] = useState(null);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [mapStyle, setMapStyle] = useState('street');
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('nom');
-  const [sortDir, setSortDir] = useState('asc');
+  const [search ] = useState('');
+  const [sortBy ] = useState('nom');
+  const [sortDir ] = useState('asc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showMap, setShowMap] = useState(false);
@@ -74,7 +56,7 @@ export default function ParcellesPage() {
     { key: 'nomProjet', label: 'Projet rattaché' },
   ];
   // On retire 'pratique' des colonnes visibles
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
+  const [visibleColumns] = useState(columns.map(c => c.key));
 
 
   const columnsDT = [

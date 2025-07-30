@@ -22,12 +22,12 @@ export default function PepinieresPage() {
   const { isLoading: authLoading, isAuthorized } = useAuthGuard(true);
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [mapPepiniere, setMapPepiniere] = useState(null);
+  const [setMapPepiniere] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState('nom');
-  const [sortDir, setSortDir] = useState('asc');
+  const [search ] = useState("");
+  const [sortBy ] = useState('nom');
+  const [sortDir ] = useState('asc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 

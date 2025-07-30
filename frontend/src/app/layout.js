@@ -22,9 +22,6 @@ function LayoutContent({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Ajout d'un état global d'erreur
-  const [errorCode, setErrorCode] = useState(null);
-
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
   // Fermer les dropdowns quand on clique ailleurs

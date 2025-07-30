@@ -12,7 +12,7 @@ import PasswordChangeModal from '../../components/PasswordChangeModal';
 
 export default function ProfilPage() {
   const { isLoading, isAuthorized } = useAuthGuard(true);
-  const { isAuthenticated, user: authUser } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { data, loading, refetch, error } = useQuery(GET_ME, {
     skip: !isAuthenticated,
     onError: (error) => {

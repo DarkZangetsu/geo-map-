@@ -6,7 +6,6 @@ import { useState } from 'react';
 import MapGlobal from '../components/MapGlobal';
 
 export default function HomePage() {
-  const router = useRouter();
   const { data: parcellesData, loading: parcellesLoading, error: parcellesError } = useQuery(GET_ALL_PARCELLES);
   const { data: siegesData, loading: siegesLoading, error: siegesError } = useQuery(GET_ALL_SIEGES);
   const { data: pepinieresData, loading: pepinieresLoading, error: pepinieresError } = useQuery(GET_ALL_PEPINIERES);
