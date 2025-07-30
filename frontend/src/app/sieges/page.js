@@ -31,16 +31,15 @@ export default function SiegePage() {
   const [showMap, setShowMap] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [mapStyle, setMapStyle] = useState('street');
-  const [search ] = useState("");
+  const [search] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [visibleColumns ] = useState([
+  const [visibleColumns] = useState([
     "nom",
     "categorie",
     "adresse",
     "pointContact",
     "horaires",
-    "description",
     "nomProjet"
   ]);
   const { showSuccess, showError } = useToast();
@@ -156,25 +155,25 @@ export default function SiegePage() {
   // Colonnes DataTable shadcn/ui
   const columns = useMemo(() => [
     visibleColumns.includes('nom') && {
-      accessorKey: 'nom',
-      header: 'Nom',
-      cell: info => info.getValue(),
+      id: 'nom',
+      header: 'Locaux',
+      cell: info => info.row.original.nom || '-',
     },
     visibleColumns.includes('categorie') && {
-      accessorKey: 'categorie',
+      id: 'Catégorie',
       header: 'Catégorie',
       cell: info => {
-        const cat = info.getValue();
+        const cat = info.row.original.categorie;
         return CATEGORIE_LABELS[(cat || '').toLowerCase()] || cat || '-';
       },
     },
     visibleColumns.includes('adresse') && {
-      accessorKey: 'adresse',
+      id: 'Adresse',
       header: 'Adresse',
-      cell: info => info.getValue(),
+      cell: info => info.row.original.adresse || '-',
     },
     visibleColumns.includes('pointContact') && {
-      id: 'pointContact',
+      id: 'Point de Contact',
       header: 'Point de Contact',
       cell: info => {
         const s = info.row.original;
@@ -189,7 +188,7 @@ export default function SiegePage() {
       },
     },
     visibleColumns.includes('horaires') && {
-      id: 'horaires',
+      id: 'Horaires',
       header: 'Horaires',
       cell: info => {
         const s = info.row.original;
@@ -202,9 +201,9 @@ export default function SiegePage() {
       },
     },
     visibleColumns.includes('nomProjet') && {
-      accessorKey: 'nomProjet',
+      id: 'Projet rattaché',
       header: 'Projet rattaché',
-      cell: info => info.getValue() || '-',
+      cell: info => info.row.original.nomProjet || '-',
     },
     {
       id: 'actions',
@@ -475,7 +474,7 @@ export default function SiegePage() {
 
         {/* Modal de détails du siège */}
         {showDetailsModal && selectedSiege && (
-          <SiegeDetailModal 
+          <SiegeDetailModal
             siege={selectedSiege}
             onClose={() => {
               setShowDetailsModal(false);
@@ -483,7 +482,7 @@ export default function SiegePage() {
             }}
           />
         )}
-      
+
         {/* Modal de confirmation suppression */}
         <ConfirmationDialog
           open={showDeleteConfirm}
