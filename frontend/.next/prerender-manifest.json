@@ -5,7 +5,7 @@
       "initialHeaders": {
         "cache-control": "public, max-age=0, must-revalidate",
         "content-type": "image/x-icon",
-        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico"
+        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico/"
       },
       "experimentalBypassFor": [
         {
@@ -21,30 +21,6 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/favicon.ico",
       "dataRoute": null,
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/",
-      "dataRoute": "/index.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -78,6 +54,30 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/",
+      "dataRoute": "/index.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/parcelles-globales": {
       "experimentalBypassFor": [
         {
@@ -102,7 +102,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/pepinieres": {
+    "/pepinieres-globales": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -115,8 +115,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/pepinieres",
-      "dataRoute": "/pepinieres.rsc",
+      "srcRoute": "/pepinieres-globales",
+      "dataRoute": "/pepinieres-globales.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -174,6 +174,30 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/pepinieres": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/pepinieres",
+      "dataRoute": "/pepinieres.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/sieges-globaux": {
       "experimentalBypassFor": [
         {
@@ -222,30 +246,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/pepinieres-globales": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/pepinieres-globales",
-      "dataRoute": "/pepinieres-globales.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/parcelles": {
       "experimentalBypassFor": [
         {
@@ -274,8 +274,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "e022237a6f9192579741af349e46f745",
-    "previewModeSigningKey": "9fb1c1dbe1113f4d6ac341b11f5a05d2c273ed5c2f338ffca025eca8f835012a",
-    "previewModeEncryptionKey": "e77bfcc69abf2dfbe96e7e01dd0b2d56a05cc0d966a61c585c1365bbb5ee8670"
+    "previewModeId": "f28d5a14b2e10df8010ae1b4de6e76aa",
+    "previewModeSigningKey": "614834c9059b7b22fced30391f0ce338a9fff55c191f7daf6355ef73da1fb536",
+    "previewModeEncryptionKey": "2d63cf5d5a43658baa917309d645f9ceda00ab02b58fab1451950db7e1937dd2"
   }
 }
