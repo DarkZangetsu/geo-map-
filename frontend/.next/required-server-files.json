@@ -97,7 +97,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\Fitahiana\\Documents\\GitHub\\Agri-Geo\\frontend",
+    "outputFileTracingRoot": "C:\\Users\\User\\Videos\\Nouveau dossier\\geomap\\geo-map-\\frontend",
     "experimental": {
       "nodeMiddleware": false,
       "cacheLife": {
@@ -155,7 +155,7 @@
       "middlewarePrefetch": "flexible",
       "optimisticClientCache": true,
       "manualClientBasePath": false,
-      "cpus": 3,
+      "cpus": 5,
       "memoryBasedWorkersCount": false,
       "imgOptConcurrency": null,
       "imgOptTimeoutInSeconds": 7,
@@ -280,10 +280,10 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.mjs",
     "turbopack": {
-      "root": "C:\\Users\\Fitahiana\\Documents\\GitHub\\Agri-Geo\\frontend"
+      "root": "C:\\Users\\User\\Videos\\Nouveau dossier\\geomap\\geo-map-\\frontend"
     }
   },
-  "appDir": "C:\\Users\\Fitahiana\\Documents\\GitHub\\Agri-Geo\\frontend",
+  "appDir": "C:\\Users\\User\\Videos\\Nouveau dossier\\geomap\\geo-map-\\frontend",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",

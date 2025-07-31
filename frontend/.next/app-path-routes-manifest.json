@@ -1,14 +1,13 @@
 {
-  "/favicon.ico/route": "/favicon.ico",
   "/_not-found/page": "/_not-found",
-  "/login/page": "/login",
-  "/page": "/",
-  "/parcelles-globales/page": "/parcelles-globales",
   "/parcelles/page": "/parcelles",
-  "/pepinieres-globales/page": "/pepinieres-globales",
+  "/page": "/",
   "/pepinieres/page": "/pepinieres",
-  "/profil/page": "/profil",
+  "/parcelles-globales/page": "/parcelles-globales",
   "/register/page": "/register",
+  "/sieges/page": "/sieges",
+  "/pepinieres-globales/page": "/pepinieres-globales",
+  "/profil/page": "/profil",
   "/sieges-globaux/page": "/sieges-globaux",
-  "/sieges/page": "/sieges"
+  "/login/page": "/login"
 }

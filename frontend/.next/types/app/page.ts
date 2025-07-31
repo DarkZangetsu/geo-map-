@@ -1,4 +1,4 @@
-// File: C:\Users\Fitahiana\Documents\GitHub\Agri-Geo\frontend\src\app\page.js
+// File: C:\Users\User\Videos\Nouveau dossier\geomap\geo-map-\frontend\src\app\page.js
 import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
